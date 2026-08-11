@@ -6,6 +6,7 @@
 [![TypeScript](https://img.shields.io/badge/TypeScript-5.x-blue)](https://typescriptlang.org)
 [![Angular Material](https://img.shields.io/badge/Angular%20Material-18-purple)](https://material.angular.io)
 [![License](https://img.shields.io/badge/License-Apache%202.0-blue)](../LICENSE)
+[![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.21880388.svg)](https://doi.org/10.5281/zenodo.21880388)
 
 ---
 
