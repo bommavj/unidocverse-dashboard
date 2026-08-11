@@ -1,0 +1,66 @@
+<div class="page">
+  <div class="search-hero">
+    <div class="search-bar">
+      <span style="font-size:18px;flex-shrink:0">🧠</span>
+      <input [(ngModel)]="query" placeholder="Search documents by meaning, not just keywords…" (keydown.enter)="search()">
+      <button class="search-btn" (click)="search()">Search</button>
+    </div>
+    <div class="chips-row">
+      <span style="font-size:12.5px;color:var(--t3);font-weight:500">💡 Try:</span>
+      <div *ngFor="let c of chips" class="chip" [class.on]="query===c" (click)="query=c;search()">{{ c }}</div>
+    </div>
+  </div>
+
+  <div *ngIf="loading" style="text-align:center;padding:48px;color:#94a3b8;font-size:14px">
+    <div style="display:inline-block;width:20px;height:20px;border:2px solid #c7d2fe;border-top-color:#4f46e5;border-radius:50%;animation:spin .7s linear infinite;margin-right:8px;vertical-align:middle"></div>
+    Searching…
+  </div>
+
+  <div *ngIf="!loading && query && results.length === 0" style="text-align:center;padding:48px;color:#94a3b8">
+    <div style="font-size:40px;margin-bottom:12px">🔍</div>
+    <p>No results found for "<strong>{{ query }}</strong>"</p>
+    <p style="font-size:12px;margin-top:8px">Try different keywords or check your document library</p>
+  </div>
+
+  <div *ngIf="results.length > 0">
+    <div style="font-size:13px;font-weight:700;color:var(--t1);margin-bottom:12px">
+      Results for "<em>{{ query }}</em>"
+      <span style="color:var(--t3);font-weight:500">{{ results.length }} found</span>
+    </div>
+
+    <div *ngFor="let d of results" class="res-card" (click)="openDoc(d)">
+      <div class="fico" [ngClass]="icoClass(d.doc_type)">{{ icoTxt(d.doc_type) }}</div>
+      <div class="fbody">
+        <div class="fn">{{ d.filename }}</div>
+        <div style="font-size:12px;color:var(--t3);margin-top:2px;line-height:1.6">
+          {{ d.summary?.substring(0, 100) }}…
+        </div>
+        <div style="display:flex;gap:8px;margin-top:5px;align-items:center">
+
+          <!-- ✅ FIX: was d.score (undefined) → now d.match_score from API -->
+          <!-- Color-coded: green ≥70, amber 50–69, muted <50 -->
+          <span class="score-badge"
+                [style.background]="d.match_score >= 70 ? '#dcfce7' : d.match_score >= 50 ? '#fef9c3' : '#f1f5f9'"
+                [style.color]="d.match_score >= 70 ? '#15803d' : d.match_score >= 50 ? '#854d0e' : '#64748b'"
+                [style.border]="d.match_score >= 70 ? '1px solid #86efac' : d.match_score >= 50 ? '1px solid #fde047' : '1px solid #cbd5e1'">
+            ✦ {{ d.match_score }}%
+          </span>
+
+          <span class="fbg" [ngClass]="badgeClass(d.doc_type)">
+            {{ d.doc_type?.replace('_', ' ') }}
+          </span>
+
+          <!-- ✅ Optional: show match quality label (excellent / good / fair / poor) -->
+          <span *ngIf="d.match_quality"
+                style="font-size:10.5px;color:var(--t3);font-style:italic;margin-left:2px">
+            {{ d.match_quality }}
+          </span>
+
+        </div>
+      </div>
+      <button class="open-btn">Open →</button>
+    </div>
+  </div>
+</div>
+
+<app-doc-sheet [doc]="selectedDoc" (closed)="selectedDoc=null"></app-doc-sheet>

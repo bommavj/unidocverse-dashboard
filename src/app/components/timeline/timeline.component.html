@@ -1,0 +1,29 @@
+<div class="tl-page">
+  <div class="tl-topbar">
+    <button class="tl-back" (click)="closed.emit()">← Documents</button>
+    <span class="tl-title">📅 Document Timeline</span>
+  </div>
+  <div class="tl-scroll">
+    <div *ngFor="let m of months" class="tl-month">
+      <div class="tl-month__label">{{ m.label }}</div>
+      <div class="tl-items">
+        <div
+          *ngFor="let e of m.entries"
+          class="tl-item"
+          [ngClass]="'tl-item--' + e.status"
+          (click)="openDoc.emit({id:e.docId,tab:'summary'})">
+          <div class="tl-item__date"><span class="tl-item__day">{{ e.day }}</span>{{ e.month }}</div>
+          <div class="tl-item__ico" [style.background]="e.color">{{ e.icon }}</div>
+          <div class="tl-item__body">
+            <div class="tl-item__name">{{ e.name }}</div>
+            <div class="tl-item__meta">
+              <span>{{ e.type }}</span>
+              <span class="tl-tag" [ngClass]="'tl-tag--' + e.status">{{ e.status === 'done' ? 'Analyzed' : e.status === 'upcoming' ? 'Upcoming' : 'Urgent' }}</span>
+            </div>
+          </div>
+          <div class="tl-item__amount">{{ e.amount }}</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

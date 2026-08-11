@@ -1,0 +1,147 @@
+<div class="apr-page">
+  <div class="apr-header">
+    <div>
+      <h1 class="apr-title">Approval Workflows</h1>
+      <p class="apr-sub">Route documents for review and track sign-off status</p>
+    </div>
+    <button class="btn-new" (click)="openCreate()">+ New Request</button>
+  </div>
+
+  <!-- Status filter tabs -->
+  <div class="tab-row">
+    <button class="tab" [class.active]="filterStatus==='all'"      (click)="filterStatus='all'">All <span class="tab-n">{{ requests.length }}</span></button>
+    <button class="tab pending"  [class.active]="filterStatus==='pending'"  (click)="filterStatus='pending'">Pending <span class="tab-n">{{ countOf('pending') }}</span></button>
+    <button class="tab approved" [class.active]="filterStatus==='approved'" (click)="filterStatus='approved'">Approved <span class="tab-n">{{ countOf('approved') }}</span></button>
+    <button class="tab rejected" [class.active]="filterStatus==='rejected'" (click)="filterStatus='rejected'">Rejected <span class="tab-n">{{ countOf('rejected') }}</span></button>
+  </div>
+
+  <div class="loading-row" *ngIf="loading"><div class="spinner"></div> Loading…</div>
+
+  <!-- List -->
+  <div class="apr-list" *ngIf="!loading">
+    <div class="apr-empty" *ngIf="filtered.length === 0">
+      <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="#cbd5e1" stroke-width="1.5"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>
+      <p>No approval requests here</p>
+    </div>
+
+    <div class="apr-row" *ngFor="let r of filtered" (click)="openRequest(r)">
+      <div class="apr-status-bar" [style.background]="STATUS_COLOR[r.status]"></div>
+      <div class="apr-main">
+        <div class="apr-top">
+          <span class="apr-title-text">{{ r.title }}</span>
+          <span class="priority-badge" [style.background]="PRIORITY_COLOR[r.priority] + '20'" [style.color]="PRIORITY_COLOR[r.priority]">{{ r.priority }}</span>
+          <span class="status-chip" [style.background]="STATUS_COLOR[r.status] + '20'" [style.color]="STATUS_COLOR[r.status]">{{ r.status }}</span>
+        </div>
+        <div class="apr-doc">{{ r.filename || r.doc_id }}</div>
+        <div class="apr-meta">
+          <span>{{ approvedCount(r) }}/{{ $any(r.approvers)?.length || 0 }} approved</span>
+          <span *ngIf="r.due_date">Due {{ fmtDate(r.due_date) }}</span>
+          <span>{{ fmtDate(r.created_at) }}</span>
+        </div>
+        <div class="apr-approvers">
+          <span class="approver-chip" *ngFor="let a of r.approvers">{{ a }}</span>
+        </div>
+      </div>
+      <!-- Progress bar -->
+      <div class="apr-progress">
+        <div class="progress-bar">
+          <div class="progress-fill" [style.width.%]="$any(r.approvers)?.length ? (approvedCount(r) / $any(r.approvers).length * 100) : 0"
+               [style.background]="STATUS_COLOR[$any(r.status)]"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ── Create modal ────────────────────────────────────────────────────────── -->
+<div class="modal-overlay" *ngIf="createOpen" (click)="createOpen=false">
+  <div class="modal" (click)="$event.stopPropagation()">
+    <div class="modal-head">New Approval Request</div>
+    <div class="modal-body">
+      <label>Document</label>
+      <udv-select [(ngModel)]="draft.doc_id" [options]="docOptions" placeholder="— Select document —"></udv-select>
+      <label>Request Title</label>
+      <input [(ngModel)]="draft.title" placeholder="e.g. Q4 Contract Review" />
+      <label>Description</label>
+      <textarea [(ngModel)]="draft.description" rows="2" placeholder="What needs to be reviewed…"></textarea>
+      <label>Approvers (comma-separated names or emails)</label>
+      <input [(ngModel)]="draft.approvers" placeholder="Alice, Bob, carol@company.com" />
+      <label>Priority</label>
+      <udv-select [(ngModel)]="draft.priority" [options]="priorityOptions" placeholder="Select priority…"></udv-select>
+      <label>Due Date</label>
+      <input type="date" [(ngModel)]="draft.due_date" />
+    </div>
+    <div class="modal-foot">
+      <button class="btn-cancel" (click)="createOpen=false">Cancel</button>
+      <button class="btn-confirm" (click)="submitCreate()" [disabled]="!draft.doc_id||!draft.title">Send for Approval</button>
+    </div>
+  </div>
+</div>
+
+<!-- ── Detail panel ────────────────────────────────────────────────────────── -->
+<div class="detail-overlay" *ngIf="selected" (click)="selected=null">
+  <div class="detail-panel" (click)="$event.stopPropagation()">
+    <div class="dp-head">
+      <div>
+        <span class="status-chip large" [style.background]="STATUS_COLOR[selected.status]+'20'" [style.color]="STATUS_COLOR[selected.status]">
+          {{ selected.status }}
+        </span>
+        <div class="dp-title">{{ selected.title }}</div>
+        <div class="dp-doc">{{ selected.filename }}</div>
+      </div>
+      <div class="dp-head-actions">
+        <button class="dp-btn" (click)="openDoc(selected.doc_id)">View Doc</button>
+        <button class="dp-btn danger" (click)="deleteRequest(selected.id)">Delete</button>
+        <button class="dp-close" (click)="selected=null">×</button>
+      </div>
+    </div>
+
+    <div class="dp-body">
+      <div class="dp-desc" *ngIf="selected.description">{{ selected.description }}</div>
+
+      <!-- Approvers & decisions -->
+      <div class="section-label">Approvers</div>
+      <div class="approver-list">
+        <div class="approver-row" *ngFor="let a of selected.approvers">
+          <div class="av-name">{{ a }}</div>
+          <ng-container *ngIf="getDecision(selected.decisions, a) as dec">
+            <span class="dec-chip" [style.background]="decisionColor(dec.decision)+'20'" [style.color]="decisionColor(dec.decision)">
+              {{ decisionIcon(dec.decision) }} {{ dec.decision }}
+            </span>
+          </ng-container>
+          <span class="dec-chip pending" *ngIf="!getDecision(selected.decisions, a)">⏳ pending</span>
+        </div>
+      </div>
+
+      <!-- Submit decision -->
+      <div class="section-label" *ngIf="selected.status === 'pending'">Your Decision</div>
+      <div class="decision-form" *ngIf="selected.status === 'pending'">
+        <udv-select [(ngModel)]="decisionDraft.approver" [options]="approverOptions" placeholder="Select approver"></udv-select>
+        <div class="decision-btns">
+          <button class="dec-btn approve" [class.sel]="decisionDraft.decision==='approve'" (click)="decisionDraft.decision='approve'">✓ Approve</button>
+          <button class="dec-btn reject"  [class.sel]="decisionDraft.decision==='reject'"  (click)="decisionDraft.decision='reject'">✗ Reject</button>
+          <button class="dec-btn changes" [class.sel]="decisionDraft.decision==='request_changes'" (click)="decisionDraft.decision='request_changes'">↺ Request Changes</button>
+        </div>
+        <textarea [(ngModel)]="decisionDraft.comment" rows="2" placeholder="Optional comment…"></textarea>
+        <button class="btn-confirm" (click)="submitDecision()">Submit Decision</button>
+      </div>
+
+      <!-- Comments -->
+      <div class="section-label">Comments ({{ selected.comments.length || 0 }})</div>
+      <div class="comment-list">
+        <div class="comment-row" *ngFor="let c of selected.comments">
+          <div class="cm-author">{{ $any(c).author }}</div>
+          <div class="cm-text">{{ $any(c).text }}</div>
+          <div class="cm-date">{{ fmtDate($any(c).at) }}</div>
+        </div>
+        <div class="no-comments" *ngIf="!selected.comments.length">No comments yet.</div>
+      </div>
+      <div class="comment-form">
+        <input [(ngModel)]="commentDraft.text" placeholder="Add a comment…" (keydown.enter)="submitComment()" />
+        <button class="btn-comment" (click)="submitComment()">Post</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<app-doc-sheet [doc]="selectedDoc" (closed)="selectedDoc=null" />

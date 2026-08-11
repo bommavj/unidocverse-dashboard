@@ -1,0 +1,339 @@
+<div class="research-page">
+
+  <!-- ── Sidebar: document picker + history ── -->
+  <div class="sidebar">
+
+    <!-- Tab switcher -->
+    <div class="sidebar-tabs">
+      <button class="stab" [class.active]="sideTab === 'docs'" (click)="setSideTab('docs')">📂 Documents</button>
+      <button class="stab" [class.active]="sideTab === 'history'" (click)="setSideTab('history')">🕑 History</button>
+    </div>
+
+    <!-- ── Documents tab ── -->
+    <ng-container *ngIf="sideTab === 'docs'">
+      <div class="sidebar-sub-header">
+        <button class="sel-all-btn" (click)="toggleSelectAll()" [class.active]="selectAll">
+          {{ selectAll ? 'Deselect All' : 'Select All' }}
+        </button>
+      </div>
+      <div class="doc-search-wrap">
+        <input class="doc-search" [(ngModel)]="docSearch" placeholder="Filter documents…">
+      </div>
+      <div class="doc-list" *ngIf="!docsLoading">
+        <div *ngIf="filteredDocs.length === 0" class="doc-empty">No documents found</div>
+        <div *ngFor="let d of filteredDocs"
+             class="doc-item"
+             [class.selected]="selectedDocIds.has(d.id)"
+             (click)="toggleDoc(d.id)">
+          <input type="checkbox" [checked]="selectedDocIds.has(d.id)" (click)="$event.stopPropagation()" (change)="toggleDoc(d.id)">
+          <div class="doc-ico" [ngClass]="icoClass(d.doc_type)">{{ icoTxt(d.doc_type) }}</div>
+          <div class="doc-info">
+            <div class="doc-name">{{ d.filename }}</div>
+            <div class="doc-meta">{{ d.chunk_count }} chunks</div>
+          </div>
+          <span *ngIf="!d.searchable" class="doc-no-idx" title="Not indexed yet">⚠</span>
+        </div>
+      </div>
+      <div class="doc-loading" *ngIf="docsLoading">
+        <span class="analyzing-dots"><span></span><span></span><span></span></span>
+      </div>
+    </ng-container>
+
+    <!-- ── History tab ── -->
+    <ng-container *ngIf="sideTab === 'history'">
+      <div class="hist-tab-head">
+        <span class="hist-count" *ngIf="sessions.length > 0">{{ sessions.length }} session{{ sessions.length !== 1 ? 's' : '' }}</span>
+        <button class="clear-history-btn" *ngIf="sessions.length > 0" (click)="clearHistory()" title="Clear list">✕ Clear</button>
+      </div>
+
+      <div *ngIf="sessions.length === 0 && !historyLoading" class="hist-empty">
+        <div class="hist-empty-ico">🕑</div>
+        <div>No research sessions yet.</div>
+        <div class="hist-empty-sub">Past queries will appear here.</div>
+      </div>
+      <div *ngIf="historyLoading && sessions.length === 0" class="doc-loading">
+        <span class="analyzing-dots"><span></span><span></span><span></span></span>
+      </div>
+
+      <div class="past-list">
+        <div *ngFor="let s of sessions"
+             class="past-item"
+             [class.active]="activeSession === s"
+             (click)="openSession(s)">
+          <div class="past-item-body">
+            <span class="past-q">{{ (s.rootQuestion || s.question) | slice:0:52 }}{{ (s.rootQuestion || s.question).length > 52 ? '…' : '' }}</span>
+            <span class="past-time">{{ s.ts | date:'MMM d, HH:mm' }}{{ (s.thread?.length || 0) > 0 ? ' · ' + (s.thread?.length || 0) + ' follow-up' + ((s.thread?.length || 0) > 1 ? 's' : '') : '' }}</span>
+          </div>
+          <button *ngIf="hasChart(s)" class="hist-viz-btn" (click)="$event.stopPropagation(); goToAnalytics(s)" title="View chart in Analytics">
+            📊
+          </button>
+        </div>
+      </div>
+
+      <button class="load-more-btn" *ngIf="historyHasMore" (click)="loadMoreHistory()" [disabled]="historyLoading">
+        {{ historyLoading ? 'Loading…' : 'Load more' }}
+      </button>
+    </ng-container>
+
+  </div>
+
+  <!-- ── Main: chat + results ── -->
+  <div class="main">
+
+    <!-- Header -->
+    <div class="main-header">
+      <div>
+        <div class="main-title">🔬 Document Research Agent</div>
+        <div class="main-sub">ReAct loop · {{ activeModel }} · Reason → Search → Answer</div>
+      </div>
+      <div class="scope-badge">
+        <span class="scope-ico">📂</span>
+        {{ selectedLabel }}
+      </div>
+    </div>
+
+    <!-- Empty state / examples -->
+    <div class="empty-state" *ngIf="!running && !activeSession">
+      <div class="empty-icon">🧠</div>
+      <div class="empty-title">Ask anything across your documents</div>
+      <div class="empty-sub">The agent searches, reads, and reasons across multiple documents to find answers that no single search can surface.</div>
+      <div class="examples">
+        <div class="examples-label">Try an example:</div>
+        <div class="example-chips">
+          <button *ngFor="let q of exampleQuestions" class="example-chip" (click)="useExample(q)">{{ q }}</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Active session result -->
+    <div class="result-area" *ngIf="activeSession && !running">
+
+      <!-- ── Prior turns thread ── -->
+      <div class="thread-history" *ngIf="activeSession.thread?.length">
+        <div *ngFor="let turn of activeSession.thread; let i = index" class="thread-turn">
+          <div class="thread-turn-q">
+            <span class="thread-turn-idx">{{ i + 1 }}</span>
+            <span class="thread-q-ico">❓</span>
+            <span class="thread-q-text">{{ turn.question }}</span>
+          </div>
+          <div class="thread-turn-a" [innerHTML]="md(turn.answer)"></div>
+          <div class="thread-turn-src" *ngIf="turn.sources?.length">
+            <span *ngFor="let s of turn.sources" class="source-chip">{{ s }}</span>
+          </div>
+        </div>
+        <div class="thread-divider">
+          <span>↩ Follow-up · Turn {{ (activeSession.thread?.length || 0) + 1 }}</span>
+        </div>
+      </div>
+
+      <div class="result-question">
+        <span class="q-ico">❓</span>
+        <span>{{ activeSession.question }}</span>
+      </div>
+
+      <!-- ReAct trace steps -->
+      <div class="trace-section">
+        <div class="trace-label">Reasoning Trace · {{ activeSession.iterations }} step{{ activeSession.iterations !== 1 ? 's' : '' }}</div>
+        <div *ngFor="let step of activeSession.steps; let i = index" class="trace-step"
+             [class.step-final]="step.tool === 'final_answer'"
+             [class.step-error]="step.tool === 'error'"
+             [class.step-hitl]="step.hitlPending">
+
+          <!-- Step header (always visible) -->
+          <div class="step-header" (click)="toggleStep(step)">
+            <div class="step-left">
+              <span class="step-num">{{ step.iteration }}</span>
+              <span class="step-tool-ico">{{ toolIcons[step.tool] || '🔧' }}</span>
+              <span class="step-tool-name">{{ toolLabels[step.tool] || step.tool }}</span>
+              <span class="hitl-badge" *ngIf="step.hitlPending">PENDING APPROVAL</span>
+              <span class="hitl-badge hitl-confirmed" *ngIf="step.hitlStatus === 'confirmed' && !step.hitlPending">CONFIRMED</span>
+              <span class="hitl-badge hitl-cancelled" *ngIf="step.hitlStatus === 'cancelled'">CANCELLED</span>
+              <span class="step-thought" *ngIf="step.thought && !step.hitlPending">— {{ step.thought | slice:0:80 }}{{ step.thought.length > 80 ? '…' : '' }}</span>
+            </div>
+            <div class="step-right">
+              <span class="step-ms">{{ step.latency_ms }}ms</span>
+              <span class="step-toggle">{{ step.expanded ? '▲' : '▼' }}</span>
+            </div>
+          </div>
+
+          <!-- HITL confirmation panel -->
+          <div class="hitl-panel" *ngIf="step.hitlPending">
+            <div class="hitl-preview">
+              <span class="hitl-icon">🔔</span>
+              <span class="hitl-text">{{ step.hitlPreview }}</span>
+            </div>
+            <div class="hitl-entities" *ngIf="step.hitlEntities">
+              <div *ngFor="let entry of step.hitlEntities | keyvalue" class="hitl-entity-row">
+                <span class="hitl-entity-key">{{ entry.key }}</span>
+                <span class="hitl-entity-val">{{ entry.value }}</span>
+              </div>
+            </div>
+            <div class="hitl-actions">
+              <button class="hitl-confirm-btn" (click)="confirmAction(step); $event.stopPropagation()">
+                ✅ Confirm &amp; Execute
+              </button>
+              <button class="hitl-cancel-btn" (click)="cancelAction(step); $event.stopPropagation()">
+                ✕ Cancel
+              </button>
+            </div>
+          </div>
+
+          <!-- Expanded detail -->
+          <div class="step-detail" *ngIf="step.expanded">
+            <div class="detail-row" *ngIf="step.thought">
+              <span class="detail-label">THOUGHT</span>
+              <span class="detail-val">{{ step.thought }}</span>
+            </div>
+            <div class="detail-row" *ngIf="step.tool !== 'final_answer'">
+              <span class="detail-label">ACTION</span>
+              <span class="detail-val">
+                <strong>{{ step.tool }}</strong>
+                <code class="args-code">{{ step.args | json }}</code>
+              </span>
+            </div>
+            <div class="detail-row" *ngIf="step.observation !== null && step.observation !== undefined">
+              <span class="detail-label">OBSERVATION</span>
+              <pre class="obs-pre">{{ formatObs(step.observation) }}</pre>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Final answer -->
+      <div class="answer-card">
+        <div class="answer-header">
+          <span class="answer-ico">✅</span>
+          <span class="answer-title">Answer</span>
+          <div class="answer-actions">
+            <button class="viz-action-btn" (click)="goToAnalytics(activeSession)" title="Open in Analytics">
+              📊 Visualize
+            </button>
+            <div class="download-wrap">
+              <button class="dl-btn" (click)="toggleDownloadMenu($event)" title="Download answer">
+                ⬇ Download
+              </button>
+              <div class="dl-menu" *ngIf="showDownloadMenu">
+                <div class="dl-group-label">Document</div>
+                <button (click)="downloadAnswer('pdf')">📄 PDF</button>
+                <button (click)="downloadAnswer('doc')">📝 Word (.doc)</button>
+                <button (click)="downloadAnswer('html')">🌐 HTML</button>
+                <div class="dl-group-label">Data</div>
+                <button (click)="downloadAnswer('md')">Markdown (.md)</button>
+                <button (click)="downloadAnswer('txt')">Plain text (.txt)</button>
+                <button (click)="downloadAnswer('csv')">CSV (.csv)</button>
+                <button (click)="downloadAnswer('json')">JSON (.json)</button>
+                <div class="dl-divider"></div>
+                <button (click)="copyAnswer()">📋 Copy to clipboard</button>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="answer-body" [innerHTML]="md(activeSession.answer)"></div>
+        <span *ngIf="running && streamingAnswer" class="stream-cursor">▍</span>
+
+        <!-- Analytics redirect -->
+        <div class="viz-cta" *ngIf="hasChart(activeSession)">
+          <span class="viz-cta-ico">📊</span>
+          <span class="viz-cta-text">Structured data detected — visualize as charts in Analytics</span>
+          <button class="viz-cta-btn" (click)="goToAnalytics(activeSession)">
+            Visualize in Analytics →
+          </button>
+        </div>
+
+        <div class="answer-sources" *ngIf="activeSession.sources?.length">
+          <span class="sources-label">Sources:</span>
+          <span *ngFor="let s of activeSession.sources" class="source-chip">{{ s }}</span>
+        </div>
+
+        <!-- Pagination: load next chunk window -->
+        <div class="load-more-row" *ngIf="activeSession.hasMore || activeSession.loadingMore">
+          <button class="load-more-answer-btn"
+                  (click)="loadMore()"
+                  [disabled]="activeSession.loadingMore || running">
+            <span *ngIf="!activeSession.loadingMore">⬇ Load More Results</span>
+            <span *ngIf="activeSession.loadingMore" class="lm-spinner"></span>
+            <span *ngIf="activeSession.loadingMore">Loading more…</span>
+          </button>
+          <span class="load-more-hint">Page {{ (activeSession.currentPage ?? 0) + 1 }} · more content available</span>
+        </div>
+      </div>
+
+      <!-- Follow-up question input -->
+      <div class="followup-bar" *ngIf="!running && activeSession?.matchedDocIds?.length">
+        <div class="followup-header">
+          <div class="followup-header-left">
+            <span class="followup-pill">↩ Follow-up</span>
+            <span class="followup-ctx">Same {{ activeSession!.matchedDocIds!.length }} document{{ activeSession!.matchedDocIds!.length !== 1 ? 's' : '' }} · no re-search needed</span>
+          </div>
+          <span class="followup-hint">Shift+Enter for newline</span>
+        </div>
+        <div class="followup-input-row">
+          <textarea
+            class="followup-input"
+            [(ngModel)]="followUpQuestion"
+            placeholder="Ask another question on the same dataset… e.g. 'who did the most sales?' or 'show by region'"
+            rows="2"
+            (keydown.enter)="submitFollowUpEnter($event)"
+          ></textarea>
+          <button class="followup-send-btn"
+                  [disabled]="!followUpQuestion.trim() || running"
+                  (click)="submitFollowUp()">
+            ↵ Ask
+          </button>
+        </div>
+      </div>
+
+      <button class="new-query-btn" (click)="closeSession()">+ New Query</button>
+    </div>
+
+    <!-- Running / thinking state -->
+    <div class="thinking-area" *ngIf="running">
+      <div class="thinking-question" *ngIf="activeSession?.question">
+        <span class="q-ico">❓</span>
+        <span>{{ activeSession?.question }}</span>
+      </div>
+      <div class="thinking-card">
+        <div class="thinking-spinner"></div>
+        <div class="thinking-text">{{ liveThinking }}</div>
+        <div class="thinking-sub">ReAct agent is reasoning through your documents…</div>
+      </div>
+    </div>
+
+    <!-- Input bar -->
+    <div class="input-bar">
+      <div class="input-wrap">
+        <textarea
+          #questionInput
+          class="question-input"
+          [(ngModel)]="question"
+          placeholder="Ask a research question across your documents…"
+          rows="1"
+          [disabled]="running"
+          (keydown.enter)="$event.preventDefault(); submit()"
+          (input)="autoResize($event)">
+        </textarea>
+        <button class="send-btn" [disabled]="!question.trim() || running" (click)="submit()">
+          <span *ngIf="!running">→</span>
+          <span *ngIf="running" class="analyzing-dots"><span></span><span></span><span></span></span>
+        </button>
+      </div>
+      <div class="input-hint">Enter to send · Shift+Enter for new line · Searching {{ selectedDocIds.size === 0 ? 'all' : selectedDocIds.size }} document{{ selectedDocIds.size !== 1 ? 's' : '' }}</div>
+    </div>
+
+    <div #chatBottom></div>
+  </div>
+
+</div>
+
+<!-- Leave confirmation dialog -->
+<div class="leave-overlay" *ngIf="showLeaveDialog" (click)="confirmLeave(false)">
+  <div class="leave-dialog" (click)="$event.stopPropagation()">
+    <div class="leave-icon">⏳</div>
+    <div class="leave-title">Query still running</div>
+    <div class="leave-msg">A research query is in progress. If you leave now the result will be lost.</div>
+    <div class="leave-actions">
+      <button class="leave-stay-btn" (click)="confirmLeave(false)">Stay on page</button>
+      <button class="leave-go-btn"   (click)="confirmLeave(true)">Leave anyway</button>
+    </div>
+  </div>
+</div>

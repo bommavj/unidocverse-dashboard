@@ -1,0 +1,266 @@
+<div class="page">
+
+  <!-- TOPBAR -->
+  <div class="topbar">
+    <div>
+      <div class="topbar-title">Documents</div>
+      <div class="topbar-sub">{{ filtered.length }} of {{ docs.length }} documents</div>
+    </div>
+    <div class="tb-sp"></div>
+    <div class="tb-search">
+      <span style="color:#94a3b8;font-size:14px">🔍</span>
+      <input [(ngModel)]="searchQ" placeholder="Search documents…"
+        (ngModelChange)="applySort()" (keydown.escape)="searchQ='';applySort()">
+      <button *ngIf="searchQ" class="tb-clear" (click)="searchQ='';applySort()">✕</button>
+      <kbd *ngIf="!searchQ">⌘K</kbd>
+    </div>
+    <button class="tb-btn tb-sec" routerLink="/upload">↑ Upload</button>
+    <button *ngIf="auth.isAdmin()" class="tb-btn tb-pri" (click)="confirmDeleteAll()">🗑 Delete All</button>
+  </div>
+
+  <div class="content">
+
+    <!-- GLOBAL ALERT BANNER -->
+    <div *ngIf="globalAlertCount > 0"
+        class="anomaly"
+        [class.critical]="globalAlertCount >= 3"
+        [class.warning]="globalAlertCount < 3"
+        (click)="router.navigate(['/insights'])">
+        <span style="font-size:16px">{{ globalAlertCount >= 3 ? '🔴' : '🟡' }}</span>
+        <span class="anomaly-text">
+          <strong>{{ globalAlertCount }} item{{ globalAlertCount === 1 ? '' : 's' }} need attention</strong>
+          — {{ globalAlertSummary }}
+        </span>
+        <span class="anomaly-badge">{{ globalAlertCount }}</span>
+        <span style="color:#f97316;font-size:14px">›</span>
+    </div>
+
+    <!-- FOLDER GRID -->
+    <div class="folder-grid" *ngIf="docs.length > 0">
+      <div class="folder-card"
+           [class.active]="activeFolderFilter === 'all'"
+           (click)="setFolderFilter('all')">
+        <div class="folder-card-icon" style="background:#eef2ff;color:#6366f1">📁</div>
+        <div class="folder-card-name">All Documents</div>
+        <div class="folder-card-count">{{ docs.length }}</div>
+      </div>
+      <ng-container *ngFor="let f of builtinFolders">
+        <div class="folder-card"
+             *ngIf="getFolderCount(f.id) > 0"
+             [class.active]="activeFolderFilter === f.id"
+             (click)="setFolderFilter(f.id)">
+          <div class="folder-card-icon" [style.background]="f.bg" [style.color]="f.color">{{ f.icon }}</div>
+          <div class="folder-card-name">{{ f.name }}</div>
+          <div class="folder-card-count">{{ getFolderCount(f.id) }}</div>
+        </div>
+      </ng-container>
+      <ng-container *ngFor="let f of customFolderList">
+        <div class="folder-card"
+             *ngIf="getCustomFolderCount(f) > 0"
+             [class.active]="activeFolderFilter === f"
+             (click)="setFolderFilter(f)">
+          <div class="folder-card-icon" style="background:#f5f3ff;color:#7c3aed">📂</div>
+          <div class="folder-card-name">{{ f }}</div>
+          <div class="folder-card-count">{{ getCustomFolderCount(f) }}</div>
+        </div>
+      </ng-container>
+      <!-- New Folder -->
+      <div class="folder-card folder-card--new" (click)="showNewFolderInput = true" *ngIf="!showNewFolderInput">
+        <div class="folder-card-icon" style="background:#f9fafb;color:#9ca3af">＋</div>
+        <div class="folder-card-name" style="color:#9ca3af">New Folder</div>
+      </div>
+      <div class="folder-card folder-card--new-input" *ngIf="showNewFolderInput">
+        <input class="folder-new-input" [(ngModel)]="newFolderName"
+               placeholder="Folder name…"
+               (keydown.enter)="createFolder()"
+               (keydown.escape)="showNewFolderInput=false;newFolderName=''"
+               autofocus />
+        <div class="folder-new-actions">
+          <button class="folder-new-ok" (click)="createFolder()">✓</button>
+          <button class="folder-new-cancel" (click)="showNewFolderInput=false;newFolderName=''">✕</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- BULK BAR -->
+    <div class="bulk-bar" [class.show]="selectedDocs.size > 0">
+      <span class="bulk-count">{{ selectedDocs.size }} document{{ selectedDocs.size!==1?'s':'' }} selected</span>
+      <div style="position:relative">
+        <button class="bulk-btn" (click)="showMoveMenu=!showMoveMenu">→ Move to…</button>
+        <div *ngIf="showMoveMenu" class="move-menu">
+          <div *ngFor="let f of builtinFolders" class="move-item"
+               (click)="moveSelected(f.id)">{{ f.icon }} {{ f.name }}</div>
+          <div *ngFor="let f of customFolderList" class="move-item"
+               (click)="moveSelected(f)">📂 {{ f }}</div>
+          <div *ngIf="customFolderList.length===0 && builtinFolders.length===0" class="move-empty">
+            No folders available
+          </div>
+        </div>
+      </div>
+      <button class="bulk-btn" (click)="toast.info('Exporting…');clearBulk()">↓ Export</button>
+      <button *ngIf="auth.isAdmin()" class="bulk-btn" (click)="deleteSelected()">🗑 Delete</button>
+      <span style="color:rgba(255,255,255,.4);cursor:pointer;font-size:12px" (click)="clearBulk()">✕</span>
+    </div>
+
+    <!-- TABLE HEADER -->
+    <div class="docs-tb">
+      <div class="docs-tb-title">
+        {{ activeFolderLabel }} <span>({{ filtered.length }})</span>
+      </div>
+      <div class="docs-controls">
+        <select class="sort-sel" [(ngModel)]="sortBy" (ngModelChange)="applySort()">
+          <option value="date">Date Modified</option>
+          <option value="name">Name</option>
+          <option value="size">Size</option>
+        </select>
+        <div class="vt-grp">
+          <div class="vt" [class.on]="view==='list'" (click)="view='list'">☰</div>
+          <div class="vt" [class.on]="view==='grid'" (click)="view='grid'">⊞</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- TABLE VIEW -->
+    <!-- TABLE HEADER -->
+    <div class="doc-table" *ngIf="view==='list'">
+      <div class="dth-row">
+        <div class="dth-checkbox" *ngIf="auth.isAdmin()">
+          <input type="checkbox"
+                [checked]="isAllSelected()"
+                [indeterminate]="isIndeterminate()"
+                (change)="toggleSelectAll($event)">
+        </div>
+        <div class="dth s" *ngIf="auth.isAdmin()">SELECT ALL ↓</div>
+        <div class="dth">TYPE</div>
+        <div class="dth">FOLDER</div>
+        <div class="dth">ACTIONS</div>
+      </div>
+      <ng-container *ngFor="let d of filtered">
+        <!-- ── Normal document row ── -->
+        <div class="dr" [class.on]="selectedDoc?.id===d.id"
+             [class.dr-archive]="d.doc_type==='archive'"
+             (click)="d.doc_type!=='archive' && openDoc(d)">
+          <div class="dcb" *ngIf="auth.isAdmin()">
+            <input type="checkbox" [checked]="selectedDocs.has(d.id)"
+              (change)="toggleBulk(d.id,$any($event.target).checked)"
+              (click)="$event.stopPropagation()">
+          </div>
+          <div class="dnc">
+            <!-- Archive chevron toggle -->
+            <button *ngIf="d.doc_type==='archive'" class="archive-chevron"
+                    [class.open]="expandedArchives.has(d.id)"
+                    (click)="$event.stopPropagation();toggleArchive(d)"
+                    title="Show contents">▶</button>
+            <div class="dpdf" [ngClass]="icoClass(d.doc_type, d)">{{ icoTxt(d.doc_type, d) }}</div>
+            <div>
+              <div class="dname">{{ d.filename }}</div>
+              <div class="ddate">
+                {{ d.created_at | date:'mediumDate' }}
+                <span *ngIf="d.doc_type==='archive' && d.child_count" class="archive-count">
+                  · {{ archiveProgress(d) }}
+                </span>
+              </div>
+            </div>
+          </div>
+          <div>
+            <ng-container *ngIf="d.status==='processing'||d.status==='pending'; else showBadge">
+              <span class="analyzing-dots"><span></span><span></span><span></span></span>
+            </ng-container>
+            <ng-template #showBadge>
+              <span class="tbadge" [ngClass]="badgeClass(d.doc_type, d)">
+                {{ d.doc_type ? d.doc_type.replace('_',' ') : (d.filename?.split('.').pop()?.toUpperCase()) }}
+              </span>
+            </ng-template>
+          </div>
+          <div class="dfolder">{{ folderSvc.getDocFolder(d.id) || folderName(d.doc_type) }}</div>
+          <div class="dacts-cell">
+            <div class="dacts" *ngIf="d.status==='completed'; else processingPlaceholder">
+              <button *ngIf="d.doc_type!=='archive'" class="da" (click)="$event.stopPropagation();previewDoc(d)" title="Preview">👁</button>
+              <button *ngIf="d.doc_type==='archive'" class="da" (click)="$event.stopPropagation();toggleArchive(d)" title="Show contents">📦</button>
+              <button class="da" (click)="$event.stopPropagation();openAnalytics(d)" title="Analytics">📊</button>
+              <button *ngIf="d.doc_type!=='archive'" class="da" (click)="$event.stopPropagation();openSimilar(d)" title="Find Similar">🔍</button>
+              <button *ngIf="d.doc_type!=='archive'" class="da" (click)="$event.stopPropagation();openDocTab(d,'askai')" title="Ask AI">💬</button>
+              <button *ngIf="d.doc_type!=='archive'" class="da" (click)="$event.stopPropagation();openCompare(d, filtered[0])" title="Compare">⇄</button>
+              <button class="da" (click)="$event.stopPropagation();downloadDoc(d)" title="Download">⬇</button>
+            </div>
+            <ng-template #processingPlaceholder>
+              <div class="dacts">
+                <button class="da" (click)="$event.stopPropagation();downloadDoc(d)" title="Download">⬇</button>
+              </div>
+            </ng-template>
+          </div>
+        </div>
+
+        <!-- ── Archive children (expanded) ── -->
+        <ng-container *ngIf="d.doc_type==='archive' && expandedArchives.has(d.id)">
+          <div *ngIf="archiveChildren[d.id]?.loading" class="dr-child dr-child-loading">
+            <span class="analyzing-dots"><span></span><span></span><span></span></span>
+            <span style="font-size:12px;color:#94a3b8;margin-left:8px">Loading contents…</span>
+          </div>
+          <div *ngFor="let c of archiveChildren[d.id]?.children || []"
+               class="dr dr-child" [class.on]="selectedDoc?.id===c.id"
+               (click)="openDoc(c)">
+            <div class="dcb"></div>
+            <div class="dnc">
+              <div class="child-indent"></div>
+              <div class="dpdf" [ngClass]="icoClass(c.doc_type, c)">{{ icoTxt(c.doc_type, c) }}</div>
+              <div>
+                <div class="dname">{{ c.filename }}</div>
+                <div class="ddate">from archive</div>
+              </div>
+            </div>
+            <div>
+              <span *ngIf="c.status==='completed'" class="tbadge" [ngClass]="badgeClass(c.doc_type, c)">
+                {{ c.doc_type ? c.doc_type.replace('_',' ') : c.filename?.split('.').pop()?.toUpperCase() }}
+              </span>
+              <span *ngIf="c.status==='processing'||c.status==='pending'" class="tbadge" style="background:#fef9c3;color:#92400e">⟳ Processing</span>
+              <span *ngIf="c.status==='error'" class="tbadge" style="background:#fef2f2;color:#dc2626">✗ Error</span>
+            </div>
+            <div class="dfolder">Archive</div>
+            <div class="dacts-cell">
+              <div class="dacts">
+                <button *ngIf="c.status==='completed'" class="da" (click)="$event.stopPropagation();previewDoc(c)" title="Preview">👁</button>
+                <button *ngIf="c.status==='completed'" class="da" (click)="$event.stopPropagation();openAnalytics(c)" title="Analytics">📊</button>
+                <button *ngIf="c.status==='completed'" class="da" (click)="$event.stopPropagation();openDocTab(c,'askai')" title="Ask AI">💬</button>
+                <button class="da" (click)="$event.stopPropagation();downloadDoc(c)" title="Download">⬇</button>
+              </div>
+            </div>
+          </div>
+        </ng-container>
+      </ng-container>
+    </div>
+
+    <!-- GRID VIEW -->
+    <div class="doc-grid" *ngIf="view==='grid'">
+      <div *ngFor="let d of filtered" class="gc" (click)="openDoc(d)">
+        <div class="gc-thumb">
+          <div class="fico" [ngClass]="icoClass(d.doc_type)" style="width:48px;height:48px;font-size:13px">{{ icoTxt(d.doc_type) }}</div>
+        </div>
+        <div class="gc-body">
+          <div class="gc-name">{{ d.filename }}</div>
+          <div class="gc-meta">{{ fmtSize(d.file_size) }} · {{ d.created_at | date:'mediumDate' }}</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- EMPTY -->
+    <div class="empty" *ngIf="!loading && filtered.length===0">
+      <span class="empty-ico">📁</span>
+      <h3>No documents found</h3>
+      <p *ngIf="docs.length===0">Upload some documents to get started</p>
+      <p *ngIf="docs.length>0">Try a different search or clear filters</p>
+      <button class="empty-btn" *ngIf="docs.length===0" routerLink="/upload">↑ Upload</button>
+      <button class="empty-btn" *ngIf="docs.length>0" (click)="searchQ='';applySort()">Clear Search</button>
+    </div>
+
+  </div><!-- /content -->
+</div>
+
+<app-doc-sheet [doc]="selectedDoc" [initialTab]="selectedDocTab" (closed)="selectedDoc=null;selectedDocTab='summary'"></app-doc-sheet>
+
+<app-document-compare
+  [isOpen]="compareOpen"
+  [docA]="compareDocA"
+  [docB]="compareDocB"
+  (closed)="compareOpen=false">
+</app-document-compare>

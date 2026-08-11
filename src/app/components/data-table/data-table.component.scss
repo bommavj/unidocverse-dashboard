@@ -1,0 +1,17 @@
+.table-wrapper {
+    overflow-x: auto;
+    background: white;
+    border-radius: 12px;
+    border: 1px solid #eee;
+    padding: 12px;
+  
+    table {
+      width: 100%;
+    }
+  
+    th {
+      font-weight: 600;
+      text-transform: capitalize;
+    }
+  }
+  

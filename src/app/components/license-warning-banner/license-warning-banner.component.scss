@@ -1,0 +1,100 @@
+.license-banner {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 10px 20px;
+    font-size: 13px;
+    font-weight: 500;
+    width: 100%;
+    box-sizing: border-box;
+    animation: slideDown 0.3s ease-out;
+  
+    // Welcome: green (trial active, >30 days)
+    &.welcome {
+      background: linear-gradient(135deg, #064e3b, #065f46);
+      border-bottom: 1px solid #10b981;
+      .banner-icon { color: #6ee7b7; }
+    }
+
+    // Default: warning (amber)
+    &.warning {
+      background: #78350f;
+      color: #fef3c7;
+      border-bottom: 1px solid #b45309;
+  
+      .banner-icon { color: #fcd34d; }
+      .renew-link  { color: #fcd34d; }
+      .dismiss-btn { color: #fef3c7; }
+    }
+  
+    // Urgent: ≤3 days (orange-red)
+    &.urgent {
+      background: #7f1d1d;
+      color: #fee2e2;
+      border-bottom: 1px solid #b91c1c;
+  
+      .banner-icon { color: #fca5a5; }
+      .renew-link  { color: #fca5a5; }
+      .dismiss-btn { color: #fee2e2; }
+    }
+  
+    // Expired (solid red)
+    &.expired {
+      background: #991b1b;
+      color: #fff;
+      border-bottom: 1px solid #7f1d1d;
+  
+      .banner-icon { color: #fca5a5; }
+    }
+  }
+  
+  .banner-content {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    flex: 1;
+  }
+  
+  .banner-icon {
+    font-size: 18px;
+    width: 18px;
+    height: 18px;
+    flex-shrink: 0;
+  }
+  
+  .banner-message {
+    flex: 1;
+    line-height: 1.4;
+  }
+  
+  .renew-link {
+    white-space: nowrap;
+    font-weight: 600;
+    text-decoration: none;
+    padding: 3px 10px;
+    border: 1px solid currentColor;
+    border-radius: 4px;
+    font-size: 12px;
+    transition: opacity 0.15s;
+  
+    &:hover { opacity: 0.8; }
+  }
+  
+  .dismiss-btn {
+    width: 28px !important;
+    height: 28px !important;
+    line-height: 28px !important;
+    flex-shrink: 0;
+    margin-left: 8px;
+  
+    mat-icon {
+      font-size: 16px;
+      width: 16px;
+      height: 16px;
+    }
+  }
+  
+  @keyframes slideDown {
+    from { transform: translateY(-100%); opacity: 0; }
+    to   { transform: translateY(0);     opacity: 1; }
+  }

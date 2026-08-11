@@ -1,0 +1,13 @@
+<div class="chart-wrapper">
+    <h3>{{ config?.title }}</h3>
+  
+    <div class="chart-canvas">
+      <canvas
+        baseChart
+        [type]="chartType"
+        [data]="chartData"
+        [options]="chartOptions">
+      </canvas>
+    </div>
+  </div>
+  

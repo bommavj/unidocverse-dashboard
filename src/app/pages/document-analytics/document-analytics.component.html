@@ -1,0 +1,206 @@
+<div class="analytics-container">
+  
+  <!-- Header with Back Button -->
+  <div class="analytics-header">
+    <button mat-icon-button (click)="goBack()" class="back-button" matTooltip="Back to Dashboard">
+      <mat-icon>arrow_back</mat-icon>
+    </button>
+    <div class="header-content">
+      <h1>📊 {{ documentName }}</h1>
+      <p class="subtitle">Advanced Analytics & Insights</p>
+    </div>
+    <div class="header-actions">
+      <button mat-icon-button (click)="retry()" matTooltip="Refresh">
+        <mat-icon>refresh</mat-icon>
+      </button>
+      <button mat-raised-button color="primary" (click)="exportDashboard()">
+        <mat-icon>download</mat-icon>
+        Export Report
+      </button>
+    </div>
+  </div>
+
+  <!-- Loading State -->
+  <div class="loading-container" *ngIf="loading">
+    <mat-spinner diameter="60"></mat-spinner>
+    <h3>{{ loadingMessage }}</h3>
+  </div>
+
+  <!-- Error State -->
+  <mat-card *ngIf="!loading && error" class="error-card">
+    <mat-card-content>
+      <div class="error-content">
+        <mat-icon class="error-icon">error</mat-icon>
+        <div class="error-details">
+          <h2>Error Loading Analytics</h2>
+          <p>{{ error }}</p>
+          
+          <div class="error-debug" *ngIf="errorDetails">
+            <strong>Debug Info:</strong>
+            <pre>{{ errorDetails | json }}</pre>
+          </div>
+
+          <button mat-raised-button color="primary" (click)="retry()">
+            <mat-icon>refresh</mat-icon>
+            Retry
+          </button>
+        </div>
+      </div>
+    </mat-card-content>
+  </mat-card>
+
+  <!-- Main Content -->
+  <div *ngIf="!loading && !error && dashboardData" class="analytics-content">
+    
+    <!-- KPI Cards -->
+    <div class="kpi-section">
+      <mat-card class="kpi-card total-records">
+        <mat-card-content>
+          <div class="kpi-icon">
+            <mat-icon>table_rows</mat-icon>
+          </div>
+          <div class="kpi-content">
+            <div class="kpi-label">Total Records</div>
+            <div class="kpi-value">{{ dashboardData.kpis.total_records | number }}</div>
+          </div>
+        </mat-card-content>
+      </mat-card>
+
+      <mat-card 
+        *ngFor="let metric of dashboardData.kpis.metrics.slice(0, 5); let i = index"
+        class="kpi-card"
+        [class.kpi-primary]="i % 4 === 0"
+        [class.kpi-accent]="i % 4 === 1"
+        [class.kpi-success]="i % 4 === 2"
+        [class.kpi-warn]="i % 4 === 3">
+        <mat-card-content>
+          <div class="kpi-icon">
+            <mat-icon>analytics</mat-icon>
+          </div>
+          <div class="kpi-content">
+            <div class="kpi-label">{{ metric.name }}</div>
+            <div class="kpi-value">
+              {{ metric.formatted_total || formatValue(metric.total, metric.type) }}
+            </div>
+            <div class="kpi-subtitle">
+              Avg: {{ formatValue(metric.average, metric.type) }}
+            </div>
+          </div>
+        </mat-card-content>
+      </mat-card>
+    </div>
+
+    <!-- Initial Charts Section -->
+    <div class="initial-charts-section" *ngIf="dashboardData.charts && dashboardData.charts.length > 0">
+      <div class="section-header">
+        <h2>
+          <mat-icon>bar_chart</mat-icon>
+          Overview Charts
+        </h2>
+        <p>Key visualizations from your data</p>
+      </div>
+
+      <div class="charts-grid">
+        <mat-card *ngFor="let chartConfig of dashboardData.charts" class="chart-card">
+          <mat-card-header>
+            <div class="chart-header">
+              <mat-icon [style.color]="'#2196f3'">{{ getChartIcon(chartConfig.type) }}</mat-icon>
+              <h3>{{ chartConfig.title }}</h3>
+            </div>
+          </mat-card-header>
+          <mat-card-content>
+            <div class="chart-container" *ngIf="chartConfigs.get(chartConfig.id) as config">
+              <canvas 
+                baseChart
+                [type]="config.type"
+                [data]="config.data"
+                [options]="config.options">
+              </canvas>
+            </div>
+          </mat-card-content>
+        </mat-card>
+      </div>
+    </div>
+
+    <!-- Insight Sections (Infinite Scroll) -->
+    <div class="insight-sections">
+      
+      <div *ngFor="let section of insightSections" class="insight-section">
+        <!-- Section Header -->
+        <div class="section-header">
+          <h2>
+            <mat-icon>{{ section.icon }}</mat-icon>
+            {{ section.title }}
+          </h2>
+          <p>{{ section.description }}</p>
+        </div>
+    
+        <!-- Loading State for Section -->
+        <div *ngIf="!section.loaded" class="section-loading">
+          <mat-spinner diameter="40"></mat-spinner>
+          <p>Loading insights...</p>
+        </div>
+    
+        <!-- Section Charts -->
+        <div class="charts-grid" *ngIf="section.loaded && section.charts.length > 0">
+          <mat-card *ngFor="let chartConfig of section.charts" class="chart-card">
+            <mat-card-header>
+              <div class="chart-header">
+                <mat-icon [style.color]="'#2196f3'">{{ getChartIcon(chartConfig.type) }}</mat-icon>
+                <h3>{{ chartConfig.title }}</h3>
+              </div>
+            </mat-card-header>
+            <mat-card-content>
+              <div class="chart-container" *ngIf="chartConfigs.get(chartConfig.id) as config">
+                <canvas 
+                  baseChart
+                  [type]="config.type"
+                  [data]="config.data"
+                  [options]="config.options">
+                </canvas>
+              </div>
+            </mat-card-content>
+          </mat-card>
+        </div>
+    
+        <!-- Empty State -->
+        <div *ngIf="section.loaded && section.charts.length === 0" class="section-empty">
+          <mat-icon>info</mat-icon>
+          <p>No insights available for this section</p>
+        </div>
+      </div>
+    
+      <!-- Loading More Indicator -->
+      <div *ngIf="loadingMoreInsights" class="loading-more">
+        <mat-spinner diameter="50"></mat-spinner>
+        <p>Loading more insights...</p>
+      </div>
+    
+      <!-- All Done Message -->
+      <div *ngIf="allInsightsLoaded && insightSections.length > 0" class="all-loaded">
+        <mat-icon>check_circle</mat-icon>
+        <h3>All Insights Loaded</h3>
+        <p>You've reached the end of the analytics dashboard</p>
+      </div>
+    </div>
+
+    <!-- Debug Section -->
+    <details class="debug-section">
+      <summary>🔍 Debug: Show Raw Data</summary>
+      <pre>{{ dashboardData | json }}</pre>
+    </details>
+
+  </div>
+
+  <!-- Empty State -->
+  <div *ngIf="!loading && !error && !dashboardData" class="empty-state">
+    <mat-icon>analytics</mat-icon>
+    <h2>No Analytics Data Available</h2>
+    <p>This document doesn't have analytics data yet.</p>
+    <button mat-raised-button color="primary" (click)="goBack()">
+      <mat-icon>arrow_back</mat-icon>
+      Back to Dashboard
+    </button>
+  </div>
+
+</div>

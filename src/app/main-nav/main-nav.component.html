@@ -1,0 +1,234 @@
+<!-- main-nav.component.html -->
+<aside class="sb">
+
+  <!-- Brand -->
+  <div class="sb-brand">
+    <div class="sb-brand-left" routerLink="/dashboard">
+      <img src="assets/udv-icon.png" style="width:40px;height:40px;border-radius:10px;object-fit:contain;" alt="UniDocVerse"/>
+      
+      <span style="font-size:15px;font-weight:600;letter-spacing:-0.3px;margin-left:2px;">
+        <span style="color:#000;">Uni</span>
+        <strong style="
+          background:linear-gradient(90deg,#4f46e5 0%, #6366f1 40%, #818cf8 100%);
+          -webkit-background-clip:text;
+          background-clip:text;
+          color:transparent;
+        ">Doc</strong>
+        <span style="color:#000;">Verse</span>
+      </span>
+    </div>
+    <button class="sb-logout-top" (click)="logout()" title="Sign out">
+      <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24"
+           fill="none" stroke="currentColor" stroke-width="2.2"
+           stroke-linecap="round" stroke-linejoin="round">
+        <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/>
+        <polyline points="16 17 21 12 16 7"/>
+        <line x1="21" y1="12" x2="9" y2="12"/>
+      </svg>
+    </button>
+  </div>
+
+  <div class="sb-scroll">
+
+    <!-- Main nav -->
+    <div class="sb-sec">
+      <div class="sb-lbl">{{ 'Main' | translate }}</div>
+      <a class="sb-a" routerLink="/dashboard"  routerLinkActive="on"><span class="sbi">⊞</span>{{ 'Dashboard' | translate }}</a>
+      <a class="sb-a" routerLink="/documents"  routerLinkActive="on">
+        <span class="sbi">📁</span>{{ 'Documents' | translate }}
+        <span class="sb-badge" *ngIf="docCount > 0">{{ docCount }}</span>
+      </a>
+      <a class="sb-a" routerLink="/search"     routerLinkActive="on"><span class="sbi">🔍</span>{{ 'Search' | translate }}</a>
+      <a class="sb-a" routerLink="/research"   routerLinkActive="on"><span class="sbi">🔬</span>{{ 'Research Agent' | translate }}</a>
+      <a class="sb-a" routerLink="/timeline"   routerLinkActive="on"><span class="sbi">🕒</span>{{ 'Timeline' | translate }}</a>
+      <a class="sb-a" routerLink="/upload"     routerLinkActive="on"><span class="sbi">↑</span>{{ 'Upload' | translate }}</a>
+      <a class="sb-a" routerLink="/insights"   routerLinkActive="on"><span class="sbi">⚡</span>{{ 'Insights' | translate }}</a>
+      <a class="sb-a" routerLink="/alerts"     routerLinkActive="on">
+        <span class="sbi">🔔</span>{{ 'Alerts' | translate }}
+        <span class="sb-badge sb-badge--red" *ngIf="unreadAlerts > 0">{{ unreadAlerts }}</span>
+      </a>
+      <a class="sb-a" routerLink="/settings" routerLinkActive="on" *ngIf="auth.isAdmin()">
+        <span class="sbi">⚙️</span>{{ 'Settings' | translate }}
+      </a>
+      <a class="sb-a" routerLink="/report-issue" routerLinkActive="on" title="Report Issue">
+        <span class="sbi">🐛</span>{{ 'Report Issue' | translate }}
+      </a>
+    </div>
+
+    <!-- Analytics & Insights -->
+    <div class="sb-sec">
+      <div class="sb-lbl">{{ 'Analytics & Insights' | translate }}</div>
+<a class="sb-a" routerLink="/history"               routerLinkActive="on"><span class="sbi">💬</span>{{ 'Document Conversation History' | translate }}</a>
+<a class="sb-a" routerLink="/research-history"      routerLinkActive="on"><span class="sbi">🔬</span>{{ 'Agent Conversation History' | translate }}</a>
+    </div>
+
+    <!-- Personal Assistant -->
+    <div class="sb-sec">
+      <div class="sb-lbl">{{ 'Assistant' | translate }}</div>
+      <a class="sb-a" routerLink="/planner"   routerLinkActive="on"><span class="sbi">📅</span>{{ 'Daily Planner' | translate }}</a>
+      <a class="sb-a" routerLink="/notes"     routerLinkActive="on"><span class="sbi">📝</span>{{ 'Quick Notes' | translate }}</a>
+    </div>
+
+    <!-- AI & Automation -->
+    <div class="sb-sec">
+      <div class="sb-lbl">{{ 'AI & Automation' | translate }}</div>
+      <a class="sb-a" routerLink="/automation-hub"        routerLinkActive="on"><span class="sbi">⚙️</span>{{ 'Automation' | translate }}</a>
+    </div>
+
+    <!-- Agency Management — shown only when feature flag enabled -->
+    <div class="sb-sec" *ngIf="features.agencyMode()">
+      <div class="sb-lbl">{{ 'Agency' | translate }}</div>
+      <a class="sb-a" routerLink="/clients"     routerLinkActive="on"><span class="sbi">👤</span>{{ 'Clients' | translate }}</a>
+      <a class="sb-a" routerLink="/policies"    routerLinkActive="on"><span class="sbi">🗂</span>{{ 'Policies' | translate }}</a>
+      <a class="sb-a" routerLink="/renewals"    routerLinkActive="on"><span class="sbi">🔄</span>{{ 'Renewals' | translate }}</a>
+      <a class="sb-a" routerLink="/calendar"    routerLinkActive="on"><span class="sbi">📅</span>{{ 'Calendar' | translate }}</a>
+      <a class="sb-a" routerLink="/commission"  routerLinkActive="on"><span class="sbi">💰</span>{{ 'Commission' | translate }}</a>
+      <a class="sb-a" routerLink="/loss-runs"   routerLinkActive="on"><span class="sbi">📉</span>{{ 'Loss Runs' | translate }}</a>
+      <a class="sb-a" routerLink="/gap-analysis" routerLinkActive="on"><span class="sbi">🔎</span>{{ 'Gap Analysis' | translate }}</a>
+      <a class="sb-a" routerLink="/coi"            routerLinkActive="on"><span class="sbi">📜</span>{{ 'COI' | translate }}</a>
+      <a class="sb-a" routerLink="/agency-reports" routerLinkActive="on"><span class="sbi">📊</span>{{ 'AI Reports' | translate }}</a>
+    </div>
+
+    <!-- Immigration -->
+    <div class="sb-sec" *ngIf="features.hrMode()">
+      <div class="sb-lbl">{{ 'Immigration' | translate }}</div>
+      <a class="sb-a" routerLink="/immigration" routerLinkActive="on"><span class="sbi">🛂</span>{{ 'Visa Tracker' | translate }}</a>
+    </div>
+
+    <!-- Legal & Compliance -->
+    <div class="sb-sec" *ngIf="features.legalMode()">
+      <div class="sb-lbl">{{ 'Legal' | translate }}</div>
+      <a class="sb-a" routerLink="/legal" [queryParams]="{ tab: 'clauses' }" routerLinkActive="on"><span class="sbi">⚖️</span>{{ 'Contracts' | translate }}</a>
+      <a class="sb-a" routerLink="/legal" [queryParams]="{ tab: 'obligations' }" routerLinkActive="on"><span class="sbi">🔒</span>{{ 'NDAs' | translate }}</a>
+      <a class="sb-a" routerLink="/legal" [queryParams]="{ tab: 'renewals' }" routerLinkActive="on"><span class="sbi">🏠</span>{{ 'Lease Agmt' | translate }}</a>
+      <a class="sb-a" routerLink="/legal" [queryParams]="{ tab: 'counterparties' }" routerLinkActive="on"><span class="sbi">📋</span>{{ 'Reg Filings' | translate }}</a>
+    </div>
+
+    <!-- Healthcare & Medical -->
+    <div class="sb-sec" *ngIf="features.medicalMode()">
+      <div class="sb-lbl">{{ 'Healthcare' | translate }}</div>
+      <a class="sb-a" routerLink="/healthcare" [queryParams]="{ tab: 'prescriptions' }" routerLinkActive="on"><span class="sbi">🩺</span>{{ 'Medical Charts' | translate }}</a>
+      <a class="sb-a" routerLink="/healthcare" [queryParams]="{ tab: 'diagnoses' }" routerLinkActive="on"><span class="sbi">📝</span>{{ 'Intake Forms' | translate }}</a>
+      <a class="sb-a" routerLink="/healthcare" [queryParams]="{ tab: 'procedures' }" routerLinkActive="on"><span class="sbi">🔬</span>{{ 'Lab Reports' | translate }}</a>
+    </div>
+
+    <!-- Finance, Tax & Auditing -->
+    <div class="sb-sec" *ngIf="features.financeMode()">
+      <div class="sb-lbl">{{ 'Finance' | translate }}</div>
+      <a class="sb-a" routerLink="/finance" [queryParams]="{ tab: 'reconciliation' }" routerLinkActive="on"><span class="sbi">🏦</span>{{ 'Bank Stmts' | translate }}</a>
+      <a class="sb-a" routerLink="/finance" [queryParams]="{ tab: 'tax' }" routerLinkActive="on"><span class="sbi">📅</span>{{ 'Tax Returns' | translate }}</a>
+      <a class="sb-a" routerLink="/finance" [queryParams]="{ tab: 'expenses' }" routerLinkActive="on"><span class="sbi">🧾</span>{{ 'Invoices' | translate }}</a>
+    </div>
+
+    <!-- Real Estate & Mortgages -->
+    <div class="sb-sec" *ngIf="features.realEstateMode()">
+      <div class="sb-lbl">{{ 'Real Estate' | translate }}</div>
+      <a class="sb-a" routerLink="/real-estate" [queryParams]="{ tab: 'leases' }" routerLinkActive="on"><span class="sbi">📉</span>{{ 'Appraisals' | translate }}</a>
+      <a class="sb-a" routerLink="/real-estate" [queryParams]="{ tab: 'inspections' }" routerLinkActive="on"><span class="sbi">📜</span>{{ 'Title Deeds' | translate }}</a>
+      <a class="sb-a" routerLink="/real-estate" [queryParams]="{ tab: 'closing' }" routerLinkActive="on"><span class="sbi">📑</span>{{ 'Disclosures' | translate }}</a>
+    </div>
+
+    <!-- Human Resources -->
+    <div class="sb-sec" *ngIf="features.hrMode()">
+      <div class="sb-lbl">{{ 'HR & People' | translate }}</div>
+      <a class="sb-a" routerLink="/hr" [queryParams]="{ tab: 'talent' }" routerLinkActive="on"><span class="sbi">👤</span>{{ 'Resumes' | translate }}</a>
+      <a class="sb-a" routerLink="/hr" [queryParams]="{ tab: 'onboarding' }" routerLinkActive="on"><span class="sbi">📘</span>{{ 'Handbooks' | translate }}</a>
+      <a class="sb-a" routerLink="/hr" [queryParams]="{ tab: 'policies' }" routerLinkActive="on"><span class="sbi">📈</span>{{ 'Reviews' | translate }}</a>
+    </div>
+
+    <!-- Supply Chain & Logistics -->
+    <div class="sb-sec" *ngIf="features.supplyChainMode()">
+      <div class="sb-lbl">{{ 'Supply Chain' | translate }}</div>
+      <a class="sb-a" routerLink="/supply-chain" [queryParams]="{ tab: 'logistics' }" routerLinkActive="on"><span class="sbi">📦</span>{{ 'PO Register' | translate }}</a>
+      <a class="sb-a" routerLink="/supply-chain" [queryParams]="{ tab: 'carriers' }" routerLinkActive="on"><span class="sbi">🚚</span>{{ 'Bills of Lading' | translate }}</a>
+      <a class="sb-a" routerLink="/supply-chain" [queryParams]="{ tab: 'sanctions' }" routerLinkActive="on"><span class="sbi">🚢</span>{{ 'Manifests' | translate }}</a>
+    </div>
+
+    <!-- Compliance & Risk -->
+    <div class="sb-sec" *ngIf="features.complianceMode()">
+      <div class="sb-lbl">{{ 'Compliance & Risk' | translate }}</div>
+      <a class="sb-a" routerLink="/compliance"    routerLinkActive="on"><span class="sbi">✅</span>{{ 'Compliance' | translate }}</a>
+      <a class="sb-a" routerLink="/risk"          routerLinkActive="on"><span class="sbi">⚠️</span>{{ 'Risk' | translate }}</a>
+      <a class="sb-a" routerLink="/audit"         routerLinkActive="on"><span class="sbi">🔍</span>{{ 'Audit' | translate }}</a>
+      <a class="sb-a" routerLink="/deadlines"     routerLinkActive="on"><span class="sbi">⏰</span>{{ 'Deadlines' | translate }}</a>
+    </div>
+
+    <!-- Operations -->
+    <div class="sb-sec" *ngIf="features.operationsMode()">
+      <div class="sb-lbl">{{ 'Operations' | translate }}</div>
+      <a class="sb-a" routerLink="/matters"       routerLinkActive="on"><span class="sbi">📁</span>{{ 'Matters' | translate }}</a>
+      <a class="sb-a" routerLink="/claims"        routerLinkActive="on"><span class="sbi">🏥</span>{{ 'Claims' | translate }}</a>
+      <a class="sb-a" routerLink="/approvals"     routerLinkActive="on"><span class="sbi">✔️</span>{{ 'Approvals' | translate }}</a>
+      <a class="sb-a" routerLink="/quotes"        routerLinkActive="on"><span class="sbi">💬</span>{{ 'Quotes' | translate }}</a>
+      <a class="sb-a" routerLink="/clm"           routerLinkActive="on"><span class="sbi">📝</span>{{ 'CLM' | translate }}</a>
+      <a class="sb-a" routerLink="/jurisdiction"  routerLinkActive="on"><span class="sbi">🗺️</span>{{ 'Jurisdiction' | translate }}</a>
+    </div>
+
+    <!-- Tools -->
+    <div class="sb-sec">
+      <div class="sb-lbl">{{ 'Tools' | translate }}</div>
+      <div class="sb-a sb-ask-ai" (click)="openAskAi.emit()">
+        <span class="sbi">✦</span>{{ 'Ask AI' | translate }}
+      </div>
+      <div class="sb-a sb-voice-command" (click)="openVoice.emit()">
+        <span class="sbi">🎙️</span>{{ 'Voice Assistant' | translate }}
+      </div>
+      <a class="sb-a" routerLink="/integrations" routerLinkActive="on">
+        <span class="sbi">🔌</span>{{ 'Integrations' | translate }}
+      </a>
+
+    </div>
+
+    <!-- Disclaimer -->
+    <div class="sb-sec">
+      <a class="sb-a sb-a--disclaimer" routerLink="/disclaimer" routerLinkActive="on">
+        <span class="sbi">⚠️</span>Disclaimer & Terms
+      </a>
+    </div>
+
+  </div><!-- end sb-scroll -->
+
+  <!-- Language selector -->
+  <div class="sb-lang-select" title="Change language">
+    <span style="font-size:16px;">🌐</span>
+    <select [ngModel]="languageService.currentLang()" (ngModelChange)="changeLanguage($event)">
+      <option value="en">English</option>
+      <option value="es">Español</option>
+      <option value="fr">Français</option>
+      <option value="de">Deutsch</option>
+    </select>
+  </div>
+
+  <!-- Theme toggle -->
+  <div class="sb-theme-toggle" (click)="theme.toggle()" title="Toggle dark mode">
+    <span class="sb-theme-icon">{{ theme.isDark ? '☀️' : '🌙' }}</span>
+    <span class="sb-theme-label">{{ (theme.isDark ? 'Light mode' : 'Dark mode') | translate }}</span>
+    <div class="sb-theme-switch" [class.on]="theme.isDark">
+      <div class="sb-theme-thumb"></div>
+    </div>
+  </div>
+
+  <!-- Bottom: storage + user -->
+  <div class="sb-bot">
+    <div class="sb-sto">
+      <div class="sb-sto-row">
+        <span>{{ 'Storage' | translate }}</span>
+        <span style="font-family:var(--mono)">{{ storageUsed }} MB / 10 GB</span>
+      </div>
+      <div class="sb-sto-bar">
+        <div class="sb-sto-fill" [style.width.%]="storagePercent"></div>
+      </div>
+    </div>
+    <div class="sb-user">
+      <div class="sb-av" [style.background]="auth.currentUser()?.avatar_color || '#6366f1'">
+        {{ auth.getInitials() }}
+      </div>
+      <div style="flex:1; min-width:0">
+        <div class="sb-uname">{{ auth.currentUser()?.full_name || 'User' }}</div>
+        <div class="sb-urole">{{ auth.currentUser()?.role | titlecase }} · {{ 'Trial' | translate }}</div>
+      </div>
+    </div>
+  </div>
+
+</aside>
+<app-toast></app-toast>

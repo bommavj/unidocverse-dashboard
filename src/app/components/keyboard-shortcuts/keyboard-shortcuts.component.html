@@ -1,0 +1,12 @@
+<div class="kbd-backdrop" *ngIf="isOpen" (click)="close()">
+  <div class="kbd-modal" (click)="$event.stopPropagation()">
+    <div class="kbd-modal__header"><span class="kbd-modal__title">⌨ Keyboard Shortcuts</span><button class="kbd-modal__close" (click)="close()">✕</button></div>
+    <div class="kbd-modal__body">
+      <div *ngFor="let s of shortcuts" class="kbd-row">
+        <span class="kbd-row__label">{{ s.label }}</span>
+        <div class="kbd-row__keys"><kbd *ngFor="let k of s.keys">{{ k }}</kbd></div>
+      </div>
+    </div>
+    <div class="kbd-modal__footer">Press <strong>?</strong> anytime to show shortcuts</div>
+  </div>
+</div>

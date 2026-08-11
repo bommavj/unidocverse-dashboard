@@ -1,0 +1,139 @@
+<div class="clm-page">
+
+  <!-- Header -->
+  <div class="clm-header">
+    <div>
+      <h1 class="clm-title">Contract Lifecycle</h1>
+      <p class="clm-sub">Drag contracts between stages to progress them through the pipeline</p>
+    </div>
+    <button class="btn-add" (click)="openAdd()">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+      Add to Pipeline
+    </button>
+  </div>
+
+  <!-- Loading -->
+  <div class="loading-row" *ngIf="loading">
+    <div class="spinner"></div> Loading contracts…
+  </div>
+
+  <!-- Kanban board -->
+  <div class="clm-board" *ngIf="!loading">
+    <div class="clm-col" *ngFor="let s of STAGES"
+         [class.drag-over]="dragOverStage === s.key"
+         (dragover)="onDragOver($event, s.key)"
+         (dragleave)="onDragLeave()"
+         (drop)="onDrop($event, s.key)">
+
+      <div class="col-head" [style.color]="s.color" [style.background]="s.bg">
+        <span class="col-label">{{ s.label }}</span>
+        <span class="col-count">{{ stageEntries(s.key).length }}</span>
+      </div>
+
+      <div class="col-cards">
+        <div class="clm-card" *ngFor="let e of stageEntries(s.key)"
+             draggable="true"
+             (dragstart)="onDragStart($event, e)"
+             (click)="openEntry(e)">
+          <div class="cc-type">{{ e.doc_type || 'document' }}</div>
+          <div class="cc-name">{{ e.filename }}</div>
+          <div class="cc-party" *ngIf="e.counterparty">{{ e.counterparty }}</div>
+          <div class="cc-value" *ngIf="e.contract_value">{{ fmt(e.contract_value) }}</div>
+          <div class="cc-date">{{ fmtDate(e.updated_at) }}</div>
+        </div>
+        <div class="col-empty" *ngIf="stageEntries(s.key).length === 0">
+          Drop a contract here
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ── Add to Pipeline modal ─────────────────────────────────────────────── -->
+<div class="modal-overlay" *ngIf="addOpen" (click)="addOpen=false">
+  <div class="modal" (click)="$event.stopPropagation()">
+    <div class="modal-head">Add Contract to Pipeline</div>
+    <div class="modal-body">
+      <label>Document</label>
+      <udv-select [(ngModel)]="addDraft.doc_id" [options]="docOptions" placeholder="— Select document —"></udv-select>
+      <label>Starting Stage</label>
+      <udv-select [(ngModel)]="addDraft.stage" [options]="stageOptions" placeholder="Stage"></udv-select>
+      <label>Counterparty / Vendor</label>
+      <input [(ngModel)]="addDraft.counterparty" placeholder="e.g. Acme Corp" />
+      <label>Contract Value ($)</label>
+      <input type="number" [(ngModel)]="addDraft.contract_value" placeholder="0.00" />
+      <label>Governing Law</label>
+      <input [(ngModel)]="addDraft.governing_law" placeholder="e.g. California" />
+      <label>Notes</label>
+      <textarea [(ngModel)]="addDraft.notes" rows="2" placeholder="Any notes…"></textarea>
+    </div>
+    <div class="modal-foot">
+      <button class="btn-cancel" (click)="addOpen=false">Cancel</button>
+      <button class="btn-confirm" (click)="submitAdd()" [disabled]="!addDraft.doc_id">Add Contract</button>
+    </div>
+  </div>
+</div>
+
+<!-- ── Entry detail panel ────────────────────────────────────────────────── -->
+<div class="detail-overlay" *ngIf="selected" (click)="selected=null">
+  <div class="detail-panel" (click)="$event.stopPropagation()">
+    <div class="dp-head">
+      <div>
+        <div class="dp-stage-badge" [style.background]="stageInfo(selected.stage).bg" [style.color]="stageInfo(selected.stage).color">
+          {{ stageInfo(selected.stage).label }}
+        </div>
+        <div class="dp-fname">{{ selected.filename }}</div>
+      </div>
+      <div class="dp-actions">
+        <button class="dp-btn" (click)="editMode=!editMode">{{ editMode ? 'Cancel' : 'Edit' }}</button>
+        <button class="dp-btn danger" (click)="deleteEntry(selected.id)">Remove</button>
+        <button class="dp-btn" (click)="openDoc(selected.doc_id)">View Doc</button>
+        <button class="dp-close" (click)="selected=null">×</button>
+      </div>
+    </div>
+
+    <!-- View mode -->
+    <div class="dp-body" *ngIf="!editMode">
+      <div class="dp-row"><span>Counterparty</span><b>{{ selected.counterparty || '—' }}</b></div>
+      <div class="dp-row"><span>Value</span><b>{{ fmt(selected.contract_value) }}</b></div>
+      <div class="dp-row"><span>Governing Law</span><b>{{ selected.governing_law || '—' }}</b></div>
+      <div class="dp-row"><span>Last Updated</span><b>{{ fmtDate(selected.updated_at) }}</b></div>
+      <div class="dp-notes" *ngIf="selected.notes"><b>Notes:</b> {{ selected.notes }}</div>
+      <div class="dp-summary" *ngIf="selected.summary">
+        <b>AI Summary:</b>
+        <p>{{ selected.summary | slice:0:300 }}…</p>
+      </div>
+
+      <!-- Stage history -->
+      <div class="dp-hist-toggle" (click)="historyOpen=!historyOpen">
+        {{ historyOpen ? '▾' : '▸' }} Stage History ({{ selected.history?.length || 0 }})
+      </div>
+      <div class="dp-history" *ngIf="historyOpen">
+        <div class="hist-row" *ngFor="let h of selected.history">
+          <div class="hist-arrow">
+            <span class="hist-from">{{ h.from_stage || 'created' }}</span>
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
+            <span class="hist-to">{{ h.to_stage }}</span>
+          </div>
+          <span class="hist-note">{{ h.note }}</span>
+          <span class="hist-by">{{ h.moved_by }}</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Edit mode -->
+    <div class="dp-body" *ngIf="editMode">
+      <label>Counterparty</label>
+      <input [(ngModel)]="editDraft.counterparty" placeholder="Counterparty" />
+      <label>Contract Value ($)</label>
+      <input type="number" [(ngModel)]="editDraft.contract_value" />
+      <label>Governing Law</label>
+      <input [(ngModel)]="editDraft.governing_law" placeholder="Governing Law" />
+      <label>Notes</label>
+      <textarea [(ngModel)]="editDraft.notes" rows="3"></textarea>
+      <button class="btn-confirm" (click)="saveEdit()">Save Changes</button>
+    </div>
+  </div>
+</div>
+
+<app-doc-sheet [doc]="selectedDoc" (closed)="selectedDoc=null" />

@@ -1,0 +1,67 @@
+<div class="license-container">
+    <div class="license-card">
+      <!-- Header -->
+      <div class="license-header">
+        <mat-icon class="license-icon">verified_user</mat-icon>
+        <h1>Welcome to UniDocVerse</h1>
+        <p>Please upload your license file to continue</p>
+      </div>
+  
+      <!-- Upload Area -->
+      <div 
+        class="upload-area"
+        [class.dragging]="isDragging"
+        [class.uploading]="isUploading"
+        (dragover)="onDragOver($event)"
+        (dragleave)="onDragLeave($event)"
+        (drop)="onDrop($event)"
+        (click)="triggerFileInput()"
+      >
+        <input
+          type="file"
+          id="fileInput"
+          accept=".udv.json"
+          (change)="onFileSelected($event)"
+          style="display: none"
+        />
+  
+        <div class="upload-content" *ngIf="!isUploading">
+          <mat-icon class="upload-icon">cloud_upload</mat-icon>
+          <h2>Drag & Drop License File</h2>
+          <p>or click to browse</p>
+          <span class="file-format">Accepts: .udv.json files only</span>
+        </div>
+  
+        <div class="upload-progress" *ngIf="isUploading">
+          <mat-spinner diameter="60"></mat-spinner>
+          <p>Validating license...</p>
+        </div>
+      </div>
+  
+      <!-- Instructions -->
+      <div class="instructions">
+        <h3><mat-icon>info</mat-icon> How to get a license:</h3>
+        <ol>
+          <li>Please visit https://unidocverse.com and click on License and Submit</li>
+          <li>You will receive a <code>license_yourname.udv.json</code> file</li>
+          <li>Upload it using the area above</li>
+          <li>Start using UniDocVerse!</li>
+        </ol>
+      </div>
+  
+      <!-- Current Status (if checking) -->
+      <div class="license-status" *ngIf="licenseStatus && !licenseStatus.is_valid">
+        <mat-icon class="status-icon error">error</mat-icon>
+        <div class="status-content">
+          <h4>No Valid License Found</h4>
+          <p>{{ licenseStatus.error || 'Please upload a license file to continue' }}</p>
+        </div>
+      </div>
+    </div>
+  
+    <!-- Footer -->
+    <div class="license-footer">
+      <p>UniDocVerse &copy; 2026 | Version 1.0.0</p>
+      <p>Need help? Visit <a href="https://docs.unidocverse.com">docs.unidocverse.com</a></p>
+    </div>
+  </div>

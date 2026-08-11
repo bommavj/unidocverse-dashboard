@@ -1,0 +1,76 @@
+<div class="gai-backdrop" *ngIf="isOpen" (click)="closed.emit()">
+  <div class="gai-modal" (click)="$event.stopPropagation()">
+    <div class="gai-handle"></div>
+
+    <div class="gai-header">
+      <div class="gai-header__ico">U</div>
+      <div>
+        <div class="gai-header__title">Ask AI — All Documents</div>
+        <div class="gai-header__sub">Ask across your entire library · phi3:mini · local</div>
+      </div>
+      <button class="gai-header__close" (click)="closed.emit()">✕</button>
+    </div>
+
+    <!-- ── CONTEXT TABS — real doc types ── -->
+    <div class="gai-ctx-strip">
+
+      <!-- All docs tab — always first -->
+      <div class="gai-ctx-chip"
+           [class.gai-ctx-chip--on]="activeTab === null"
+           (click)="selectTab(null)">
+        📚 All {{ totalDocs }} doc{{ totalDocs === 1 ? '' : 's' }}
+      </div>
+
+      <!-- Dynamic category tabs from real doc types -->
+      <div *ngFor="let tab of tabs"
+           class="gai-ctx-chip"
+           [class.gai-ctx-chip--on]="activeTab === tab.docType"
+           (click)="selectTab(tab.docType)">
+        {{ tab.icon }} {{ tab.label }}
+        <span *ngIf="tab.count > 1" style="opacity:0.6;font-size:11px;margin-left:3px">{{ tab.count }}</span>
+      </div>
+
+    </div>
+
+    <!-- ── CHAT THREAD ── -->
+    <div class="gai-thread" #threadEl>
+      <ng-container *ngFor="let m of messages">
+        <div class="gai-msg gai-msg--user" *ngIf="m.role === 'user'">
+          <div class="gai-bubble gai-bubble--user">{{ m.text }}</div>
+        </div>
+        <div class="gai-msg gai-msg--ai" *ngIf="m.role === 'ai'">
+          <div class="gai-av">U</div>
+          <div class="gai-bubble gai-bubble--ai" [innerHTML]="m.text"></div>
+        </div>
+      </ng-container>
+
+      <!-- Typing indicator -->
+      <div class="gai-msg gai-msg--ai" *ngIf="loading">
+        <div class="gai-av">U</div>
+        <div class="gai-typing">
+          <div class="gai-dot"></div>
+          <div class="gai-dot"></div>
+          <div class="gai-dot"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── INPUT ── -->
+    <div class="gai-input-wrap">
+      <div class="gai-input-bar">
+        <textarea class="gai-textarea"
+                  [(ngModel)]="query"
+                  placeholder="Ask anything across all your documents…"
+                  rows="1"
+                  (keydown)="onKey($event)">
+        </textarea>
+        <button class="gai-send" (click)="send()">➤</button>
+      </div>
+      <div class="gai-footer">
+        <span class="gai-footer__local">🔒 phi3:mini · local · private</span>
+        <span>{{ msgCount }} messages</span>
+      </div>
+    </div>
+
+  </div>
+</div>

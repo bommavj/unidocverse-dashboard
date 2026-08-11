@@ -1,0 +1,143 @@
+<div class="dashboard-wrapper">
+  
+  <!-- LOADING STATE -->
+  <div *ngIf="loading" class="loading-state">
+    <mat-spinner diameter="60"></mat-spinner>
+    <p>Generating dashboard analytics...</p>
+  </div>
+
+  <!-- ERROR STATE -->
+  <div *ngIf="error && !loading" class="error-state">
+    <mat-icon>error_outline</mat-icon>
+    <h3>Failed to Load Dashboard</h3>
+    <p>{{ error }}</p>
+    <button mat-raised-button color="primary" (click)="fetchDashboardAnalytics()">
+      <mat-icon>refresh</mat-icon>
+      Retry
+    </button>
+  </div>
+
+  <!-- MAIN DASHBOARD -->
+  <div *ngIf="!loading && !error && dashboardMeta" class="dashboard-container">
+    
+    <!-- HEADER -->
+    <div class="dashboard-header">
+      <div class="header-left">
+        <button mat-icon-button (click)="goBack()" matTooltip="Back">
+          <mat-icon>arrow_back</mat-icon>
+        </button>
+        <div class="header-content">
+          <h1>{{ dashboardMeta.title }}</h1>
+          <p class="description">{{ dashboardMeta.description }}</p>
+        </div>
+      </div>
+      
+      <div class="header-actions">
+        <button mat-raised-button color="primary" [matMenuTriggerFor]="exportMenu">
+          <mat-icon>file_download</mat-icon>
+          Export
+        </button>
+        <mat-menu #exportMenu="matMenu">
+          <button mat-menu-item (click)="exportToExcel()">
+            <mat-icon style="color: #10b981;">table_chart</mat-icon>
+            <span>Excel</span>
+          </button>
+          <button mat-menu-item (click)="exportToPDF()">
+            <mat-icon style="color: #ef4444;">picture_as_pdf</mat-icon>
+            <span>PDF</span>
+          </button>
+        </mat-menu>
+        
+        <button mat-icon-button matTooltip="Refresh" (click)="fetchDashboardAnalytics()">
+          <mat-icon>refresh</mat-icon>
+        </button>
+      </div>
+    </div>
+
+    <!-- INSIGHTS BAR (KPI Cards) - FIXED STRUCTURE -->
+    <div *ngIf="insights.length > 0" class="insights-bar">
+      <mat-card *ngFor="let insight of insights" class="insight-card">
+        <mat-icon class="card-icon">{{ insight.icon }}</mat-icon>
+        <div class="card-content">
+          <div class="card-label">{{ insight.title }}</div>
+          <div class="card-value">{{ insight.value }}</div>
+          <div class="card-metric" *ngIf="insight.metric">{{ insight.metric }}</div>
+        </div>
+      </mat-card>
+    </div>
+
+    <!-- VISUALIZATIONS GRID -->
+    <div class="visualizations-grid">
+      <mat-card 
+        *ngFor="let viz of visualizations; let i = index" 
+        class="viz-card"
+        [class.full-width]="viz.type === 'pie'"
+        [class.animate-in]="true"
+        [style.animation-delay.ms]="i * 100">
+        
+        <mat-card-header>
+          <mat-card-title>
+            <mat-icon class="viz-icon">
+              {{ viz.type === 'scatter' ? 'scatter_plot' : 
+                 viz.type === 'line' ? 'show_chart' : 
+                 viz.type === 'pie' ? 'pie_chart' : 'bar_chart' }}
+            </mat-icon>
+            {{ viz.title }}
+          </mat-card-title>
+          <mat-card-subtitle *ngIf="viz.subtitle">
+            {{ viz.subtitle }}
+          </mat-card-subtitle>
+        </mat-card-header>
+        
+        <mat-card-content>
+          <div class="chart-container">
+            <canvas 
+              *ngIf="getChartConfig(i) as chartConfig"
+              baseChart
+              [type]="chartConfig.type"
+              [data]="chartConfig.data"
+              [options]="chartConfig.options">
+            </canvas>
+            
+            <div *ngIf="!getChartConfig(i)" class="no-data">
+              <mat-icon>info</mat-icon>
+              <p>No data available</p>
+            </div>
+          </div>
+          
+          <!-- Insight text -->
+          <div *ngIf="viz.insight" class="chart-insight">
+            <mat-icon>lightbulb</mat-icon>
+            <span>{{ viz.insight }}</span>
+          </div>
+        </mat-card-content>
+      </mat-card>
+    </div>
+
+    <!-- FOOTER -->
+    <div class="dashboard-footer">
+      <div class="footer-left">
+        <mat-icon>analytics</mat-icon>
+        <span>Powered by UniDocVerse AI Analytics</span>
+      </div>
+      <div class="footer-right">
+        <span>{{ dashboardMeta.record_count }} records analyzed</span>
+        <mat-divider [vertical]="true"></mat-divider>
+        <span>{{ visualizations.length }} visualizations</span>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- NO DATA STATE -->
+  <div *ngIf="!loading && !error && !dashboardMeta" class="no-data-state">
+    <mat-icon>dashboard</mat-icon>
+    <h3>No Dashboard Available</h3>
+    <p>This document type doesn't support dashboard analytics.</p>
+    <button mat-raised-button color="primary" (click)="goBack()">
+      <mat-icon>arrow_back</mat-icon>
+      Back to Documents
+    </button>
+  </div>
+
+</div>

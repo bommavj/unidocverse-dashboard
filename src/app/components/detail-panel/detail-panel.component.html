@@ -1,0 +1,33 @@
+<div class="detail-panel" *ngIf="doc; else emptyState">
+  <div class="detail-panel__file-hdr">
+    <div class="detail-panel__ico">PDF</div>
+    <div class="detail-panel__name">{{ doc.filename || doc.name }}</div>
+    <div class="detail-panel__tags">
+      <span class="dtag dtag--gray">{{ doc.document_type || doc.type }}</span>
+      <span class="dtag dtag--green">✓ Analyzed</span>
+    </div>
+  </div>
+  <div class="detail-panel__actions">
+    <button class="detail-panel__act detail-panel__act--primary" (click)="openDoc.emit({id:doc.id,tab:'summary'})">Open</button>
+    <button class="detail-panel__act" (click)="openDoc.emit({id:doc.id,tab:'analytics'})">📊</button>
+    <button class="detail-panel__act" (click)="openDoc.emit({id:doc.id,tab:'qa'})">💬</button>
+    <button class="detail-panel__act" (click)="openSimilar.emit(doc)">⇄</button>
+    <button class="detail-panel__act" (click)="openExport.emit(doc)">↓</button>
+  </div>
+  <div class="detail-panel__section">
+    <div class="detail-panel__sec-title">AI Summary</div>
+    <div class="detail-panel__summary">{{ summary }}</div>
+  </div>
+  <div class="detail-panel__section">
+    <div class="detail-panel__sec-title">File Details</div>
+    <div class="detail-panel__meta-row"><span class="detail-panel__meta-k">Type</span><span class="detail-panel__meta-v">{{ doc.document_type || doc.type }}</span></div>
+    <div class="detail-panel__meta-row"><span class="detail-panel__meta-k">Size</span><span class="detail-panel__meta-v">{{ doc.file_size | number }} bytes</span></div>
+    <div class="detail-panel__meta-row"><span class="detail-panel__meta-k">Modified</span><span class="detail-panel__meta-v">{{ doc.created_at | date:'mediumDate' }}</span></div>
+  </div>
+</div>
+<ng-template #emptyState>
+  <div class="detail-panel__empty">
+    <div class="detail-panel__empty-ico">📁</div>
+    <div class="detail-panel__empty-txt">Select a file or folder<br>to view details.</div>
+  </div>
+</ng-template>

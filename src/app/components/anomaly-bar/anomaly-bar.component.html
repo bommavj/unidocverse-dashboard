@@ -1,0 +1,14 @@
+<div class="anomaly">
+  <div class="anomaly__bar" (click)="toggle()">
+    <span class="anomaly__ico">⚠</span>
+    <span class="anomaly__text"><strong>{{ anomalies.length }} items need attention</strong> — unusual transaction, upcoming deadlines</span>
+    <span class="anomaly__count">{{ anomalies.length }}</span>
+    <span class="anomaly__arrow" [class.anomaly__arrow--open]="expanded">›</span>
+  </div>
+  <div class="anomaly__detail" *ngIf="expanded">
+    <div *ngFor="let a of anomalies" class="anomaly__item" (click)="openDoc.emit(a.docId)">
+      <span class="anomaly__sev" [ngClass]="'anomaly__sev--' + a.severity">{{ a.severity }}</span>
+      <div><div class="anomaly__item-title">{{ a.title }}</div><div class="anomaly__item-desc">{{ a.description }}</div></div>
+    </div>
+  </div>
+</div>

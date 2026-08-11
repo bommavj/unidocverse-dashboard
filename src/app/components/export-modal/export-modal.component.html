@@ -1,0 +1,19 @@
+<div class="exp-backdrop" *ngIf="isOpen" (click)="closed.emit()">
+  <div class="exp-modal" (click)="$event.stopPropagation()">
+    <div class="exp-modal__header">
+      <span class="exp-modal__title">📤 Export Report</span>
+      <button class="exp-modal__close" (click)="closed.emit()">✕</button>
+    </div>
+    <div class="exp-modal__body">
+      <div *ngFor="let f of formats" class="exp-opt" [class.exp-opt--selected]="selected===f.id" (click)="selected=f.id">
+        <div class="exp-opt__ico" [style.background]="f.color">{{ f.emoji }}</div>
+        <div><div class="exp-opt__name">{{ f.label }}</div><div class="exp-opt__desc">{{ f.desc }}</div></div>
+        <div class="exp-opt__check" [class.exp-opt__check--on]="selected===f.id">{{ selected===f.id ? '✓' : '' }}</div>
+      </div>
+    </div>
+    <div class="exp-modal__footer">
+      <button class="exp-modal__cancel" (click)="closed.emit()">Cancel</button>
+      <button class="exp-modal__go" (click)="export()">↓ Export</button>
+    </div>
+  </div>
+</div>

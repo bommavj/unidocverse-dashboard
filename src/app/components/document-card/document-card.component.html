@@ -1,0 +1,30 @@
+<div class="dc">
+  <!-- Icon -->
+  <div class="dc-ico" [class]="'dc-ico dc-ico--' + icoClass">{{ icoTxt }}</div>
+
+  <!-- Title + meta -->
+  <div class="dc-name" [title]="document?.filename">{{ document?.filename }}</div>
+  <div class="dc-meta">
+    <span class="dc-type">{{ typeLabel }}</span>
+    <span class="dc-dot">·</span>
+    <span class="dc-size">{{ fmtSize }}</span>
+  </div>
+  <div class="dc-date">{{ fmtDate }}</div>
+
+  <!-- Status badge -->
+  <div class="dc-badge" [class]="badgeClass">{{ badgeTxt }}</div>
+
+  <!-- Sparkline chart -->
+  <div class="dc-chart" *ngIf="document?.status === 'completed'">
+    <span [innerHTML]="sparklineSvg"></span>
+    <span class="dc-chart-lbl">{{ chartLabel }}</span>
+  </div>
+
+  <!-- Actions -->
+  <div class="dc-actions">
+    <button class="dc-btn dc-btn--view"    (click)="view.emit(document);    $event.stopPropagation()" title="View">👁</button>
+    <button class="dc-btn dc-btn--similar" (click)="similar.emit(document); $event.stopPropagation()" title="Similar">⌖</button>
+    <button class="dc-btn dc-btn--chat"    (click)="chat.emit(document);    $event.stopPropagation()" title="Ask AI">💬</button>
+    <button class="dc-btn dc-btn--del"     (click)="delete.emit(document);  $event.stopPropagation()" title="Delete">✕</button>
+  </div>
+</div>

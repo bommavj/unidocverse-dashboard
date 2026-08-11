@@ -1,0 +1,104 @@
+<div class="ams-page">
+    <div class="ams-header">
+      <div>
+        <h1>📉 Loss Run Intelligence</h1>
+        <p>Upload loss runs · Compute loss ratios · Flag high-risk clients</p>
+      </div>
+      <div class="header-stats">
+        <div class="stat-pill stat-red" *ngIf="highRisk.length > 0">{{ highRisk.length }} High Risk</div>
+      </div>
+    </div>
+  
+    <div class="tabs">
+      <button [class.active]="activeTab==='high-risk'" (click)="activeTab='high-risk'">High Risk Clients</button>
+      <button [class.active]="activeTab==='upload'" (click)="activeTab='upload'">Upload Loss Run</button>
+    </div>
+  
+    <!-- High Risk Tab -->
+    <div *ngIf="activeTab==='high-risk'">
+      <div class="split-layout">
+        <div class="list-panel">
+          <div *ngIf="loading" class="loading">Loading...</div>
+          <div class="risk-card" *ngFor="let r of highRisk"
+               [class.selected]="selectedClientId === r.client_id"
+               (click)="selectClient(r.client_id)">
+            <div class="risk-header">
+              <strong>{{ r.business_name || (r.first_name + ' ' + r.last_name) }}</strong>
+              <span class="badge" [ngClass]="getRiskClass(r.risk_level)">{{ r.risk_level }}</span>
+            </div>
+            <div class="risk-metrics">
+              <span>Loss Ratio: <strong>{{ r.loss_ratio | number:'1.0-1' }}%</strong></span>
+              <span>Claims: {{ r.total_claims }}</span>
+              <span>Incurred: {{ formatCurrency(r.total_incurred) }}</span>
+            </div>
+            <div class="risk-flags" *ngIf="r.risk_flags?.length">
+              <span class="flag" *ngFor="let f of r.risk_flags">{{ f }}</span>
+            </div>
+          </div>
+          <div *ngIf="!loading && highRisk.length === 0" class="empty-state">✅ No high-risk clients</div>
+        </div>
+  
+        <!-- Client Loss Run Detail -->
+        <div class="detail-panel" *ngIf="selectedClient || clientLossRuns.length > 0">
+          <h2>Loss Runs for {{ selectedClient?.business_name || (selectedClient?.first_name + ' ' + selectedClient?.last_name) }}</h2>
+  
+          <div class="run-list">
+            <div class="run-card" *ngFor="let run of clientLossRuns" (click)="loadClaims(run.id)">
+              <div class="run-header">
+                <strong>{{ run.carrier_name || 'Unknown Carrier' }}</strong>
+                <span class="badge" [ngClass]="getRiskClass(run.risk_level)">{{ run.risk_level }}</span>
+              </div>
+              <div class="run-metrics">
+                <div class="metric"><span>Loss Ratio</span><strong [class.text-red]="run.loss_ratio > 60">{{ run.loss_ratio | number:'1.0-1' }}%</strong></div>
+                <div class="metric"><span>Claims</span><strong>{{ run.total_claims }}</strong></div>
+                <div class="metric"><span>Incurred</span><strong>{{ formatCurrency(run.total_incurred) }}</strong></div>
+                <div class="metric"><span>Premium</span><strong>{{ formatCurrency(run.total_premium) }}</strong></div>
+              </div>
+            </div>
+          </div>
+  
+          <!-- Claims Table -->
+          <div *ngIf="selectedRun && claims.length > 0" class="claims-section">
+            <h3>Claims — {{ selectedRun.carrier_name }}</h3>
+            <table>
+              <thead>
+                <tr><th>Claim #</th><th>Date of Loss</th><th>Type</th><th>Status</th><th>Paid</th><th>Reserved</th><th>Incurred</th><th>Large?</th></tr>
+              </thead>
+              <tbody>
+                <tr *ngFor="let c of claims" [class.row-large]="c.is_large_loss">
+                  <td>{{ c.claim_number || '—' }}</td>
+                  <td>{{ c.date_of_loss | date:'MM/dd/yy' }}</td>
+                  <td>{{ c.claim_type || '—' }}</td>
+                  <td>{{ c.status || '—' }}</td>
+                  <td>{{ formatCurrency(c.amount_paid) }}</td>
+                  <td>{{ formatCurrency(c.amount_reserved) }}</td>
+                  <td><strong>{{ formatCurrency(c.amount_incurred) }}</strong></td>
+                  <td>{{ c.is_large_loss ? '🔴' : '' }}</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+  
+    <!-- Upload Tab -->
+    <div *ngIf="activeTab==='upload'" class="upload-card">
+      <h3>Upload Loss Run PDF</h3>
+      <div class="upload-form">
+        <select [(ngModel)]="selectedClientId" (change)="selectClient(selectedClientId)" class="input">
+          <option value="">Select client...</option>
+          <option *ngFor="let c of clients" [value]="c.id">
+            {{ c.business_name || (c.first_name + ' ' + c.last_name) }} — {{ c.client_number }}
+          </option>
+        </select>
+        <label class="file-btn">
+          <input type="file" accept=".pdf" (change)="onFileSelect($event)" hidden>
+          {{ selectedFile ? selectedFile.name : 'Choose Loss Run PDF' }}
+        </label>
+        <button class="btn-primary" (click)="upload()" [disabled]="uploading">
+          {{ uploading ? 'Processing...' : 'Upload & Analyze' }}
+        </button>
+      </div>
+    </div>
+  </div>

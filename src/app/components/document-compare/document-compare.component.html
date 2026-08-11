@@ -1,0 +1,31 @@
+<div class="cmp-backdrop" *ngIf="isOpen" (click)="closed.emit()">
+  <div class="cmp-modal" (click)="$event.stopPropagation()">
+    <div class="cmp-header">
+      <div class="cmp-header__title">⇄ Document Comparison</div>
+      <button class="cmp-header__close" (click)="closed.emit()">✕</button>
+    </div>
+    <div class="cmp-body">
+      <div *ngFor="let doc of [docA, docB]; let i = index" class="cmp-col" [class.cmp-col--b]="i===1">
+        <div class="cmp-col__header">
+          <div class="cmp-col__name">{{ doc?.filename || doc?.name }}</div>
+          <div class="cmp-col__meta">{{ doc?.document_type }} · {{ doc?.file_size | number }} bytes</div>
+        </div>
+        <div class="cmp-col__body">
+          <div class="cmp-section"><div class="cmp-section__label">Summary</div><div class="cmp-section__val">{{ getSummary(doc) }}</div></div>
+          <div *ngFor="let ins of getInsights(doc)" class="cmp-section" [class.cmp-section--hi]="i===0" [class.cmp-section--lo]="i===1">
+            <div class="cmp-section__label">{{ ins.label || ins.l }}</div>
+            <div class="cmp-section__val"><strong>{{ ins.value || ins.v }}</strong> — {{ ins.sub || ins.s }}</div>
+          </div>
+          <div class="cmp-section" *ngIf="getKP(doc).length">
+            <div class="cmp-section__label">Key Points</div>
+            <div *ngFor="let kp of getKP(doc)" class="cmp-kp">{{ kp }}</div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="cmp-footer">
+      <span class="cmp-footer__note">🔒 Powered by pgvector · semantic diff · local</span>
+      <button class="cmp-footer__close" (click)="closed.emit()">Close</button>
+    </div>
+  </div>
+</div>

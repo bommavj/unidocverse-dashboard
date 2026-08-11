@@ -1,0 +1,59 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 680 200" width="680" height="200">
+  <defs>
+    <linearGradient id="uGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#6366f1"/>
+      <stop offset="50%" stop-color="#8b5cf6"/>
+      <stop offset="100%" stop-color="#0ea5e9"/>
+    </linearGradient>
+    <linearGradient id="glowU" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#a78bfa" stop-opacity="0.25"/>
+      <stop offset="100%" stop-color="#0ea5e9" stop-opacity="0.04"/>
+    </linearGradient>
+    <linearGradient id="docGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#6366f1"/>
+      <stop offset="100%" stop-color="#0ea5e9"/>
+    </linearGradient>
+    <linearGradient id="underline" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#6366f1"/>
+      <stop offset="100%" stop-color="#0ea5e9"/>
+    </linearGradient>
+  </defs>
+
+  <!-- Icon background -->
+  <rect x="20" y="16" width="128" height="128" rx="32" fill="#f5f5f7" stroke="#e2e2e7" stroke-width="1"/>
+
+  <!-- Glow behind U -->
+  <ellipse cx="84" cy="84" rx="32" ry="40" fill="url(#glowU)"/>
+
+  <!-- U gradient stroke -->
+  <path d="M 51 40 L 51 90 Q 51 124 84 124 Q 117 124 117 90 L 117 40"
+        fill="none" stroke="url(#uGrad)" stroke-width="13" stroke-linecap="round"/>
+
+  <!-- Inner U highlight -->
+  <path d="M 57 46 L 57 90 Q 57 116 84 116 Q 111 116 111 90 L 111 46"
+        fill="none" stroke="#ffffff" stroke-width="3.5" stroke-linecap="round" opacity="0.45"/>
+
+  <!-- Three dots -->
+  <circle cx="84" cy="56" r="6.5" fill="#30d158"/>
+  <circle cx="84" cy="77" r="6.5" fill="#0071e3"/>
+  <circle cx="84" cy="98" r="6.5" fill="#ff9f0a"/>
+  <circle cx="84" cy="56" r="11" fill="#30d158" opacity="0.10"/>
+  <circle cx="84" cy="77" r="11" fill="#0071e3" opacity="0.10"/>
+  <circle cx="84" cy="98" r="11" fill="#ff9f0a" opacity="0.10"/>
+
+  <!-- Wordmark -->
+  <text x="168" y="96" font-family="'Helvetica Neue',Helvetica,Arial,sans-serif" font-size="52" font-weight="100" fill="#1d1d1f" letter-spacing="-2">Uni</text>
+  <text x="246" y="96" font-family="'Helvetica Neue',Helvetica,Arial,sans-serif" font-size="52" font-weight="800" fill="url(#docGrad)" letter-spacing="-2">Doc</text>
+  <text x="352" y="96" font-family="'Helvetica Neue',Helvetica,Arial,sans-serif" font-size="52" font-weight="100" fill="#1d1d1f" letter-spacing="-2">Verse</text>
+
+  <!-- Gradient underline -->
+  <rect x="246" y="103" width="104" height="3.5" rx="1.75" fill="url(#underline)"/>
+
+  <!-- Dot separators -->
+  <circle cx="168" cy="122" r="2.5" fill="#6366f1" opacity="0.5"/>
+  <circle cx="178" cy="122" r="2.5" fill="#8b5cf6" opacity="0.5"/>
+  <circle cx="188" cy="122" r="2.5" fill="#0ea5e9" opacity="0.5"/>
+
+  <!-- Tagline -->
+  <text x="200" y="127" font-family="'Helvetica Neue',Helvetica,Arial,sans-serif" font-size="11.5" font-weight="400" fill="#86868b" letter-spacing="2">Private AI  ·  Document Intelligence</text>
+</svg>

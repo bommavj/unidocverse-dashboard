@@ -1,0 +1,182 @@
+<!-- renewals.component.html -->
+<div class="page">
+
+    <!-- Topbar -->
+    <div class="topbar">
+      <div>
+        <div class="topbar-title">Renewal Pipeline</div>
+        <div class="topbar-sub">Next 90 days · ${{ (summary.total_premium_at_risk || 0) | number:'1.0-0' }} premium at stake</div>
+      </div>
+      <div class="tb-sp"></div>
+      <button class="tb-btn tb-sec" (click)="load()">↻ Refresh</button>
+    </div>
+  
+    <div class="content">
+  
+      <!-- Summary chips -->
+      <div class="summary-row" *ngIf="!loading && !isEmpty">
+        <div class="sum-chip red">
+          <span class="sum-ico">🔴</span>
+          <div>
+            <div class="sum-val">{{ summary.urgent_count || 0 }}</div>
+            <div class="sum-lbl">Expiring in 7 days</div>
+          </div>
+        </div>
+        <div class="sum-chip amber">
+          <span class="sum-ico">🟡</span>
+          <div>
+            <div class="sum-val">{{ summary.soon_count || 0 }}</div>
+            <div class="sum-lbl">Expiring in 30 days</div>
+          </div>
+        </div>
+        <div class="sum-chip green">
+          <span class="sum-ico">🟢</span>
+          <div>
+            <div class="sum-val">{{ summary.planned_count || 0 }}</div>
+            <div class="sum-lbl">Expiring in 90 days</div>
+          </div>
+        </div>
+        <div class="sum-chip indigo">
+          <span class="sum-ico">💰</span>
+          <div>
+            <div class="sum-val">${{ (summary.total_premium_at_risk || 0) | number:'1.0-0' }}</div>
+            <div class="sum-lbl">Premium at stake</div>
+          </div>
+        </div>
+      </div>
+  
+      <!-- Loading -->
+      <div class="loading-row" *ngIf="loading">
+        <div class="spinner"></div><span>Loading renewal pipeline…</span>
+      </div>
+  
+      <!-- Empty -->
+      <div class="empty-state" *ngIf="isEmpty">
+        <span class="empty-ico">🔄</span>
+        <h3>No renewals in the next 90 days</h3>
+        <p>All policies are in good shape. Check back closer to renewal dates.</p>
+      </div>
+  
+      <!-- Kanban columns -->
+      <div class="pipeline" *ngIf="!loading && !isEmpty">
+  
+        <!-- URGENT -->
+        <div class="col">
+          <div class="col-header red">
+            <span class="col-dot red-dot"></span>
+            <span class="col-title">Urgent — 0 to 7 Days</span>
+            <span class="col-count red-count">{{ urgent.length }}</span>
+          </div>
+          <div class="col-body">
+            <div class="renewal-card" *ngFor="let p of urgent">
+              <div class="rc-top">
+                <span class="rc-client" (click)="openClient(p)">{{ p.client_name }}</span>
+                <span class="days-badge days-urgent">{{ p.days_to_expiry }}d</span>
+              </div>
+              <div class="rc-policy">{{ p.line_of_business | titlecase }} · {{ p.policy_number }}</div>
+              <div class="rc-meta">
+                <span class="rc-premium">{{ fmtPremium(p.premium_amount) }}</span>
+                <span class="rc-carrier">{{ p.carrier_name }}</span>
+              </div>
+              <div class="rc-status">
+                <select class="status-sel"
+                        [(ngModel)]="p.renewal_status"
+                        (change)="updateStatus(p, p.renewal_status)">
+                  <option value="not_started">Not Started</option>
+                  <option value="contacted">Contacted</option>
+                  <option value="in_progress">In Progress</option>
+                  <option value="complete">✓ Complete</option>
+                  <option value="lost">Lost</option>
+                </select>
+              </div>
+              <div class="rc-actions">
+                <button class="rc-btn" (click)="contactClient(p, 'email')" [disabled]="p._sending">{{ p._sending ? 'Sending…' : '📧 Email' }}</button>
+                <button class="rc-btn" (click)="contactClient(p, 'phone')">📞 Call</button>
+                <button class="rc-btn primary" (click)="updateStatus(p, 'in_progress')">▶ Start</button>
+              </div>
+            </div>
+            <div class="col-empty" *ngIf="urgent.length === 0">No urgent renewals</div>
+          </div>
+        </div>
+  
+        <!-- SOON -->
+        <div class="col">
+          <div class="col-header amber">
+            <span class="col-dot amber-dot"></span>
+            <span class="col-title">Coming Up — 8 to 30 Days</span>
+            <span class="col-count amber-count">{{ soon.length }}</span>
+          </div>
+          <div class="col-body">
+            <div class="renewal-card" *ngFor="let p of soon">
+              <div class="rc-top">
+                <span class="rc-client" (click)="openClient(p)">{{ p.client_name }}</span>
+                <span class="days-badge days-soon">{{ p.days_to_expiry }}d</span>
+              </div>
+              <div class="rc-policy">{{ p.line_of_business | titlecase }} · {{ p.policy_number }}</div>
+              <div class="rc-meta">
+                <span class="rc-premium">{{ fmtPremium(p.premium_amount) }}</span>
+                <span class="rc-carrier">{{ p.carrier_name }}</span>
+              </div>
+              <div class="rc-status">
+                <select class="status-sel"
+                        [(ngModel)]="p.renewal_status"
+                        (change)="updateStatus(p, p.renewal_status)">
+                  <option value="not_started">Not Started</option>
+                  <option value="contacted">Contacted</option>
+                  <option value="in_progress">In Progress</option>
+                  <option value="complete">✓ Complete</option>
+                  <option value="lost">Lost</option>
+                </select>
+              </div>
+              <div class="rc-actions">
+                <button class="rc-btn" (click)="contactClient(p, 'email')" [disabled]="p._sending">{{ p._sending ? 'Sending…' : '📧 Email' }}</button>
+                <button class="rc-btn" (click)="contactClient(p, 'phone')">📞 Call</button>
+                <button class="rc-btn primary" (click)="updateStatus(p, 'in_progress')">▶ Start</button>
+              </div>
+            </div>
+            <div class="col-empty" *ngIf="soon.length === 0">No renewals in this window</div>
+          </div>
+        </div>
+  
+        <!-- PLANNED -->
+        <div class="col">
+          <div class="col-header green">
+            <span class="col-dot green-dot"></span>
+            <span class="col-title">Planned — 31 to 90 Days</span>
+            <span class="col-count green-count">{{ planned.length }}</span>
+          </div>
+          <div class="col-body">
+            <div class="renewal-card" *ngFor="let p of planned">
+              <div class="rc-top">
+                <span class="rc-client" (click)="openClient(p)">{{ p.client_name }}</span>
+                <span class="days-badge days-ok">{{ p.days_to_expiry }}d</span>
+              </div>
+              <div class="rc-policy">{{ p.line_of_business | titlecase }} · {{ p.policy_number }}</div>
+              <div class="rc-meta">
+                <span class="rc-premium">{{ fmtPremium(p.premium_amount) }}</span>
+                <span class="rc-carrier">{{ p.carrier_name }}</span>
+              </div>
+              <div class="rc-status">
+                <select class="status-sel"
+                        [(ngModel)]="p.renewal_status"
+                        (change)="updateStatus(p, p.renewal_status)">
+                  <option value="not_started">Not Started</option>
+                  <option value="contacted">Contacted</option>
+                  <option value="in_progress">In Progress</option>
+                  <option value="complete">✓ Complete</option>
+                  <option value="lost">Lost</option>
+                </select>
+              </div>
+              <div class="rc-actions">
+                <button class="rc-btn" (click)="contactClient(p, 'email')" [disabled]="p._sending">{{ p._sending ? 'Sending…' : '📧 Email' }}</button>
+                <button class="rc-btn" (click)="contactClient(p, 'phone')">📞 Call</button>
+                <button class="rc-btn" (click)="updateStatus(p, 'contacted')">📋 Schedule</button>
+              </div>
+            </div>
+            <div class="col-empty" *ngIf="planned.length === 0">No renewals planned yet</div>
+          </div>
+        </div>
+  
+      </div><!-- end pipeline -->
+    </div>
+  </div>

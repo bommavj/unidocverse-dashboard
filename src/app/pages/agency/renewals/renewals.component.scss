@@ -1,0 +1,79 @@
+:host { display: block; font-family: var(--font); }
+.page { padding: 0 0 24px; }
+
+/* ── Topbar ── */
+.topbar { height: 56px; background: rgba(255,255,255,.82); backdrop-filter: blur(20px); border-bottom: 1px solid rgba(255,255,255,.6); display: flex; align-items: center; padding: 0 26px; gap: 10px; box-shadow: 0 1px 12px rgba(79,70,229,.06); }
+.topbar-title { font-size: 16px; font-weight: 800; color: #0f172a; letter-spacing: -.3px; }
+.topbar-sub   { font-size: 11.5px; color: #94a3b8; margin-top: 1px; }
+.tb-sp { flex: 1; }
+.tb-btn { display:inline-flex; align-items:center; gap:6px; height:36px; padding:0 14px; border-radius:10px; font-family:var(--font); font-size:12.5px; font-weight:600; cursor:pointer; transition:all .16s; border:none; white-space:nowrap; }
+.tb-sec { background:rgba(255,255,255,.8); border:1.5px solid #c7d2fe; color:#475569; &:hover{border-color:#4f46e5;color:#4f46e5} }
+
+.content { padding: 20px 26px; }
+
+/* ── Summary chips ── */
+.summary-row { display:grid; grid-template-columns:repeat(4,1fr); gap:14px; margin-bottom:22px; }
+.sum-chip { background:rgba(255,255,255,.9); backdrop-filter:blur(10px); border:1px solid rgba(255,255,255,.7); border-radius:14px; padding:14px 16px; display:flex; align-items:center; gap:12px; box-shadow:0 2px 8px rgba(79,70,229,.07); }
+.sum-ico { font-size:22px; }
+.sum-val { font-size:22px; font-weight:800; color:#0f172a; letter-spacing:-.5px; }
+.sum-lbl { font-size:11.5px; color:#94a3b8; margin-top:2px; }
+.sum-chip.red    .sum-val { color:#dc2626; }
+.sum-chip.amber  .sum-val { color:#d97706; }
+.sum-chip.green  .sum-val { color:#16a34a; }
+.sum-chip.indigo .sum-val { color:#4f46e5; }
+
+/* ── Loading / Empty ── */
+.loading-row { display:flex; align-items:center; gap:12px; padding:40px 0; color:#94a3b8; font-size:14px; }
+.spinner { width:20px; height:20px; border:2px solid #e2e8f4; border-top-color:#4f46e5; border-radius:50%; animation:spin .7s linear infinite; }
+@keyframes spin { to { transform:rotate(360deg) } }
+.empty-state { background:rgba(255,255,255,.85); backdrop-filter:blur(12px); border:1px solid rgba(255,255,255,.7); border-radius:16px; padding:64px 20px; text-align:center; box-shadow:0 2px 8px rgba(79,70,229,.08); }
+.empty-ico  { font-size:52px; opacity:.2; margin-bottom:16px; display:block; }
+.empty-state h3 { font-size:18px; font-weight:700; color:#0f172a; margin-bottom:8px; }
+.empty-state p  { font-size:13.5px; color:#94a3b8; }
+
+/* ── Pipeline kanban ── */
+.pipeline { display:grid; grid-template-columns:repeat(3,1fr); gap:16px; align-items:start; }
+
+.col { background:rgba(255,255,255,.9); backdrop-filter:blur(12px); border:1px solid rgba(255,255,255,.7); border-radius:16px; overflow:hidden; box-shadow:0 2px 8px rgba(79,70,229,.08); }
+
+.col-header { display:flex; align-items:center; gap:8px; padding:13px 16px; border-bottom:1px solid #f1f5f9; }
+.col-header.red    { border-left:3px solid #dc2626; }
+.col-header.amber  { border-left:3px solid #d97706; }
+.col-header.green  { border-left:3px solid #16a34a; }
+.col-dot   { width:8px; height:8px; border-radius:50%; }
+.red-dot   { background:#dc2626; }
+.amber-dot { background:#d97706; }
+.green-dot { background:#16a34a; }
+.col-title { font-size:12.5px; font-weight:700; color:#0f172a; flex:1; }
+.col-count { font-size:11px; font-weight:800; padding:2px 8px; border-radius:10px; }
+.red-count   { background:#fee2e2; color:#dc2626; }
+.amber-count { background:#fef3c7; color:#d97706; }
+.green-count { background:#dcfce7; color:#16a34a; }
+
+.col-body { padding:10px; display:flex; flex-direction:column; gap:8px; min-height:120px; }
+.col-empty { padding:20px; text-align:center; color:#94a3b8; font-size:12.5px; font-style:italic; }
+
+/* ── Renewal card ── */
+.renewal-card { background:#f8fafc; border:1.5px solid transparent; border-radius:10px; padding:12px 13px; transition:all .15s;
+  &:hover { border-color:#c7d2fe; background:#fff; box-shadow:0 2px 8px rgba(79,70,229,.1); }
+}
+.rc-top { display:flex; align-items:center; justify-content:space-between; margin-bottom:4px; }
+.rc-client { font-size:13px; font-weight:700; color:#0f172a; cursor:pointer; &:hover{color:#4f46e5;text-decoration:underline} }
+.rc-policy { font-size:11.5px; color:#64748b; margin-bottom:8px; }
+.rc-meta   { display:flex; align-items:center; justify-content:space-between; margin-bottom:8px; }
+.rc-premium { font-size:13px; font-weight:700; color:#0f172a; font-family:var(--mono); }
+.rc-carrier { font-size:11px; color:#94a3b8; }
+.rc-status  { margin-bottom:8px; }
+
+.days-badge { font-size:11px; font-weight:800; padding:2px 7px; border-radius:6px; }
+.days-urgent { background:#fee2e2; color:#dc2626; }
+.days-soon   { background:#fef3c7; color:#d97706; }
+.days-ok     { background:#dcfce7; color:#16a34a; }
+
+.status-sel { width:100%; height:28px; padding:0 8px; border-radius:7px; border:1.5px solid #e2e8f4; background:#fff; font-size:11.5px; color:#334155; font-family:var(--font); cursor:pointer; outline:none; appearance:none; transition:border-color .13s; &:focus{border-color:#4f46e5} }
+
+.rc-actions { display:flex; gap:5px; }
+.rc-btn { flex:1; height:26px; border-radius:6px; border:1.5px solid #e2e8f4; background:none; font-size:11px; font-weight:600; cursor:pointer; font-family:var(--font); color:#475569; transition:all .12s;
+  &:hover:not(.primary) { border-color:#c7d2fe; color:#4f46e5; }
+  &.primary { background:#4f46e5; color:#fff; border-color:#4f46e5; &:hover{background:#4338ca} }
+}

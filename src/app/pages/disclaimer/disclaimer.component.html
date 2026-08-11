@@ -1,0 +1,62 @@
+<div class="page">
+
+  <!-- Header -->
+  <div class="disc-header">
+    <div class="disc-header-left">
+      <div class="disc-header-icon">⚠️</div>
+      <div>
+        <h1 class="disc-title">Disclaimer & Terms of Use</h1>
+        <div class="disc-meta">UniDocVerse {{ version }} &nbsp;·&nbsp; Last updated {{ lastUpdated }} &nbsp;·&nbsp; Read carefully before use</div>
+      </div>
+    </div>
+    <div class="disc-header-badges">
+      <span class="disc-badge disc-badge--beta">BETA SOFTWARE</span>
+      <span class="disc-badge disc-badge--warn">NOT FOR REGULATED USE WITHOUT REVIEW</span>
+    </div>
+  </div>
+
+  <!-- Alert strip -->
+  <div class="disc-alert">
+    <span class="disc-alert-icon">🚨</span>
+    <div class="disc-alert-text">
+      <strong>Critical Notice:</strong> UniDocVerse is an AI-assisted tool and <strong>will make mistakes</strong>.
+      Do not use AI-generated output as the sole basis for legal, financial, insurance, medical, or regulatory decisions.
+      All output must be independently verified by a qualified professional before action is taken.
+    </div>
+  </div>
+
+  <!-- TOC -->
+  <div class="disc-toc">
+    <div class="disc-toc-label">Contents</div>
+    <div class="disc-toc-links">
+      <a class="disc-toc-a" *ngFor="let s of sections" [href]="'#' + s.id">{{ s.title }}</a>
+    </div>
+  </div>
+
+  <!-- Sections -->
+  <div class="disc-sections">
+    <div class="disc-section" *ngFor="let s of sections" [id]="s.id" [ngClass]="'disc-section--' + s.color">
+      <div class="disc-sec-header">
+        <span class="disc-sec-icon">{{ s.icon }}</span>
+        <h2 class="disc-sec-title">{{ s.title }}</h2>
+      </div>
+      <div class="disc-sec-body">
+        <div class="disc-item" *ngFor="let item of s.items; let i = index">
+          <div class="disc-item-num">{{ i + 1 }}</div>
+          <div class="disc-item-text">{{ item }}</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Footer -->
+  <div class="disc-footer">
+    <div class="disc-footer-logo">⚠️ UniDocVerse Beta</div>
+    <div class="disc-footer-text">
+      By using this software you acknowledge that you have read, understood, and agree to this disclaimer in full.
+      These terms are subject to change without notice as the software evolves.
+    </div>
+    <div class="disc-footer-version">Version {{ version }} &nbsp;·&nbsp; {{ lastUpdated }}</div>
+  </div>
+
+</div>

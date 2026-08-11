@@ -1,0 +1,94 @@
+<div class="ams-page">
+    <div class="ams-header">
+      <div>
+        <h1>🔎 Policy Gap Analysis</h1>
+        <p>Identify coverage gaps · Compare against benchmarks · Generate recommendations</p>
+      </div>
+    </div>
+  
+    <!-- Client Selector -->
+    <div class="selector-bar">
+      <select [(ngModel)]="selectedClientId" (change)="selectClient(selectedClientId)" class="input input-wide">
+        <option value="">Select a client to analyze...</option>
+        <option *ngFor="let c of clients" [value]="c.id">
+          {{ c.business_name || (c.first_name + ' ' + c.last_name) }} — {{ c.client_number }}
+        </option>
+      </select>
+      <button class="btn-primary" (click)="analyze()" [disabled]="!selectedClientId || analyzing">
+        {{ analyzing ? 'Analyzing...' : '⚡ Run Analysis' }}
+      </button>
+    </div>
+  
+    <div *ngIf="loading" class="loading">Loading...</div>
+  
+    <!-- Score Card -->
+    <div class="score-section" *ngIf="analysis">
+      <div class="score-card">
+        <div class="grade" [ngClass]="getGradeClass(analysis.overall_grade || analysis.grade)">
+          {{ analysis.overall_grade || analysis.grade || '?' }}
+        </div>
+        <div class="score-detail">
+          <div class="score-num">{{ analysis.overall_score || analysis.score || 0 }}<span>/100</span></div>
+          <div class="score-label">Coverage Score</div>
+        </div>
+      </div>
+      <div class="score-stats">
+        <div class="stat-box">
+          <div class="stat-val">{{ analysis.total_gaps || analysis.gaps?.length || 0 }}</div>
+          <div class="stat-lbl">Total Gaps</div>
+        </div>
+        <div class="stat-box stat-box-red">
+          <div class="stat-val">{{ analysis.critical_gaps || 0 }}</div>
+          <div class="stat-lbl">Critical</div>
+        </div>
+        <div class="stat-box">
+          <div class="stat-val">{{ analysis.policies_reviewed || '—' }}</div>
+          <div class="stat-lbl">Policies</div>
+        </div>
+        <div class="stat-box">
+          <div class="stat-val">{{ formatCurrency(analysis.total_premium) }}</div>
+          <div class="stat-lbl">Total Premium</div>
+        </div>
+      </div>
+  
+      <!-- Missing Coverage -->
+      <div class="missing-section" *ngIf="analysis.missing_lines?.length > 0">
+        <h3>Missing Coverage Lines</h3>
+        <div class="missing-chips">
+          <span class="chip chip-red" *ngFor="let m of analysis.missing_lines">
+            ❌ {{ m | titlecase }}
+          </span>
+        </div>
+      </div>
+    </div>
+  
+    <!-- Recommendations -->
+    <div class="recs-section" *ngIf="recommendations.length > 0">
+      <h2>Recommendations</h2>
+      <div class="rec-card" *ngFor="let r of recommendations">
+        <div class="rec-header">
+          <span class="badge" [ngClass]="getPriorityClass(r.priority)">{{ r.priority }}</span>
+          <strong>{{ r.title }}</strong>
+          <span class="rec-category">{{ r.category }}</span>
+        </div>
+        <p class="rec-desc">{{ r.description }}</p>
+        <div class="rec-actions" *ngIf="r.id">
+          <button class="btn-sm btn-green" (click)="updateStatus(r.id, 'actioned')" *ngIf="r.status === 'open'">
+            ✓ Mark Actioned
+          </button>
+          <button class="btn-sm btn-gray" (click)="updateStatus(r.id, 'dismissed')" *ngIf="r.status === 'open'">
+            Dismiss
+          </button>
+          <span class="status-label" *ngIf="r.status !== 'open'">{{ r.status }}</span>
+        </div>
+      </div>
+    </div>
+  
+    <div *ngIf="!loading && !analysis && selectedClientId" class="empty-state">
+      Click "Run Analysis" to analyze this client's coverage gaps
+    </div>
+  
+    <div *ngIf="!selectedClientId" class="empty-state">
+      Select a client above to get started
+    </div>
+  </div>

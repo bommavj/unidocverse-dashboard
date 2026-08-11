@@ -1,0 +1,27 @@
+<div class="license-banner"
+     *ngIf="showBanner"
+     [class.welcome]="isWelcome"
+     [class.warning]="warning?.level === 'warning' && !isWelcome"
+     [class.urgent]="warning?.level === 'urgent'"
+     [class.expired]="warning?.level === 'expired'">
+
+  <div class="banner-content">
+    <mat-icon class="banner-icon">{{ icon }}</mat-icon>
+    <span class="banner-message">{{ message }}</span>
+    <a href="https://unidocverse.com/#license"
+       target="_blank"
+       class="renew-link">
+      {{ ctaLabel }}
+    </a>
+  </div>
+
+  <!-- Dismiss button — only for warning/urgent, not expired -->
+  <button mat-icon-button
+          class="dismiss-btn"
+          *ngIf="warning?.level !== 'expired'"
+          (click)="dismiss()"
+          aria-label="Dismiss warning">
+    <mat-icon>close</mat-icon>
+  </button>
+
+</div>

@@ -1,0 +1,273 @@
+<div class="bd" *ngIf="doc" (click)="close()"></div>
+  <div class="sheet" [class.open]="!!doc" [class.maximized]="isMaximized">
+  <div class="sh-handle"></div>
+
+  <!-- HEADER -->
+  <div class="sh-hdr" *ngIf="doc">
+    <div class="sh-ico" [class]="'sh-ico sh-ico--' + icoClass">{{ icoTxt }}</div>
+    <div style="flex:1;min-width:0">
+      <div class="sh-title">{{ d.filename }}</div>
+      <div class="sh-tags">
+        <span class="sh-tag sh-tag--type">{{ d.doc_type?.replace('_',' ') }}</span>
+        <span class="sh-tag sh-tag--ok"  *ngIf="!loadingDoc">✓ Analyzed</span>
+        <span class="sh-tag sh-tag--wait" *ngIf="loadingDoc">Loading…</span>
+      </div>
+    </div>
+    <!-- with this -->
+    <div class="sh-maximize" (click)="toggleMaximize()" [title]="isMaximized ? 'Restore' : 'Maximize'">
+      {{ isMaximized ? '⊡' : '⊞' }}
+    </div>
+    <div class="sh-close" (click)="close()">✕</div>
+  </div>
+
+  <!-- ANOMALY BAR — goes inside doc-sheet.component.html -->
+<div class="content">
+
+  <!-- Has alerts -->
+  <!-- ANOMALY BAR -->
+    <div class="anomaly" 
+    *ngIf="alertCount > 0"
+    [class.critical]="alertCount >= 3"
+    [class.warning]="alertCount < 3"
+    (click)="showPreview = !showPreview">
+    <span style="font-size:16px">{{ alertCount >= 3 ? '🔴' : '🟡' }}</span>
+    <span class="anomaly-text">
+    <strong>{{ alertCount }} item{{ alertCount === 1 ? '' : 's' }} need attention</strong>
+    — {{ alertSummary }}
+    </span>
+    <span class="anomaly-badge">{{ alertCount }}</span>
+    <span style="color:#f97316;font-size:14px;transition:transform 0.2s"
+      [style.transform]="showPreview ? 'rotate(90deg)' : 'rotate(0deg)'">›</span>
+    </div>
+
+    <!-- EXPANDED PREVIEW PANEL -->
+    <div class="anomaly-preview" *ngIf="showPreview && topAlerts.length > 0">
+    <div *ngFor="let ins of topAlerts"
+      class="mini-insight"
+      [attr.data-sev]="ins.severity"
+      (click)="switchTab('insights')">
+    <span class="mini-icon">{{ severityIcon(ins.severity) }}</span>
+    <div class="mini-body">
+    <div class="mini-title">{{ ins.title }}</div>
+    <div class="mini-detail">{{ ins.detail || ins.description }}</div>
+    </div>
+    <span class="mini-sev" [attr.data-sev]="ins.severity">
+    {{ ins.severity | titlecase }}
+    </span>
+    </div>
+    <div class="anomaly-footer" (click)="switchTab('insights')">
+    View all insights in Insights tab →
+    </div>
+    </div>
+
+    <!-- CLEAN DOC -->
+    <div class="anomaly positive" *ngIf="alertCount === 0 && insightsLoaded">
+    <span>🟢</span>
+    <span class="anomaly-text">No issues detected — document looks good</span>
+    </div>
+
+</div>
+
+  <!-- TABS -->
+  <div class="sh-tabs">
+    <div *ngFor="let t of tabs"
+         class="sh-tab"
+         [class.on]="activeTab === t.id"
+         (click)="switchTab(t.id)">{{ t.label }}</div>
+  </div>
+
+  <!-- BODY -->
+  <div class="sh-body" *ngIf="doc">
+
+    <!-- ════ SUMMARY ════ -->
+    <div *ngIf="activeTab==='summary'" class="sh-panel">
+      <div *ngIf="summaryLoading" class="tab-load">
+        <div class="spin"></div>Generating summary…
+      </div>
+      <ng-container *ngIf="!summaryLoading">
+        <div *ngIf="summary" class="sum-card">
+          <div class="sum-lbl">AI-Generated Summary</div>
+          <div class="sum-txt" [innerHTML]="md(summary)"></div>
+          <button class="show-more" (click)="summaryExpanded = !summaryExpanded">
+            {{ summaryExpanded ? '▲ Show less' : '▼ Show more' }}
+          </button>
+          <button class="gen-more-btn" (click)="generateMoreSummary()" [disabled]="generatingSummary">
+            <span *ngIf="!generatingSummary">✦ Generate More</span>
+            <span *ngIf="generatingSummary"><span class="gen-spin"></span> Generating…</span>
+          </button>
+        </div>
+        <div *ngIf="!summary && !loadingDoc" class="tab-empty">
+          No summary yet.
+          <button class="retry-btn" (click)="loadSummary()">Generate →</button>
+        </div>
+      </ng-container>
+    </div>
+
+    <!-- ════ KEY POINTS ════ -->
+    <div *ngIf="activeTab==='keypoints'" class="sh-panel">
+      <div *ngIf="kpLoading" class="tab-load">
+        <div class="spin"></div>Extracting key points…
+      </div>
+      <ng-container *ngIf="!kpLoading">
+        <div *ngIf="keyPoints.length === 0 && !loadingDoc" class="tab-empty">
+          No key points yet.
+          <button class="retry-btn" (click)="loadKeyPoints()">Extract →</button>
+        </div>
+        <div *ngIf="keyPoints.length > 0" class="kp">
+          <ng-container *ngFor="let kp of keyPoints; let i = index">
+            <div *ngIf="kpExpanded || i < 5" class="kp-item">
+              <div class="kp-num">{{ i + 1 }}</div>
+              <div class="kp-txt" [innerHTML]="md(kp)"></div>
+            </div>
+          </ng-container>
+          <button *ngIf="keyPoints.length > 5" class="show-more"
+                  (click)="kpExpanded = !kpExpanded">
+            {{ kpExpanded ? '▲ Show less' : '▼ Show ' + (keyPoints.length - 5) + ' more' }}
+          </button>
+          <button class="gen-more-btn" (click)="generateMoreKeyPoints()" [disabled]="generatingKP">
+            <span *ngIf="!generatingKP">✦ Generate More</span>
+            <span *ngIf="generatingKP"><span class="gen-spin"></span> Generating…</span>
+          </button>
+        </div>
+      </ng-container>
+    </div>
+
+    <!-- ════ INSIGHTS ════ -->
+    <div *ngIf="activeTab==='insights'" class="sh-panel">
+      <div *ngIf="insightsLoading" class="tab-load">
+        <div class="spin"></div>Extracting insights…
+      </div>
+      <ng-container *ngIf="!insightsLoading">
+        <div *ngIf="insights.length === 0 && !loadingDoc" class="tab-empty">
+          No insights yet.
+          <button class="retry-btn" (click)="loadInsights()">Generate →</button>
+        </div>
+        <div *ngIf="insights.length > 0">
+          <div class="ins-grid">
+            <ng-container *ngFor="let ins of insights; let i = index">
+              <div *ngIf="insightsExpanded || i < 6" class="ins-card">
+                <div class="ins-lbl">{{ ins.label }}</div>
+                <div class="ins-val" *ngIf="ins.value">{{ ins.value }}</div>
+                <div class="ins-sub" [innerHTML]="md(ins.sub)"></div>
+              </div>
+            </ng-container>
+          </div>
+          <button *ngIf="insights.length > 6" class="show-more"
+                  (click)="insightsExpanded = !insightsExpanded">
+            {{ insightsExpanded ? '▲ Show less' : '▼ Show ' + (insights.length - 6) + ' more' }}
+          </button>
+          <button class="gen-more-btn" (click)="generateMoreInsights()" [disabled]="generatingInsights">
+            <span *ngIf="!generatingInsights">✦ Generate More</span>
+            <span *ngIf="generatingInsights"><span class="gen-spin"></span> Generating…</span>
+          </button>
+        </div>
+      </ng-container>
+    </div>
+
+    <!-- ════ ANALYTICS ════ -->
+    <div *ngIf="activeTab==='analytics'" class="sh-panel">
+      <div *ngIf="analyticsLoading" class="tab-load">
+        <div class="spin"></div>Loading analytics…
+      </div>
+      <ng-container *ngIf="analyticsLoaded && !analyticsLoading">
+
+        <!-- Hero metrics -->
+        <div *ngIf="heroMetrics.length > 0" class="an-hero-row">
+          <div *ngFor="let m of heroMetrics" class="an-hero-card">
+            <div class="an-hero-lbl">{{ m.label }}</div>
+            <div class="an-hero-val">{{ m.value }}</div>
+          </div>
+        </div>
+
+        <!-- One card per chart from ui_config -->
+        <ng-container *ngFor="let chart of analyticsCharts">
+          <div class="an-wrap" *ngIf="chart.rows.length > 0">
+            <div class="an-title">{{ chart.title }}</div>
+            <div class="an-bars">
+              <div *ngFor="let r of chart.rows" class="an-bar-row">
+                <div class="an-bar-label">{{ r.label }}</div>
+                <div class="an-bar-track">
+                  <div class="an-bar-fill" [style.width.%]="r.pct"></div>
+                </div>
+                <div class="an-bar-value">{{ r.value }}</div>
+              </div>
+            </div>
+          </div>
+        </ng-container>
+
+        <!-- Open full analytics CTA -->
+        <div class="an-full-cta" (click)="openFullAnalytics()">
+          <span>📈 Open Full Analytics Dashboard</span>
+          <span class="an-cta-arrow">→</span>
+          <span class="an-cta-sub">Charts · Tables · Insights · Alerts · Action Plan</span>
+        </div>
+
+        <!-- Empty -->
+        <div *ngIf="analyticsCharts.length === 0 && heroMetrics.length === 0" class="tab-empty">
+          No quick analytics data. Click above to open full dashboard.
+        </div>
+      </ng-container>
+
+      <!-- Not yet loaded -->
+      <div *ngIf="!analyticsLoaded && !analyticsLoading" class="tab-empty">
+        <button class="retry-btn" (click)="loadAnalytics()">Load analytics →</button>
+      </div>
+    </div>
+
+    <!-- ════ DATA & CHARTS ════ -->
+    <div *ngIf="activeTab==='datacharts'" class="sh-panel">
+      <ng-container *ngIf="isSpreadsheet()">
+        <app-excel-visualizer
+          *ngIf="getTableData()"
+          [tableData]="getTableData()">
+        </app-excel-visualizer>
+        <div *ngIf="!getTableData()" class="tab-empty">
+          📊 Table data not yet available. Document may still be processing.
+        </div>
+      </ng-container>
+      <div *ngIf="!isSpreadsheet()" class="tab-empty">
+        📊 Data & Charts is available for spreadsheets (XLSX, CSV) and data files.
+      </div>
+    </div>
+
+    <!-- ════ ASK AI ════ -->
+    <div *ngIf="activeTab==='askai'" class="sh-panel">
+      <div class="chat-thread">
+        <ng-container *ngFor="let m of msgs">
+          <div class="chat-ai" *ngIf="m.role === 'ai'">
+            <div class="chat-av">U</div>
+            <div class="bbl-ai" [innerHTML]="md(m.text)"></div>
+          </div>
+          <div class="chat-usr" *ngIf="m.role === 'user'">
+            <div class="bbl-usr">{{ m.text }}</div>
+          </div>
+        </ng-container>
+        <div class="chat-ai" *ngIf="chatLoading">
+          <div class="chat-av">U</div>
+          <div class="bbl-ai typing"><span></span><span></span><span></span></div>
+        </div>
+      </div>
+      <div class="chat-inp">
+        <textarea [(ngModel)]="chatInput"
+                  placeholder="Ask anything about this document…"
+                  rows="1"
+                  (keydown)="onKey($event)"></textarea>
+        <button class="chat-send" (click)="sendChat()">➤</button>
+      </div>
+      <div class="chat-foot">🔒 phi3:mini · local · private</div>
+    </div>
+
+    <!-- ════ DETAILS ════ -->
+    <div *ngIf="activeTab==='details'" class="sh-panel">
+      <div class="det-grid">
+        <div class="det-item"><div class="det-k">Type</div><div class="det-v">{{ d.doc_type }}</div></div>
+        <div class="det-item"><div class="det-k">Size</div><div class="det-v">{{ d.file_size | number }} bytes</div></div>
+        <div class="det-item"><div class="det-k">Modified</div><div class="det-v">{{ d.created_at | date:'mediumDate' }}</div></div>
+        <div class="det-item"><div class="det-k">Status</div><div class="det-v">{{ d.status }}</div></div>
+        <div class="det-item"><div class="det-k">Model</div><div class="det-v">phi3:mini</div></div>
+        <div class="det-item"><div class="det-k">Embeddings</div><div class="det-v">768-dim</div></div>
+      </div>
+    </div>
+
+  </div><!-- /sh-body -->
+</div><!-- /sheet -->

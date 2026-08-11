@@ -1,0 +1,10 @@
+.folder-grid { display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:28px; }
+.folder-card {
+  background:#fff;border:1px solid #e3e7ef;border-radius:12px;padding:18px 18px 16px;cursor:pointer;transition:all .18s;position:relative;overflow:hidden;box-shadow:0 1px 3px rgba(0,0,0,.05);
+  &:hover { box-shadow:0 4px 16px rgba(0,0,0,.09);transform:translateY(-1px);border-color:#cdd4e0; }
+  &--new { border-style:dashed;border-color:#cdd4e0;display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:100px;color:#97a4b5;&:hover{background:#f7f8fa;color:#58687f;} }
+  &__emoji { font-size:22px;margin-bottom:10px;display:block; }
+  &__name  { font-size:14px;font-weight:600;color:#0d1626;margin-bottom:3px; }
+  &__count { font-size:12.5px;color:#97a4b5; }
+  &__accent { position:absolute;top:0;left:0;right:0;height:3px;opacity:.7;border-radius:12px 12px 0 0; }
+}

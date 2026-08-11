@@ -1,0 +1,345 @@
+<div class="an-page">
+
+  <!-- ── Session view back bar ── -->
+  <div class="session-back-bar" *ngIf="isSessionView">
+    <button class="session-back-btn" (click)="router.navigate(['/research'])">← Back to Research</button>
+    <span class="session-back-title">{{ researchQuestion }}</span>
+  </div>
+
+  <!-- ── KPI row — financial view ── -->
+  <div class="kpi-row" *ngIf="!isSessionView">
+    <div class="kpi-card">
+      <div class="kpi-top">
+        <div class="kpi-ico kpi-ico--indigo">🧾</div>
+        <span class="kpi-badge kpi-badge--indigo">{{ totalTxns }} txns</span>
+      </div>
+      <div class="kpi-val">{{ fmt(totalSpend) }}</div>
+      <div class="kpi-lbl">Total Spend</div>
+    </div>
+    <div class="kpi-card">
+      <div class="kpi-top">
+        <div class="kpi-ico kpi-ico--green">💰</div>
+      </div>
+      <div class="kpi-val">{{ fmt(totalIncome) }}</div>
+      <div class="kpi-lbl">Total Income (Credits)</div>
+    </div>
+    <div class="kpi-card">
+      <div class="kpi-top">
+        <div class="kpi-ico" [class]="netBalance >= 0 ? 'kpi-ico--green' : 'kpi-ico--red'">
+          {{ netBalance >= 0 ? '📈' : '📉' }}
+        </div>
+        <span class="kpi-badge" [class]="netBalance >= 0 ? 'kpi-badge--green' : 'kpi-badge--red'">
+          {{ netBalance >= 0 ? 'surplus' : 'deficit' }}
+        </span>
+      </div>
+      <div class="kpi-val" [class.negative]="netBalance < 0">{{ fmt(netBalance) }}</div>
+      <div class="kpi-lbl">Net Balance</div>
+    </div>
+    <div class="kpi-card">
+      <div class="kpi-top">
+        <div class="kpi-ico kpi-ico--amber">🔬</div>
+      </div>
+      <div class="kpi-val">{{ totalQueries }}</div>
+      <div class="kpi-lbl">Research Queries</div>
+    </div>
+  </div>
+
+  <!-- ── KPI row — research session view ── -->
+  <div class="kpi-row" *ngIf="isSessionView && researchChart">
+    <div class="kpi-card">
+      <div class="kpi-top"><div class="kpi-ico kpi-ico--indigo">📊</div></div>
+      <div class="kpi-val">{{ fmtNum(researchKpis.total) }}</div>
+      <div class="kpi-lbl">Total {{ researchChart?.datasets?.[0]?.label || 'Value' }}</div>
+    </div>
+    <div class="kpi-card">
+      <div class="kpi-top"><div class="kpi-ico kpi-ico--green">⌀</div></div>
+      <div class="kpi-val">{{ fmtNum(researchKpis.avg) }}</div>
+      <div class="kpi-lbl">Average per {{ researchGroupLabel }}</div>
+    </div>
+    <div class="kpi-card">
+      <div class="kpi-top">
+        <div class="kpi-ico kpi-ico--amber">🏆</div>
+        <span class="kpi-badge kpi-badge--indigo">peak</span>
+      </div>
+      <div class="kpi-val">{{ fmtNum(researchKpis.max) }}</div>
+      <div class="kpi-lbl">{{ researchKpis.maxLabel }}</div>
+    </div>
+    <div class="kpi-card">
+      <div class="kpi-top"><div class="kpi-ico kpi-ico--indigo">🔢</div></div>
+      <div class="kpi-val">{{ researchKpis.count }}</div>
+      <div class="kpi-lbl">{{ researchGroupLabel }} Groups</div>
+    </div>
+  </div>
+
+  <!-- loading / error -->
+  <div class="state-msg" *ngIf="loading">Loading financial data…</div>
+  <div class="state-msg state-msg--err" *ngIf="!loading && error">
+    {{ error }}
+    <button class="retry-btn" (click)="retry()">↺ Retry</button>
+  </div>
+
+  <div class="an-grid" *ngIf="!loading">
+
+    <!-- ── Left column ── -->
+    <div class="an-left">
+
+      <!-- Research chart from sessionStorage -->
+      <div class="panel rc-panel no-viz-panel" *ngIf="!researchChart">
+        <div class="no-viz">
+          <div class="no-viz-ico">📊</div>
+          <div class="no-viz-title">No visualization yet</div>
+          <div class="no-viz-sub">Ask a chart question in Research (e.g. "show me a pie chart of spending by category") and the result will appear here automatically.</div>
+          <button class="no-viz-btn" (click)="router.navigate(['/research'])">Go to Research →</button>
+        </div>
+      </div>
+      <div class="panel rc-panel" *ngIf="researchChart">
+        <div class="panel-head">
+          <div>
+            <div class="panel-title">📊 Research Visualization</div>
+            <div class="panel-sub">{{ researchQuestion }}</div>
+          </div>
+          <div class="rc-actions">
+            <div class="rc-type-btns">
+              <button *ngFor="let ct of chartTypes" class="rct-btn"
+                [class.rct-active]="activeChartType === ct.key"
+                (click)="switchType(ct.key)">
+                {{ ct.icon }} {{ ct.label }}
+              </button>
+            </div>
+            <button class="dismiss-btn" (click)="dismissChart()" title="Dismiss">✕</button>
+          </div>
+        </div>
+        <div class="rc-sources" *ngIf="researchSources?.length">
+          <span class="src-lbl">Sources:</span>
+          <span *ngFor="let s of researchSources" class="src-chip">{{ s }}</span>
+        </div>
+        <div class="chart-wrap chart-wrap--tall">
+          <canvas id="research-chart-canvas"></canvas>
+        </div>
+      </div>
+
+      <!-- Monthly Spend vs Income — financial only -->
+      <div class="panel" *ngIf="!isSessionView">
+        <div class="panel-head">
+          <div>
+            <div class="panel-title">Monthly Cash Flow</div>
+            <div class="panel-sub">Spend vs Income by month</div>
+          </div>
+        </div>
+        <div class="chart-wrap chart-wrap--tall">
+          <canvas id="monthly-canvas"></canvas>
+        </div>
+      </div>
+
+      <!-- Transactions table — financial only -->
+      <div class="panel" *ngIf="!isSessionView">
+        <div class="panel-head">
+          <div>
+            <div class="panel-title">Transactions</div>
+            <div class="panel-sub">{{ totalTxns }} total · page {{ txnPage + 1 }} of {{ txnTotalPages }}</div>
+          </div>
+          <div class="txn-pag-info">{{ txnPage * txnPageSize + 1 }}–{{ txnPageEnd }} of {{ txnTotal }}</div>
+        </div>
+        <div class="txn-table-wrap">
+          <table class="txn-table">
+            <colgroup>
+              <col style="width:88px">
+              <col>
+              <col style="width:88px">
+              <col style="width:66px">
+              <col style="width:130px">
+            </colgroup>
+            <thead>
+              <tr>
+                <th>Date</th>
+                <th>Merchant</th>
+                <th class="num">Amount</th>
+                <th>Type</th>
+                <th>Source</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr *ngIf="txnLoading">
+                <td colspan="5" class="empty-cell">Loading…</td>
+              </tr>
+              <ng-container *ngIf="!txnLoading">
+                <tr *ngFor="let t of txns" [class.credit-row]="t.type === 'credit'">
+                  <td class="date-cell">{{ t.date | date:'MMM d, y' }}</td>
+                  <td class="merchant-cell">{{ t.merchant }}</td>
+                  <td class="num mono">
+                    <span class="amt" [class.amt--credit]="t.type === 'credit'"
+                                      [class.amt--debit]="t.type === 'debit'">
+                      {{ fmt(t.amount) }}
+                    </span>
+                  </td>
+                  <td>
+                    <span class="type-chip" [class.type-chip--credit]="t.type === 'credit'"
+                                            [class.type-chip--debit]="t.type === 'debit'">
+                      {{ t.type }}
+                    </span>
+                  </td>
+                  <td class="doc-cell">{{ t.doc }}</td>
+                </tr>
+                <tr *ngIf="!txns.length">
+                  <td colspan="5" class="empty-cell">No transactions found</td>
+                </tr>
+              </ng-container>
+            </tbody>
+          </table>
+        </div>
+        <div class="pag-bar">
+          <button class="pag-btn" (click)="txnGoTo(0)" [disabled]="txnPage === 0 || txnLoading">«</button>
+          <button class="pag-btn" (click)="txnGoTo(txnPage - 1)" [disabled]="txnPage === 0 || txnLoading">‹</button>
+          <ng-container *ngFor="let p of [].constructor(txnTotalPages); let i = index">
+            <button *ngIf="i >= txnPage - 2 && i <= txnPage + 2"
+                    class="pag-btn pag-num"
+                    [class.pag-active]="i === txnPage"
+                    (click)="txnGoTo(i)"
+                    [disabled]="txnLoading">{{ i + 1 }}</button>
+          </ng-container>
+          <button class="pag-btn" (click)="txnGoTo(txnPage + 1)" [disabled]="txnPage >= txnTotalPages - 1 || txnLoading">›</button>
+          <button class="pag-btn" (click)="txnGoTo(txnTotalPages - 1)" [disabled]="txnPage >= txnTotalPages - 1 || txnLoading">»</button>
+        </div>
+      </div>
+
+      <!-- Research data table — session view only -->
+      <div class="panel" *ngIf="isSessionView && researchTableRows.length">
+        <div class="panel-head">
+          <div>
+            <div class="panel-title">Data Breakdown</div>
+            <div class="panel-sub">{{ researchTableRows.length }} {{ researchGroupLabel }} groups · sorted by value</div>
+          </div>
+        </div>
+        <div class="txn-table-wrap">
+          <table class="txn-table">
+            <thead>
+              <tr>
+                <th>#</th>
+                <th>{{ researchGroupLabel }}</th>
+                <th class="num">{{ researchChart?.datasets?.[0]?.label || 'Value' }}</th>
+                <th class="num">% of Total</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr *ngFor="let row of researchTableRows; let i = index">
+                <td class="date-cell">{{ i + 1 }}</td>
+                <td class="merchant-cell">{{ row.label }}</td>
+                <td class="num mono">{{ fmtNum(row.value) }}</td>
+                <td class="num mono">
+                  {{ researchKpis.total > 0 ? ((row.value / researchKpis.total) * 100 | number:'1.1-1') + '%' : '—' }}
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- Recent Research Sessions -->
+      <div class="panel" *ngIf="recentQuestions.length">
+        <div class="panel-head">
+          <div class="panel-title">Recent Research Sessions</div>
+          <div class="panel-sub">{{ totalQueries }} total queries</div>
+        </div>
+        <div class="q-list">
+          <div *ngFor="let q of recentQuestions" class="q-row"
+               [class.q-row--active]="selectedSession && sessionKey(selectedSession) === sessionKey(q)">
+            <div class="q-ico">🔬</div>
+            <div class="q-body">
+              <div class="q-text">{{ q.question }}</div>
+              <div class="q-ts">{{ q.ts | date:'MMM d, HH:mm' }}</div>
+            </div>
+            <div class="q-actions">
+              <button class="q-action-btn"
+                      [class.q-action-btn--active]="selectedSession && sessionKey(selectedSession) === sessionKey(q)"
+                      (click)="viewSession(q)" title="View conversation">
+                {{ selectedSession && sessionKey(selectedSession) === sessionKey(q) ? '✕ Close' : '💬 View' }}
+              </button>
+              <button class="q-action-btn q-action-btn--delete" (click)="deleteSession(q); $event.stopPropagation()" title="Delete session">🗑</button>
+            </div>
+          </div>
+          <!-- Inline session viewer -->
+          <div class="session-viewer" *ngIf="selectedSession">
+            <div class="sv-question">
+              <span class="sv-q-ico">❓</span>
+              <span>{{ selectedSession.question }}</span>
+            </div>
+            <div class="sv-answer" [innerHTML]="md(selectedSession.answer)"></div>
+            <div class="sv-sources" *ngIf="selectedSession.sources?.length">
+              <span class="sv-src-lbl">Sources:</span>
+              <span *ngFor="let s of selectedSession.sources" class="src-chip">{{ s }}</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- ── Right column ── -->
+    <div class="an-right">
+
+      <!-- Financial panels -->
+      <ng-container *ngIf="!isSessionView">
+        <div class="panel">
+          <div class="panel-head">
+            <div class="panel-title">Top Merchants by Spend</div>
+            <div class="panel-sub">Debits only · top 10</div>
+          </div>
+          <div class="chart-wrap chart-wrap--merchants">
+            <canvas id="merchant-canvas"></canvas>
+          </div>
+        </div>
+        <div class="panel">
+          <div class="panel-head">
+            <div class="panel-title">Spend by Statement</div>
+            <div class="panel-sub">{{ byDoc.length }} documents</div>
+          </div>
+          <div class="chart-wrap chart-wrap--donut">
+            <canvas id="doc-canvas"></canvas>
+          </div>
+        </div>
+      </ng-container>
+
+      <!-- Research session panels -->
+      <ng-container *ngIf="isSessionView && researchChart">
+
+        <!-- Top items bar -->
+        <div class="panel">
+          <div class="panel-head">
+            <div class="panel-title">Top 10 by {{ researchChart?.datasets?.[0]?.label || 'Value' }}</div>
+            <div class="panel-sub">{{ researchGroupLabel }} · ranked</div>
+          </div>
+          <div class="chart-wrap chart-wrap--merchants">
+            <canvas id="merchant-canvas"></canvas>
+          </div>
+        </div>
+
+        <!-- Distribution donut -->
+        <div class="panel">
+          <div class="panel-head">
+            <div class="panel-title">Distribution by {{ researchGroupLabel }}</div>
+            <div class="panel-sub">{{ researchTableRows.length }} groups</div>
+          </div>
+          <div class="chart-wrap chart-wrap--donut">
+            <canvas id="doc-canvas"></canvas>
+          </div>
+        </div>
+
+        <!-- Sources -->
+        <div class="panel" *ngIf="researchSources?.length">
+          <div class="panel-head">
+            <div class="panel-title">Source Documents</div>
+            <div class="panel-sub">{{ researchSources.length }} file(s)</div>
+          </div>
+          <div class="q-list">
+            <div *ngFor="let s of researchSources" class="q-row">
+              <div class="q-ico">📄</div>
+              <div class="q-body"><div class="q-text">{{ s }}</div></div>
+            </div>
+          </div>
+        </div>
+
+      </ng-container>
+
+    </div>
+  </div>
+</div>
