@@ -1,0 +1,11 @@
+<div class="app-shell">
+  <app-license-warning-banner></app-license-warning-banner>
+  <div class="app-body">
+    <app-main-nav (openAskAi)="askAiOpen=true" (openVoice)="voiceOpen=true"></app-main-nav>
+    <div class="page-content">
+      <router-outlet></router-outlet>
+    </div>
+  </div>
+  <app-global-ask-ai [isOpen]="askAiOpen" [initialQuery]="voiceQuery" (closed)="askAiOpen=false; voiceQuery=''"></app-global-ask-ai>
+  <app-voice-assistant [isOpen]="voiceOpen" (closed)="voiceOpen=false" (forwardToAi)="onForwardToAi($event)"></app-voice-assistant>
+</div>

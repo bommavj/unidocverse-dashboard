@@ -1,0 +1,228 @@
+<div class="aq-page">
+
+  <!-- ── HEADER ── -->
+  <div class="aq-header">
+    <div class="aq-header-left">
+      <div class="aq-title">🤖 Agent Queue</div>
+      <div class="aq-sub">{{ pendingCount }} items need attention</div>
+    </div>
+    <div class="aq-header-right">
+      <button class="aq-btn-ghost" (click)="loadRuns()">↻ Refresh</button>
+      <button class="aq-btn-primary" (click)="showRunModal = true">+ Run Agent</button>
+    </div>
+  </div>
+
+  <!-- ── SECTOR TABS ── -->
+  <div class="aq-tabs">
+    <div class="aq-tab" [class.active]="activeSector === 'all'" (click)="setSector('all')">
+      All <span class="tab-badge">{{ runs.length }}</span>
+    </div>
+    <div class="aq-tab" *ngFor="let s of sectors"
+         [class.active]="activeSector === s.id"
+         (click)="setSector(s.id)">
+      {{ s.icon }} {{ s.label }} <span class="tab-badge">{{ countBySector(s.id) }}</span>
+    </div>
+  </div>
+
+  <!-- ── BULK ACTION BAR ── -->
+  <div class="aq-bulk-bar" *ngIf="selectedIds.size > 0">
+    <span class="bulk-count">{{ selectedIds.size }} selected</span>
+    <div class="bulk-actions">
+      <button class="aq-btn-success aq-btn-sm" (click)="bulkApprove()">✅ Approve All</button>
+      <button class="aq-btn-danger aq-btn-sm" (click)="bulkReject()">❌ Reject All</button>
+      <button class="aq-btn-ghost aq-btn-sm" (click)="clearSelection()">✕ Clear</button>
+    </div>
+  </div>
+
+  <!-- ── MAIN LAYOUT ── -->
+  <div class="aq-layout" [class.drawer-open]="!!selectedRun">
+
+    <!-- TABLE -->
+    <div class="aq-table-wrap">
+
+      <!-- Table header -->
+      <div class="aq-row aq-thead">
+        <div class="aq-col-cb">
+          <div class="aq-cb" [class.checked]="allSelected" [class.indeterminate]="someSelected && !allSelected"
+               (click)="toggleAll()"></div>
+        </div>
+        <div class="aq-col-pri"></div>
+        <div class="aq-col-main">Agent / Task</div>
+        <div class="aq-col-status">Status</div>
+        <div class="aq-col-iter">Progress</div>
+        <div class="aq-col-action">Proposed Action</div>
+        <div class="aq-col-btns"></div>
+      </div>
+
+      <!-- Rows -->
+      <div class="aq-row" *ngFor="let run of filteredRuns"
+           [class.selected]="selectedRun?.id === run.id"
+           (click)="openDrawer(run)">
+
+        <div class="aq-col-cb" (click)="$event.stopPropagation()">
+          <div class="aq-cb" [class.checked]="selectedIds.has(run.id)" (click)="toggleSelect(run.id)"></div>
+        </div>
+
+        <div class="aq-col-pri">
+          <div class="priority-dot" [ngClass]="priorityClass(run)"></div>
+        </div>
+
+        <div class="aq-col-main">
+          <div class="run-name">{{ run.task_name }}</div>
+          <div class="run-sub">{{ sectorIcon(run.sector) }} {{ run.sector | titlecase }} · {{ run.trigger_type }} · {{ run.started_at | date:'shortTime' }}</div>
+        </div>
+
+        <div class="aq-col-status">
+          <span class="status-pill" [ngClass]="statusClass(run.status)">
+            {{ statusIcon(run.status) }} {{ run.status | titlecase }}
+          </span>
+        </div>
+
+        <div class="aq-col-iter">
+          <div class="iter-pips">
+            <div class="iter-pip" *ngFor="let pip of iterPips(run)"
+                 [class.filled]="pip === 'filled'" [class.active]="pip === 'active'"></div>
+          </div>
+          <div class="iter-label">{{ run.iteration || 0 }}/{{ run.max_iterations || 10 }} iters</div>
+        </div>
+
+        <div class="aq-col-action">
+          <span class="proposed-text" *ngIf="run.status === 'waiting_approval'">{{ proposedAction(run) }}</span>
+          <span class="proposed-muted" *ngIf="run.status !== 'waiting_approval'">{{ statusLabel(run.status) }}</span>
+        </div>
+
+        <div class="aq-col-btns" (click)="$event.stopPropagation()">
+          <button class="ra ra-approve" *ngIf="run.status === 'waiting_approval'" (click)="quickApprove(run)">✅</button>
+          <button class="ra ra-reject"  *ngIf="run.status === 'waiting_approval'" (click)="quickReject(run)">❌</button>
+          <button class="ra ra-view"    (click)="openDrawer(run)">View</button>
+          <button class="ra ra-cancel"  *ngIf="['thinking','acting','waiting_approval'].includes(run.status)" (click)="cancelRun(run)">✕</button>
+        </div>
+      </div>
+
+      <!-- Empty state -->
+      <div class="aq-empty" *ngIf="filteredRuns.length === 0 && !loading">
+        <div>🤖</div>
+        <div>No agent runs yet for this sector.</div>
+        <button class="aq-btn-primary" (click)="showRunModal = true">+ Run Agent</button>
+      </div>
+
+      <div class="aq-loading" *ngIf="loading">Loading…</div>
+    </div>
+
+    <!-- ── DRAWER ── -->
+    <div class="aq-drawer" *ngIf="selectedRun">
+
+      <div class="drawer-header">
+        <div class="drawer-title">{{ selectedRun.task_name }}</div>
+        <button class="drawer-close" (click)="closeDrawer()">✕</button>
+      </div>
+
+      <div class="drawer-meta">
+        <span>{{ sectorIcon(selectedRun.sector) }} {{ selectedRun.sector | titlecase }}</span>
+        <span>⏰ {{ selectedRun.trigger_type }}</span>
+        <span [ngClass]="statusClass(selectedRun.status)">{{ statusIcon(selectedRun.status) }} {{ selectedRun.status }}</span>
+      </div>
+
+      <!-- Reasoning trail -->
+      <div class="drawer-section">
+        <div class="drawer-section-title">Reasoning Trail</div>
+        <div class="tl-wrap">
+          <div class="tl-item" *ngFor="let entry of reasoningTrail(selectedRun)">
+            <div class="tl-dot" [ngClass]="entry.dotClass">{{ entry.icon }}</div>
+            <div class="tl-body">
+              <div class="tl-label">{{ entry.label }}</div>
+              <div class="tl-desc">{{ entry.text }}</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Approval action -->
+      <div class="drawer-approval" *ngIf="selectedRun.status === 'waiting_approval'">
+        <div class="approval-title">🔐 Agent Proposes Action</div>
+        <div class="approval-desc">{{ approvalDescription(selectedRun) }}</div>
+        <div class="approval-payload" [contentEditable]="editPayload" [attr.data-editable]="editPayload">{{ approvalPayload(selectedRun) }}</div>
+        <button class="aq-btn-ghost aq-btn-sm" (click)="editPayload = !editPayload">
+          {{ editPayload ? '💾 Lock' : '✏️ Edit payload' }}
+        </button>
+        <div class="approval-btns">
+          <button class="aq-btn-success" (click)="approveRun(selectedRun)">✅ Approve &amp; Execute</button>
+          <button class="aq-btn-danger"  (click)="rejectRun(selectedRun)">❌ Reject</button>
+        </div>
+      </div>
+
+      <!-- Tool calls -->
+      <div class="drawer-section" *ngIf="selectedRunDetail?.tool_calls?.length">
+        <div class="drawer-section-title">Tool Calls ({{ selectedRunDetail.tool_calls.length }})</div>
+        <div class="tool-call" *ngFor="let tc of selectedRunDetail.tool_calls">
+          <div class="tc-name">🔧 {{ tc.tool_name }} <span class="tc-latency">{{ tc.latency_ms }}ms</span></div>
+          <div class="tc-args">{{ tc.args | json }}</div>
+        </div>
+      </div>
+
+      <!-- Outcome -->
+      <div class="drawer-section" *ngIf="selectedRun.status === 'completed' && selectedRun.outcome">
+        <div class="drawer-section-title">✅ Outcome</div>
+        <div class="outcome-text">{{ selectedRun.outcome?.summary }}</div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ── SUMMARY BAR ── -->
+  <div class="aq-summary-bar">
+    <span><strong>{{ runs.length }}</strong> total</span>
+    <span><strong class="text-orange">{{ countByStatus('waiting_approval') }}</strong> awaiting approval</span>
+    <span><strong class="text-purple">{{ countByStatus('thinking') + countByStatus('acting') }}</strong> running</span>
+    <span><strong class="text-green">{{ countByStatus('completed') }}</strong> completed</span>
+    <span class="ml-auto text-muted">Auto-refreshes every 10s</span>
+  </div>
+
+</div>
+
+<!-- ── RUN AGENT MODAL ── -->
+<div class="modal-bg" *ngIf="showRunModal" (click)="closeModal($event)">
+  <div class="modal">
+    <h3>🤖 Run Agent</h3>
+
+    <div class="form-group">
+      <label class="form-label">Sector</label>
+      <div class="sector-grid">
+        <div class="sector-btn" *ngFor="let s of sectors"
+             [class.selected]="newRun.sector === s.id"
+             (click)="selectSector(s.id)">
+          <span class="si">{{ s.icon }}</span>
+          <span class="sl">{{ s.label }}</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="form-group">
+      <label class="form-label">Task</label>
+      <select class="form-select" [(ngModel)]="newRun.task_name">
+        <option *ngFor="let t of taskOptions" [value]="t">{{ t }}</option>
+      </select>
+    </div>
+
+    <div class="form-group">
+      <label class="form-label">Instruction (optional)</label>
+      <textarea class="form-textarea" [(ngModel)]="newRun.instruction"
+                placeholder="e.g. Focus on commercial clients expiring in 30 days…"></textarea>
+    </div>
+
+    <div class="form-group">
+      <label class="form-label">Require Approval Before</label>
+      <select class="form-select" [(ngModel)]="newRun.approval_level">
+        <option value="external">External communications (email, letters)</option>
+        <option value="all">All actions (maximum control)</option>
+        <option value="irreversible">Irreversible actions only</option>
+        <option value="none">Never — fully autonomous</option>
+      </select>
+    </div>
+
+    <div class="modal-footer">
+      <button class="aq-btn-ghost" (click)="showRunModal = false">Cancel</button>
+      <button class="aq-btn-primary" (click)="startRun()" [disabled]="!newRun.task_name">🚀 Start Agent Run</button>
+    </div>
+  </div>
+</div>

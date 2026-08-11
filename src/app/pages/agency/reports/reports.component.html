@@ -1,0 +1,94 @@
+<div class="page">
+
+  <div class="topbar">
+    <div>
+      <div class="topbar-title">AI Reports</div>
+      <div class="topbar-sub">AI-generated daily intelligence · runs at 4:00 AM</div>
+    </div>
+    <button class="btn-run" (click)="runNow()" [disabled]="running">
+      <span *ngIf="!running">▶ Run Now</span>
+      <span *ngIf="running" class="analyzing-dots"><span></span><span></span><span></span></span>
+    </button>
+  </div>
+
+  <div class="content">
+
+    <!-- Loading -->
+    <div *ngIf="loading" class="empty-state">
+      <span class="analyzing-dots"><span></span><span></span><span></span></span>
+      <div>Loading reports…</div>
+    </div>
+
+    <!-- No reports yet -->
+    <div *ngIf="!loading && reports.length === 0" class="empty-state">
+      <div class="empty-icon">📊</div>
+      <div class="empty-title">No reports yet</div>
+      <div class="empty-sub">Reports are generated daily once Agency Management is enabled. Check back tomorrow morning.</div>
+    </div>
+
+    <!-- Two-column layout -->
+    <div *ngIf="!loading && reports.length > 0" class="layout">
+
+      <!-- Report list -->
+      <div class="report-list">
+        <div *ngFor="let r of reports"
+             class="report-item"
+             [class.active]="r.id === selected?.id"
+             (click)="select(r)">
+          <div class="report-item-date">{{ domainIcon(r.agent_type) }} {{ r.report_date | date:'MMM d, y' }}</div>
+          <div class="report-item-title">{{ r.title }}</div>
+          <div class="report-item-summary">{{ r.summary }}</div>
+          <span class="badge" [ngClass]="statusClass(r.run_status)">{{ r.run_status }}</span>
+        </div>
+      </div>
+
+      <!-- Report detail -->
+      <div class="report-detail" *ngIf="selected">
+        <div class="detail-header">
+          <div class="detail-title">{{ selected.title }}</div>
+          <div class="detail-meta">
+            Generated {{ selected.created_at | date:'MMM d, y, h:mm a' }}
+            &nbsp;·&nbsp;
+            <span class="badge" [ngClass]="statusClass(selected.run_status)">{{ selected.run_status }}</span>
+          </div>
+          <div class="detail-summary">{{ selected.summary }}</div>
+        </div>
+
+        <!-- Sections -->
+        <div *ngFor="let sec of sections()" class="section-card">
+          <div class="section-title">{{ sec.label }}</div>
+
+          <!-- Object (KPI grid) -->
+          <div *ngIf="isObject(sec.data)" class="kpi-grid">
+            <div *ngFor="let entry of objectEntries(sec.data)" class="kpi-item">
+              <div class="kpi-label">{{ entry.k }}</div>
+              <div class="kpi-value">{{ entry.v }}</div>
+            </div>
+          </div>
+
+          <!-- Array (table) -->
+          <div *ngIf="isArray(sec.data) && sec.data.length > 0" class="table-wrap">
+            <table>
+              <thead>
+                <tr>
+                  <th *ngFor="let col of objectEntries(sec.data[0])">{{ col.k }}</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr *ngFor="let row of sec.data">
+                  <td *ngFor="let entry of objectEntries(row)">{{ entry.v }}</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+
+          <!-- Empty array -->
+          <div *ngIf="isArray(sec.data) && sec.data.length === 0" class="section-empty">
+            No data for this period
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>

@@ -1,0 +1,535 @@
+<div class="page" *ngIf="client">
+
+  <!-- Topbar -->
+  <div class="topbar">
+    <button class="tb-back" (click)="goBack()">← Clients</button>
+    <div class="tb-identity">
+      <div class="tb-avatar" [style.background]="client.avatar_color || '#6366f1'">{{ initials }}</div>
+      <div>
+        <div class="tb-name">{{ displayName }}</div>
+        <div class="tb-meta">{{ client.client_number }} · {{ client.client_type | titlecase }}
+          <span class="badge" [class.badge-green]="client.status==='active'"
+                              [class.badge-amber]="client.status==='prospect'"
+                              [class.badge-slate]="client.status==='inactive'">
+            {{ client.status | titlecase }}
+          </span>
+        </div>
+      </div>
+    </div>
+    <div class="tb-sp"></div>
+    <button class="tb-btn tb-sec" (click)="runGapAnalysis()" [disabled]="analyzing">
+      {{ analyzing ? 'Analyzing...' : '🔎 Gap Analysis' }}
+    </button>
+    <button class="tb-btn tb-pri" (click)="startEdit()" *ngIf="!editing">✏️ Edit</button>
+  </div>
+
+  <div class="content">
+
+    <!-- Loading -->
+    <div class="loading-row" *ngIf="loading">
+      <div class="spinner"></div><span>Loading client...</span>
+    </div>
+
+    <!-- Stat Cards -->
+    <div class="stats-row">
+      <div class="stat-card">
+        <div class="stat-lbl">Active Policies</div>
+        <div class="stat-val" style="color:#16a34a">{{ activePolicies }}</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-lbl">Total Premium</div>
+        <div class="stat-val">{{ fmtCurrency(totalPremium) }}</div>
+      </div>
+      <div class="stat-card" *ngIf="nearestRenewal != null">
+        <div class="stat-lbl">Next Renewal</div>
+        <div class="stat-val" [ngClass]="expiryClass(nearestRenewal)">{{ nearestRenewal }}d</div>
+      </div>
+      <div class="stat-card" *ngIf="gapAnalysis">
+        <div class="stat-lbl">Coverage Score</div>
+        <div class="stat-val grade-inline" [ngClass]="getGradeClass(gapAnalysis.overall_grade || gapAnalysis.grade)">
+          {{ gapAnalysis.overall_grade || gapAnalysis.grade }}
+        </div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-lbl">Documents</div>
+        <div class="stat-val">{{ documents.length }}</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-lbl">Loss Runs</div>
+        <div class="stat-val">{{ lossRuns.length }}</div>
+      </div>
+    </div>
+
+    <!-- Edit Form -->
+    <div class="edit-card" *ngIf="editing">
+      <div class="edit-header">
+        <strong>Edit Client</strong>
+        <button class="tb-btn tb-sec" (click)="cancelEdit()">✕ Cancel</button>
+      </div>
+      <div class="add-form-grid">
+        <ng-container *ngIf="editData.client_type === 'personal'">
+          <div class="form-field"><label>First Name</label><input [(ngModel)]="editData.first_name"></div>
+          <div class="form-field"><label>Last Name</label><input [(ngModel)]="editData.last_name"></div>
+        </ng-container>
+        <ng-container *ngIf="editData.client_type === 'commercial'">
+          <div class="form-field full"><label>Business Name</label><input [(ngModel)]="editData.business_name"></div>
+          <div class="form-field"><label>Business Type</label><input [(ngModel)]="editData.business_type"></div>
+        </ng-container>
+        <div class="form-field"><label>Email</label><input [(ngModel)]="editData.email" type="email"></div>
+        <div class="form-field"><label>Phone</label><input [(ngModel)]="editData.phone"></div>
+        <div class="form-field"><label>City</label><input [(ngModel)]="editData.city"></div>
+        <div class="form-field"><label>State</label><input [(ngModel)]="editData.state"></div>
+        <div class="form-field"><label>Assigned Agent</label><input [(ngModel)]="editData.assigned_agent"></div>
+        <div class="form-field">
+          <label>Status</label>
+          <select [(ngModel)]="editData.status">
+            <option value="active">Active</option>
+            <option value="prospect">Prospect</option>
+            <option value="inactive">Inactive</option>
+          </select>
+        </div>
+      </div>
+      <button class="tb-btn tb-pri" (click)="saveEdit()" [disabled]="saving">
+        {{ saving ? 'Saving...' : '✓ Save Changes' }}
+      </button>
+    </div>
+
+    <!-- Tabs -->
+    <div class="tabs">
+      <button [class.active]="activeTab==='overview'"  (click)="activeTab='overview'">Overview</button>
+      <button [class.active]="activeTab==='policies'"  (click)="activeTab='policies'">
+        Policies <span class="tab-ct" *ngIf="policies.length">{{ policies.length }}</span>
+      </button>
+      <button [class.active]="activeTab==='documents'" (click)="activeTab='documents'">
+        Documents <span class="tab-ct" *ngIf="documents.length">{{ documents.length }}</span>
+      </button>
+      <button [class.active]="activeTab==='loss-runs'" (click)="activeTab='loss-runs'">
+        Loss Runs <span class="tab-ct" *ngIf="lossRuns.length">{{ lossRuns.length }}</span>
+      </button>
+      <button [class.active]="activeTab==='gap'" (click)="activeTab='gap'">
+        Gap Analysis
+        <span class="tab-ct tab-ct-red" *ngIf="gapAnalysis?.critical_gaps">{{ gapAnalysis.critical_gaps }} critical</span>
+      </button>
+      <button [class.active]="activeTab==='coi'" (click)="activeTab='coi'">
+        COI <span class="tab-ct" *ngIf="cois.length">{{ cois.length }}</span>
+      </button>
+      <button [class.active]="activeTab==='notes'" (click)="activeTab='notes'; loadNotes()">
+        Notes <span class="tab-ct" *ngIf="notes.length">{{ notes.length }}</span>
+      </button>
+      <button [class.active]="activeTab==='immigration'" (click)="activeTab='immigration'">
+        🛂 Immigration
+        <span class="tab-ct tab-ct-red" *ngIf="immigrationSummary.critical > 0">{{ immigrationSummary.critical }} critical</span>
+        <span class="tab-ct tab-ct-amber" *ngIf="immigrationSummary.critical === 0 && immigrationSummary.high > 0">{{ immigrationSummary.high }} expiring</span>
+        <span class="tab-ct" *ngIf="!immigrationSummary.critical && !immigrationSummary.high && immigration.length">{{ immigration.length }}</span>
+      </button>
+    </div>
+
+    <!-- ── OVERVIEW ────────────────────────────────────────────────────────── -->
+    <div *ngIf="activeTab==='overview'" class="tab-content">
+      <div class="overview-grid">
+        <div class="info-card">
+          <div class="info-card-title">Contact Information</div>
+          <div class="info-row"><span class="info-lbl">Email</span><span>{{ client.email || '—' }}</span></div>
+          <div class="info-row"><span class="info-lbl">Phone</span><span>{{ client.phone || '—' }}</span></div>
+          <div class="info-row" *ngIf="client.mobile"><span class="info-lbl">Mobile</span><span>{{ client.mobile }}</span></div>
+          <div class="info-row">
+            <span class="info-lbl">Address</span>
+            <span>{{ client.address_line1 || '—' }}<br *ngIf="client.city">{{ client.city }}, {{ client.state }} {{ client.zip }}</span>
+          </div>
+          <div class="info-row" *ngIf="client.assigned_agent"><span class="info-lbl">Agent</span><span>{{ client.assigned_agent }}</span></div>
+        </div>
+
+        <div class="info-card" *ngIf="client.client_type === 'commercial'">
+          <div class="info-card-title">Business Details</div>
+          <div class="info-row"><span class="info-lbl">Type</span><span>{{ client.business_type || '—' }}</span></div>
+          <div class="info-row" *ngIf="client.ein_last4"><span class="info-lbl">EIN (last 4)</span><span>****{{ client.ein_last4 }}</span></div>
+        </div>
+
+        <div class="info-card">
+          <div class="info-card-title">Coverage Summary</div>
+          <div class="cov-row" *ngFor="let p of policies.slice(0,4)">
+            <span class="cov-lob">{{ lobLabel(p.line_of_business) }}</span>
+            <span class="cov-carrier">{{ p.carrier_name }}</span>
+            <span class="cov-premium">{{ fmtCurrency(p.premium_amount) }}/yr</span>
+            <span class="badge badge-sm" [class.badge-green]="p.status==='active'" [class.badge-red]="p.status==='lapsed'||p.status==='cancelled'">{{ p.status }}</span>
+          </div>
+          <div class="info-total" *ngIf="policies.length > 0">Total: {{ fmtCurrency(totalPremium) }}/yr across {{ policies.length }} policies</div>
+          <div class="empty-mini" *ngIf="policies.length === 0">No policies yet</div>
+        </div>
+
+        <div class="info-card" *ngIf="gapAnalysis">
+          <div class="info-card-title">Coverage Score</div>
+          <div class="gap-mini">
+            <div class="grade-circle" [ngClass]="getGradeClass(gapAnalysis.overall_grade || gapAnalysis.grade)">{{ gapAnalysis.overall_grade || gapAnalysis.grade }}</div>
+            <div>
+              <div class="gap-score">{{ gapAnalysis.overall_score || gapAnalysis.score }}<span>/100</span></div>
+              <div class="gap-gaps" *ngIf="gapAnalysis.total_gaps > 0">{{ gapAnalysis.total_gaps }} gaps · <span class="text-red" *ngIf="gapAnalysis.critical_gaps">{{ gapAnalysis.critical_gaps }} critical</span></div>
+              <button class="btn-link" (click)="activeTab='gap'">View recommendations →</button>
+            </div>
+          </div>
+        </div>
+
+        <div class="info-card" *ngIf="lossRuns.length > 0">
+          <div class="info-card-title">Loss Run Summary</div>
+          <div *ngFor="let lr of lossRuns.slice(0,2)" class="lr-mini">
+            <span class="badge" [ngClass]="getRiskClass(lr.risk_level)">{{ lr.risk_level }}</span>
+            <span class="lr-carrier">{{ lr.carrier_name || 'Unknown' }}</span>
+            <span class="lr-ratio" [class.text-red]="lr.loss_ratio > 60">{{ lr.loss_ratio | number:'1.0-1' }}% LR</span>
+            <span class="lr-claims">{{ lr.total_claims }} claims</span>
+          </div>
+        </div>
+
+        <div class="info-card" *ngIf="client.notes">
+          <div class="info-card-title">Notes</div>
+          <p class="notes-text">{{ client.notes }}</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── POLICIES ───────────────────────────────────────────────────────── -->
+    <div *ngIf="activeTab==='policies'" class="tab-content">
+      <div *ngIf="policies.length === 0" class="empty-state">
+        <span class="empty-ico">🗂</span><h3>No policies yet</h3><p>Add policies from the Policies page</p>
+      </div>
+      <div class="policy-table" *ngIf="policies.length > 0">
+        <table>
+          <thead>
+            <tr><th>Policy #</th><th>Line</th><th>Carrier</th><th>Premium</th><th>Effective</th><th>Expiry</th><th>Days</th><th>Status</th><th>Renewal</th></tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let p of policies" [ngClass]="expiryClass(p.days_to_expiry)">
+              <td><strong>{{ p.policy_number }}</strong></td>
+              <td>{{ lobLabel(p.line_of_business) }}</td>
+              <td>{{ p.carrier_name }}</td>
+              <td>{{ fmtCurrency(p.premium_amount) }}</td>
+              <td>{{ p.effective_date | date:'MM/dd/yy' }}</td>
+              <td>{{ p.expiry_date | date:'MM/dd/yy' }}</td>
+              <td><span [ngClass]="expiryClass(p.days_to_expiry)">{{ p.days_to_expiry != null ? p.days_to_expiry + 'd' : '—' }}</span></td>
+              <td><span class="badge badge-sm" [class.badge-green]="p.status==='active'" [class.badge-red]="p.status==='lapsed'||p.status==='cancelled'" [class.badge-amber]="p.status==='renewal_due'">{{ p.status }}</span></td>
+              <td><span class="badge badge-sm badge-gray">{{ p.renewal_status }}</span></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- ── DOCUMENTS ──────────────────────────────────────────────────────── -->
+    <div *ngIf="activeTab==='documents'" class="tab-content">
+      <div *ngIf="documents.length === 0" class="empty-state">
+        <span class="empty-ico">📁</span><h3>No linked documents</h3><p>Documents linked to this client will appear here</p>
+      </div>
+      <div class="doc-grid" *ngIf="documents.length > 0">
+        <div class="doc-card" *ngFor="let d of documents">
+          <div class="doc-icon">📄</div>
+          <div class="doc-info">
+            <div class="doc-name">{{ d.filename }}</div>
+            <div class="doc-meta">
+              <span class="badge badge-sm badge-gray">{{ d.doc_type || 'unknown' }}</span>
+              <span>{{ d.created_at | date:'MM/dd/yy' }}</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── LOSS RUNS ──────────────────────────────────────────────────────── -->
+    <div *ngIf="activeTab==='loss-runs'" class="tab-content">
+      <div *ngIf="lossRuns.length === 0" class="empty-state">
+        <span class="empty-ico">📉</span><h3>No loss runs</h3><p>Upload loss runs from the Loss Runs page</p>
+      </div>
+      <div class="lr-list" *ngIf="lossRuns.length > 0">
+        <div class="lr-card" *ngFor="let lr of lossRuns">
+          <div class="lr-header"><strong>{{ lr.carrier_name || 'Unknown Carrier' }}</strong><span class="badge" [ngClass]="getRiskClass(lr.risk_level)">{{ lr.risk_level }}</span></div>
+          <div class="lr-metrics">
+            <div class="lr-metric"><span class="lrm-val" [class.text-red]="lr.loss_ratio > 60">{{ lr.loss_ratio | number:'1.0-1' }}%</span><span class="lrm-lbl">Loss Ratio</span></div>
+            <div class="lr-metric"><span class="lrm-val">{{ lr.total_claims }}</span><span class="lrm-lbl">Claims</span></div>
+            <div class="lr-metric"><span class="lrm-val">{{ fmtCurrency(lr.total_incurred) }}</span><span class="lrm-lbl">Incurred</span></div>
+            <div class="lr-metric"><span class="lrm-val">{{ fmtCurrency(lr.total_premium) }}</span><span class="lrm-lbl">Premium</span></div>
+          </div>
+          <div class="lr-flags" *ngIf="lr.risk_flags?.length"><span class="flag" *ngFor="let f of lr.risk_flags">{{ f }}</span></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── GAP ANALYSIS ───────────────────────────────────────────────────── -->
+    <div *ngIf="activeTab==='gap'" class="tab-content">
+      <div *ngIf="!gapAnalysis" class="empty-state">
+        <span class="empty-ico">🔎</span><h3>No gap analysis yet</h3>
+        <button class="empty-btn" (click)="runGapAnalysis()" [disabled]="analyzing">{{ analyzing ? 'Analyzing...' : '⚡ Run Analysis' }}</button>
+      </div>
+      <div *ngIf="gapAnalysis">
+        <div class="gap-score-row">
+          <div class="grade-circle-lg" [ngClass]="getGradeClass(gapAnalysis.overall_grade || gapAnalysis.grade)">{{ gapAnalysis.overall_grade || gapAnalysis.grade }}</div>
+          <div class="gap-score-detail">
+            <div class="gap-score-num">{{ gapAnalysis.overall_score || gapAnalysis.score }}<span>/100</span></div>
+            <div class="gap-score-lbl">Coverage Score</div>
+            <div class="gap-chips">
+              <span class="chip chip-red" *ngIf="gapAnalysis.critical_gaps > 0">{{ gapAnalysis.critical_gaps }} critical gaps</span>
+              <span class="chip chip-gray">{{ gapAnalysis.total_gaps || gapRecs.length }} total gaps</span>
+            </div>
+          </div>
+          <button class="tb-btn tb-sec" (click)="runGapAnalysis()" [disabled]="analyzing">{{ analyzing ? 'Analyzing...' : '🔄 Re-analyze' }}</button>
+        </div>
+        <div class="recs-list">
+          <div class="rec-card" *ngFor="let r of gapRecs">
+            <div class="rec-head"><span class="badge" [ngClass]="getPriorityClass(r.priority)">{{ r.priority }}</span><strong>{{ r.title }}</strong><span class="rec-cat">{{ r.category }}</span></div>
+            <p class="rec-desc">{{ r.description }}</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── COI ────────────────────────────────────────────────────────────── -->
+    <div *ngIf="activeTab==='coi'" class="tab-content">
+      <div class="tab-actions"><button class="tb-btn tb-pri" [routerLink]="['/coi']">+ Generate New COI</button></div>
+      <div *ngIf="cois.length === 0" class="empty-state">
+        <span class="empty-ico">📜</span><h3>No certificates yet</h3><p>Generate a Certificate of Insurance from the COI page</p>
+      </div>
+      <div class="coi-grid" *ngIf="cois.length > 0">
+        <div class="coi-card" *ngFor="let cert of cois">
+          <div class="coi-header"><strong>{{ cert.certificate_number }}</strong><span class="badge" [class.badge-green]="!cert.is_expired" [class.badge-red]="cert.is_expired">{{ cert.is_expired ? 'Expired' : 'Active' }}</span></div>
+          <div class="coi-meta"><span>Holder: {{ cert.holder_name }}</span><span>Valid until: {{ cert.valid_until | date:'MM/dd/yy' }}</span><span *ngIf="cert.purpose">{{ cert.purpose }}</span></div>
+          <div class="coi-date">Issued {{ cert.issued_at | date:'MMM d, y' }}</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── NOTES ──────────────────────────────────────────────────────────── -->
+    <div *ngIf="activeTab==='notes'" class="tab-content">
+
+      <!-- Add note form -->
+      <div class="note-add-card">
+        <div class="note-add-row">
+          <select class="note-type-sel" [(ngModel)]="newNote.note_type">
+            <option *ngFor="let t of NOTE_TYPES" [value]="t.value">{{ t.label }}</option>
+          </select>
+          <input class="note-title-input" [(ngModel)]="newNote.title" placeholder="Title (optional)">
+        </div>
+        <textarea class="note-body" [(ngModel)]="newNote.body" rows="3"
+                  placeholder="Write a note, log a call, record a meeting..."></textarea>
+        <div class="note-add-footer">
+          <button class="note-save-btn" (click)="saveNote()" [disabled]="addingNote || !newNote.body.trim()">
+            {{ addingNote ? 'Saving…' : '+ Add Note' }}
+          </button>
+        </div>
+      </div>
+
+      <!-- Loading -->
+      <div class="notes-loading" *ngIf="notesLoading">
+        <div class="spinner-sm"></div> Loading activity…
+      </div>
+
+      <!-- Empty -->
+      <div class="notes-empty" *ngIf="!notesLoading && notes.length === 0">
+        <span>📋</span>
+        <p>No notes yet. Log a call, meeting, or note above.</p>
+      </div>
+
+      <!-- Notes list -->
+      <div class="note-item" *ngFor="let n of notes" [class.note-auto]="n.source === 'auto'">
+        <div class="note-icon">{{ n.icon || '📋' }}</div>
+        <div class="note-content">
+          <div class="note-header">
+            <span class="note-type-badge">{{ n.note_type }}</span>
+            <span class="note-title" *ngIf="n.title">{{ n.title }}</span>
+            <span class="note-source-badge" *ngIf="n.source === 'auto'">auto</span>
+            <span class="note-date">{{ fmtDate(n.created_at) }}</span>
+            <button class="note-delete" *ngIf="n.source === 'manual'" (click)="deleteNote(n)" title="Delete">✕</button>
+          </div>
+          <div class="note-body-text" *ngIf="n.body">{{ n.body }}</div>
+          <div class="note-by" *ngIf="n.created_by">by {{ n.created_by }}</div>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- ── IMMIGRATION ────────────────────────────────────────────────────── -->
+    <div *ngIf="activeTab==='immigration'" class="tab-content">
+
+      <!-- Summary bar -->
+      <div class="imm-summary" *ngIf="immigration.length">
+        <div class="imm-sum-chip imm-expired"  *ngIf="immigrationSummary.expired  > 0">🔴 {{ immigrationSummary.expired }}  Expired</div>
+        <div class="imm-sum-chip imm-critical" *ngIf="immigrationSummary.critical > 0">🔴 {{ immigrationSummary.critical }} Critical (&lt;7d)</div>
+        <div class="imm-sum-chip imm-high"     *ngIf="immigrationSummary.high     > 0">🟠 {{ immigrationSummary.high }}     Expiring Soon</div>
+        <div class="imm-sum-chip imm-low"      *ngIf="immigrationSummary.active   > 0">🟢 {{ immigrationSummary.active }}  Active</div>
+      </div>
+
+      <!-- Action row -->
+      <div class="tab-actions">
+        <button class="tb-btn tb-pri" (click)="showAddImmigration = !showAddImmigration">
+          {{ showAddImmigration ? '✕ Cancel' : '+ Add Document' }}
+        </button>
+      </div>
+
+      <!-- Add form -->
+      <div class="imm-add-form" *ngIf="showAddImmigration">
+        <div class="imm-add-title">Add Immigration Document</div>
+        <div class="add-form-grid">
+          <div class="form-field">
+            <label>Document Type *</label>
+            <select [(ngModel)]="newImm.doc_type">
+              <option *ngFor="let t of IMM_TYPES" [value]="t.value">{{ t.label }}</option>
+            </select>
+          </div>
+          <div class="form-field">
+            <label>Custom Label</label>
+            <input [(ngModel)]="newImm.doc_label" placeholder="e.g. H-1B Approval Notice">
+          </div>
+          <div class="form-field">
+            <label>Document / Receipt Number</label>
+            <input [(ngModel)]="newImm.document_number" placeholder="e.g. EAC2412345678">
+          </div>
+          <div class="form-field">
+            <label>Visa Class / Category</label>
+            <input [(ngModel)]="newImm.visa_class" placeholder="e.g. H-1B, EB-2, F-1">
+          </div>
+          <div class="form-field">
+            <label>Beneficiary Name</label>
+            <input [(ngModel)]="newImm.beneficiary_name" placeholder="Full name of beneficiary">
+          </div>
+          <div class="form-field">
+            <label>Employer / Sponsor</label>
+            <input [(ngModel)]="newImm.employer_sponsor" placeholder="Sponsoring company">
+          </div>
+          <div class="form-field">
+            <label>Issuing Authority</label>
+            <input [(ngModel)]="newImm.issuing_authority" placeholder="e.g. USCIS, CBP, DOS">
+          </div>
+          <div class="form-field">
+            <label>Status</label>
+            <select [(ngModel)]="newImm.status">
+              <option value="active">Active</option>
+              <option value="pending">Pending</option>
+              <option value="approved">Approved</option>
+              <option value="expired">Expired</option>
+              <option value="denied">Denied</option>
+            </select>
+          </div>
+          <div class="form-field">
+            <label>Issue Date</label>
+            <input type="date" [(ngModel)]="newImm.issue_date">
+          </div>
+          <div class="form-field">
+            <label>Valid From</label>
+            <input type="date" [(ngModel)]="newImm.valid_from">
+          </div>
+          <div class="form-field">
+            <label>Valid Until (Visa Expiry) *</label>
+            <input type="date" [(ngModel)]="newImm.valid_until">
+          </div>
+          <div class="form-field">
+            <label>I-94 Authorized Stay Until</label>
+            <input type="date" [(ngModel)]="newImm.authorized_stay_until">
+          </div>
+          <div class="form-field">
+            <label>Priority Date (Green Card)</label>
+            <input type="date" [(ngModel)]="newImm.priority_date">
+          </div>
+          <div class="form-field full">
+            <label>Notes</label>
+            <textarea [(ngModel)]="newImm.notes" rows="2" placeholder="Any additional notes..."></textarea>
+          </div>
+        </div>
+        <div class="imm-add-footer">
+          <button class="tb-btn tb-pri" (click)="saveImmigration()" [disabled]="savingImmigration">
+            {{ savingImmigration ? 'Saving…' : '✓ Save Record' }}
+          </button>
+          <button class="tb-btn tb-sec" (click)="showAddImmigration = false">Cancel</button>
+        </div>
+      </div>
+
+      <!-- Loading -->
+      <div class="loading-row" *ngIf="immigrationLoading">
+        <div class="spinner-sm"></div> Loading immigration records…
+      </div>
+
+      <!-- Empty state -->
+      <div class="empty-state" *ngIf="!immigrationLoading && immigration.length === 0">
+        <div class="empty-icon">🛂</div>
+        <div class="empty-title">No immigration documents yet</div>
+        <div class="empty-sub">Upload an H-1B, I-94, EAD, passport, or any USCIS notice and it will appear here automatically — or add one manually above.</div>
+      </div>
+
+      <!-- Records -->
+      <div class="imm-cards" *ngIf="!immigrationLoading && immigration.length > 0">
+        <div class="imm-card" *ngFor="let r of immigration" [ngClass]="urgencyClass(r.urgency)">
+          <div class="imm-card-header">
+            <div class="imm-type-badge">{{ r.doc_label }}</div>
+            <div class="imm-status-pill" [ngClass]="'imm-pill-' + r.urgency">
+              {{ r.urgency_label }}
+            </div>
+            <button class="imm-del-btn" (click)="deleteImmigration(r)" title="Delete">✕</button>
+          </div>
+
+          <!-- Countdown -->
+          <div class="imm-countdown" *ngIf="r.days_to_expiry != null">
+            <ng-container *ngIf="r.days_to_expiry >= 0">
+              <span class="imm-countdown-num" [ngClass]="urgencyClass(r.urgency)">{{ r.days_to_expiry }}</span>
+              <span class="imm-countdown-lbl">days remaining</span>
+            </ng-container>
+            <ng-container *ngIf="r.days_to_expiry < 0">
+              <span class="imm-countdown-num imm-expired">{{ r.days_to_expiry * -1 }}</span>
+              <span class="imm-countdown-lbl">days overdue</span>
+            </ng-container>
+          </div>
+
+          <!-- Key fields -->
+          <div class="imm-fields">
+            <div class="imm-field" *ngIf="r.document_number">
+              <span class="imm-fl">Receipt #</span>
+              <span class="imm-fv mono">{{ r.document_number }}</span>
+            </div>
+            <div class="imm-field" *ngIf="r.visa_class">
+              <span class="imm-fl">Visa Class</span>
+              <span class="imm-fv">{{ r.visa_class }}</span>
+            </div>
+            <div class="imm-field" *ngIf="r.beneficiary_name">
+              <span class="imm-fl">Beneficiary</span>
+              <span class="imm-fv">{{ r.beneficiary_name }}</span>
+            </div>
+            <div class="imm-field" *ngIf="r.employer_sponsor">
+              <span class="imm-fl">Employer</span>
+              <span class="imm-fv">{{ r.employer_sponsor }}</span>
+            </div>
+            <div class="imm-field" *ngIf="r.issuing_authority">
+              <span class="imm-fl">Authority</span>
+              <span class="imm-fv">{{ r.issuing_authority }}</span>
+            </div>
+          </div>
+
+          <!-- Date timeline -->
+          <div class="imm-dates">
+            <div class="imm-date-item" *ngIf="r.issue_date">
+              <span class="imm-dl">Issued</span>
+              <span class="imm-dv">{{ r.issue_date | date:'MMM d, y' }}</span>
+            </div>
+            <div class="imm-date-item" *ngIf="r.valid_from">
+              <span class="imm-dl">Valid From</span>
+              <span class="imm-dv">{{ r.valid_from | date:'MMM d, y' }}</span>
+            </div>
+            <div class="imm-date-item" *ngIf="r.valid_until">
+              <span class="imm-dl">Visa Expiry</span>
+              <span class="imm-dv" [ngClass]="urgencyClass(r.urgency)"><strong>{{ r.valid_until | date:'MMM d, y' }}</strong></span>
+            </div>
+            <div class="imm-date-item" *ngIf="r.authorized_stay_until">
+              <span class="imm-dl">I-94 Until</span>
+              <span class="imm-dv" [ngClass]="urgencyClass(r.urgency)"><strong>{{ r.authorized_stay_until | date:'MMM d, y' }}</strong></span>
+            </div>
+            <div class="imm-date-item" *ngIf="r.priority_date">
+              <span class="imm-dl">Priority Date</span>
+              <span class="imm-dv">{{ r.priority_date | date:'MMM d, y' }}</span>
+            </div>
+          </div>
+
+          <div class="imm-notes" *ngIf="r.notes">📝 {{ r.notes }}</div>
+        </div>
+      </div>
+
+    </div>
+
+  </div>
+</div>
+
+<div class="loading-row" *ngIf="loading && !client">
+  <div class="spinner"></div><span>Loading...</span>
+</div>

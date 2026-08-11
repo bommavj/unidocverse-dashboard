@@ -1,0 +1,639 @@
+    <div class="ig-page">
+
+      <div class="ig-header">
+        <h1 class="ig-title">Integrations</h1>
+        <p class="ig-sub">Connect UniDocVerse with the tools your team already uses.</p>
+      </div>
+
+      <!-- Chat & Messaging -->
+      <div class="ig-section">
+        <div class="ig-sec-label">
+          <span class="ig-sec-bar"></span>
+          <div>
+            <div class="ig-sec-title">Chat &amp; Messaging</div>
+            <div class="ig-sec-desc">Receive document alerts and interact with AI directly from your chat apps.</div>
+          </div>
+        </div>
+        <div class="ig-grid">
+
+          <!-- WhatsApp -->
+          <div class="ig-card" [class.ig-card--connected]="getIntegration('whatsapp')?.connected">
+            <div class="ig-card-icon" style="background:#25D366">
+              <svg viewBox="0 0 24 24" fill="white" width="26" height="26"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg>
+            </div>
+            <div class="ig-card-body">
+              <div class="ig-card-name">WhatsApp</div>
+              <div class="ig-card-desc">Get document alerts and query your files via WhatsApp messages.</div>
+            </div>
+            <div class="ig-card-footer">
+              <span class="ig-badge ig-badge--connected" *ngIf="getIntegration('whatsapp')?.connected">● Connected</span>
+              <button class="ig-connect-btn" (click)="openModal('whatsapp')" *ngIf="!getIntegration('whatsapp')?.connected">Connect</button>
+              <button class="ig-test-btn" (click)="testIntegration('whatsapp')" *ngIf="getIntegration('whatsapp')?.connected" [disabled]="testing === 'whatsapp'">
+                {{ testing === 'whatsapp' ? 'Sending…' : 'Test' }}
+              </button>
+              <button class="ig-disconnect-btn" (click)="disconnect('whatsapp')" *ngIf="getIntegration('whatsapp')?.connected">Disconnect</button>
+            </div>
+          </div>
+
+          <!-- Telegram -->
+          <div class="ig-card" [class.ig-card--connected]="getIntegration('telegram')?.connected">
+            <div class="ig-card-icon" style="background:#229ED9">
+              <svg viewBox="0 0 24 24" fill="white" width="26" height="26"><path d="M11.944 0A12 12 0 0 0 0 12a12 12 0 0 0 12 12 12 12 0 0 0 12-12A12 12 0 0 0 12 0a12 12 0 0 0-.056 0zm4.962 7.224c.1-.002.321.023.465.14a.506.506 0 0 1 .171.325c.016.093.036.306.02.472-.18 1.898-.962 6.502-1.36 8.627-.168.9-.499 1.201-.82 1.23-.696.065-1.225-.46-1.9-.902-1.056-.693-1.653-1.124-2.678-1.8-1.185-.78-.417-1.21.258-1.91.177-.184 3.247-2.977 3.307-3.23.007-.032.014-.15-.056-.212s-.174-.041-.249-.024c-.106.024-1.793 1.14-5.061 3.345-.48.33-.913.49-1.302.48-.428-.008-1.252-.241-1.865-.44-.752-.245-1.349-.374-1.297-.789.027-.216.325-.437.893-.663 3.498-1.524 5.83-2.529 6.998-3.014 3.332-1.386 4.025-1.627 4.476-1.635z"/></svg>
+            </div>
+            <div class="ig-card-body">
+              <div class="ig-card-name">Telegram</div>
+              <div class="ig-card-desc">Interact with your documents and get AI responses in Telegram.</div>
+            </div>
+            <div class="ig-card-footer">
+              <span class="ig-badge ig-badge--connected" *ngIf="getIntegration('telegram')?.connected">● Connected</span>
+              <button class="ig-connect-btn" (click)="openModal('telegram')" *ngIf="!getIntegration('telegram')?.connected">Connect</button>
+              <button class="ig-test-btn" (click)="testIntegration('telegram')" *ngIf="getIntegration('telegram')?.connected" [disabled]="testing === 'telegram'">
+                {{ testing === 'telegram' ? 'Sending…' : 'Test' }}
+              </button>
+              <button class="ig-disconnect-btn" (click)="disconnect('telegram')" *ngIf="getIntegration('telegram')?.connected">Disconnect</button>
+            </div>
+          </div>
+
+          <!-- Discord -->
+          <div class="ig-card" [class.ig-card--connected]="getIntegration('discord')?.connected">
+            <div class="ig-card-icon" style="background:#5865F2">
+              <svg viewBox="0 0 24 24" fill="white" width="26" height="26"><path d="M20.317 4.37a19.791 19.791 0 0 0-4.885-1.515.074.074 0 0 0-.079.037c-.21.375-.444.864-.608 1.25a18.27 18.27 0 0 0-5.487 0 12.64 12.64 0 0 0-.617-1.25.077.077 0 0 0-.079-.037A19.736 19.736 0 0 0 3.677 4.37a.07.07 0 0 0-.032.027C.533 9.046-.32 13.58.099 18.057.1 18.08.112 18.1.132 18.116a19.9 19.9 0 0 0 5.993 3.03.078.078 0 0 0 .084-.028 14.09 14.09 0 0 0 1.226-1.994.076.076 0 0 0-.041-.106 13.107 13.107 0 0 1-1.872-.892.077.077 0 0 1-.008-.128 10.2 10.2 0 0 0 .372-.292.074.074 0 0 1 .077-.01c3.928 1.793 8.18 1.793 12.062 0a.074.074 0 0 1 .078.01c.12.098.246.198.373.292a.077.077 0 0 1-.006.127 12.299 12.299 0 0 1-1.873.892.077.077 0 0 0-.041.107c.36.698.772 1.362 1.225 1.993a.076.076 0 0 0 .084.028 19.839 19.839 0 0 0 6.002-3.03.077.077 0 0 0 .032-.054c.5-5.177-.838-9.674-3.549-13.66a.061.061 0 0 0-.031-.03zM8.02 15.33c-1.183 0-2.157-1.085-2.157-2.419 0-1.333.956-2.419 2.157-2.419 1.21 0 2.176 1.096 2.157 2.42 0 1.333-.956 2.418-2.157 2.418zm7.975 0c-1.183 0-2.157-1.085-2.157-2.419 0-1.333.955-2.419 2.157-2.419 1.21 0 2.176 1.096 2.157 2.42 0 1.333-.946 2.418-2.157 2.418z"/></svg>
+            </div>
+            <div class="ig-card-body">
+              <div class="ig-card-name">Discord</div>
+              <div class="ig-card-desc">Query documents and receive notifications in your Discord server.</div>
+            </div>
+            <div class="ig-card-footer">
+              <span class="ig-badge ig-badge--connected" *ngIf="getIntegration('discord')?.connected">● Connected</span>
+              <button class="ig-connect-btn" (click)="openModal('discord')" *ngIf="!getIntegration('discord')?.connected">Connect</button>
+              <button class="ig-test-btn" (click)="testIntegration('discord')" *ngIf="getIntegration('discord')?.connected" [disabled]="testing === 'discord'">
+                {{ testing === 'discord' ? 'Sending…' : 'Test' }}
+              </button>
+              <button class="ig-disconnect-btn" (click)="disconnect('discord')" *ngIf="getIntegration('discord')?.connected">Disconnect</button>
+            </div>
+          </div>
+
+          <!-- Slack -->
+          <div class="ig-card" [class.ig-card--connected]="getIntegration('slack')?.connected">
+            <div class="ig-card-icon" style="background:#4A154B">
+              <svg viewBox="0 0 24 24" fill="white" width="26" height="26"><path d="M5.042 15.165a2.528 2.528 0 0 1-2.52 2.523A2.528 2.528 0 0 1 0 15.165a2.527 2.527 0 0 1 2.522-2.52h2.52v2.52zM6.313 15.165a2.527 2.527 0 0 1 2.521-2.52 2.527 2.527 0 0 1 2.521 2.52v6.313A2.528 2.528 0 0 1 8.834 24a2.528 2.528 0 0 1-2.521-2.522v-6.313zM8.834 5.042a2.528 2.528 0 0 1-2.521-2.52A2.528 2.528 0 0 1 8.834 0a2.528 2.528 0 0 1 2.521 2.522v2.52H8.834zM8.834 6.313a2.528 2.528 0 0 1 2.521 2.521 2.528 2.528 0 0 1-2.521 2.521H2.522A2.528 2.528 0 0 1 0 8.834a2.528 2.528 0 0 1 2.522-2.521h6.312zM18.956 8.834a2.528 2.528 0 0 1 2.522-2.521A2.528 2.528 0 0 1 24 8.834a2.528 2.528 0 0 1-2.522 2.521h-2.522V8.834zM17.688 8.834a2.528 2.528 0 0 1-2.523 2.521 2.527 2.527 0 0 1-2.52-2.521V2.522A2.527 2.527 0 0 1 15.165 0a2.528 2.528 0 0 1 2.523 2.522v6.312zM15.165 18.956a2.528 2.528 0 0 1 2.523 2.522A2.528 2.528 0 0 1 15.165 24a2.527 2.527 0 0 1-2.52-2.522v-2.522h2.52zM15.165 17.688a2.527 2.527 0 0 1-2.52-2.523 2.526 2.526 0 0 1 2.52-2.52h6.313A2.527 2.527 0 0 1 24 15.165a2.528 2.528 0 0 1-2.522 2.523h-6.313z"/></svg>
+            </div>
+            <div class="ig-card-body">
+              <div class="ig-card-name">Slack</div>
+              <div class="ig-card-desc">Send document summaries and AI answers directly to Slack channels.</div>
+            </div>
+            <div class="ig-card-footer">
+              <span class="ig-badge ig-badge--connected" *ngIf="getIntegration('slack')?.connected">● Connected</span>
+              <button class="ig-connect-btn" (click)="openModal('slack')" *ngIf="!getIntegration('slack')?.connected">Connect</button>
+              <button class="ig-test-btn" (click)="testIntegration('slack')" *ngIf="getIntegration('slack')?.connected" [disabled]="testing === 'slack'">
+                {{ testing === 'slack' ? 'Sending…' : 'Test' }}
+              </button>
+              <button class="ig-disconnect-btn" (click)="disconnect('slack')" *ngIf="getIntegration('slack')?.connected">Disconnect</button>
+            </div>
+          </div>
+
+          <!-- Microsoft Teams -->
+          <div class="ig-card" [class.ig-card--connected]="getIntegration('teams')?.connected">
+            <div class="ig-card-icon" style="background:#6264A7">
+              <svg viewBox="0 0 24 24" fill="white" width="26" height="26"><path d="M20.625 5.625h-5.25a.375.375 0 0 0-.375.375v2.25a4.125 4.125 0 0 0 4.125 4.125h1.5A.375.375 0 0 0 21 12V6a.375.375 0 0 0-.375-.375zM14.25 3a2.625 2.625 0 1 1-5.25 0 2.625 2.625 0 0 1 5.25 0zm5.25 0a1.875 1.875 0 1 1-3.75 0 1.875 1.875 0 0 1 3.75 0zm-7.875 6.75H6a.375.375 0 0 0-.375.375v7.5A3.375 3.375 0 0 0 9 21h.375a3.375 3.375 0 0 0 3.375-3.375v-7.5a.375.375 0 0 0-.375-.375h-4.5z"/></svg>
+            </div>
+            <div class="ig-card-body">
+              <div class="ig-card-name">Microsoft Teams</div>
+              <div class="ig-card-desc">Collaborate on documents and get AI insights inside Teams.</div>
+            </div>
+            <div class="ig-card-footer">
+              <span class="ig-badge ig-badge--connected" *ngIf="getIntegration('teams')?.connected">● Connected</span>
+              <button class="ig-connect-btn" (click)="openModal('teams')" *ngIf="!getIntegration('teams')?.connected">Connect</button>
+              <button class="ig-test-btn" (click)="testIntegration('teams')" *ngIf="getIntegration('teams')?.connected" [disabled]="testing === 'teams'">
+                {{ testing === 'teams' ? 'Sending…' : 'Test' }}
+              </button>
+              <button class="ig-disconnect-btn" (click)="disconnect('teams')" *ngIf="getIntegration('teams')?.connected">Disconnect</button>
+            </div>
+          </div>
+
+          <!-- Watch Folders -->
+          <div class="ig-card ig-card--connected">
+            <div class="ig-card-icon" style="background:#f0fdf4; border:1.5px solid #bbf7d0">
+              <svg viewBox="0 0 24 24" width="26" height="26" fill="none" stroke="#16a34a" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/>
+                <polyline points="12 11 12 17"/><polyline points="9 14 12 17 15 14"/>
+              </svg>
+            </div>
+            <div class="ig-card-body">
+              <div class="ig-card-name">Watch Folders</div>
+              <div class="ig-card-desc">Monitor local, NFS, or any mounted path and auto-ingest documents on change.</div>
+            </div>
+            <div class="ig-card-footer">
+              <span class="ig-badge ig-badge--connected">● Active</span>
+              <a class="ig-btn" routerLink="/watch-folders">Open →</a>
+            </div>
+          </div>
+
+          <!-- Gmail -->
+          <div class="ig-card ig-card--connected">
+            <div class="ig-card-icon" style="background:#fff; border:1.5px solid #e5e7eb">
+              <svg viewBox="0 0 24 24" width="26" height="26"><path fill="#EA4335" d="M24 5.457v13.909c0 .904-.732 1.636-1.636 1.636h-3.819V11.73L12 16.64l-6.545-4.91v9.273H1.636A1.636 1.636 0 0 1 0 19.366V5.457c0-2.023 2.309-3.178 3.927-1.964L5.455 4.64 12 9.548l6.545-4.91 1.528-1.145C21.69 2.28 24 3.434 24 5.457z"/></svg>
+            </div>
+            <div class="ig-card-body">
+              <div class="ig-card-name">Gmail</div>
+              <div class="ig-card-desc">Sync emails and attachments directly into your document library.</div>
+            </div>
+            <div class="ig-card-footer">
+              <span class="ig-badge ig-badge--connected">● Connected</span>
+              <a class="ig-btn" routerLink="/gmail">Open →</a>
+            </div>
+          </div>
+
+          <!-- Code Scanner -->
+          <div class="ig-card ig-card--connected">
+            <div class="ig-card-icon" style="background: linear-gradient(135deg,#4f46e5,#7c3aed)">
+              <svg viewBox="0 0 24 24" fill="white" width="26" height="26">
+                <path d="M2 4a2 2 0 0 1 2-2h4v2H4v4H2V4zm16-2h4a2 2 0 0 1 2 2v4h-2V4h-4V2zM2 16v4a2 2 0 0 0 2 2h4v-2H4v-4H2zm18 4v-4h2v4a2 2 0 0 1-2 2h-4v-2h4zM7 7h2v2H7V7zm2 4H7v2h2v-2zm4-4h2v2h-2V7zm2 4h-2v2h2v-2zm-4 4h2v2h-2v-2zm2 0v2h2v-2h-2zM7 15h2v2H7v-2zm8-8h2v8h-2V7z"/>
+              </svg>
+            </div>
+            <div class="ig-card-body">
+              <div class="ig-card-name">Code Scanner</div>
+              <div class="ig-card-desc">Scan QR codes and barcodes live from your camera or upload an image. Detects URLs, emails, phone numbers, Wi-Fi &amp; more.</div>
+            </div>
+            <div class="ig-card-footer">
+              <span class="ig-badge ig-badge--connected">● Active</span>
+              <a class="ig-btn" routerLink="/code-scanner">Open →</a>
+            </div>
+          </div>
+
+        </div>
+      </div>
+
+      <!-- AI Models -->
+      <div class="ig-section">
+        <div class="ig-sec-label">
+          <span class="ig-sec-bar" style="background: linear-gradient(180deg, #10b981, #059669)"></span>
+          <div>
+            <div class="ig-sec-title">BYOM (Bring Your Own Model)</div>
+            <div class="ig-sec-desc">Switch the active model used for document analysis and chat. Currently using <strong>{{ currentModel || '…' }}</strong>.</div>
+          </div>
+        </div>
+
+        <div class="ig-model-grid">
+          <div *ngIf="loadingModels" class="ig-model-loading">Loading installed models…</div>
+          <button
+            *ngFor="let m of models"
+            class="ig-model-card"
+            [class.active]="m === currentModel"
+            (click)="switchModel(m)"
+            [disabled]="switchingModel">
+            <div class="ig-model-icon">🤖</div>
+            <div class="ig-model-name">{{ m }}</div>
+            <div class="ig-model-status" *ngIf="m === currentModel">● Active</div>
+            <div class="ig-model-status ig-model-status--idle" *ngIf="m !== currentModel">Switch</div>
+          </button>
+        </div>
+
+      </div>
+
+      <!-- MCP Clients -->
+      <div class="ig-section">
+        <div class="ig-sec-label">
+          <span class="ig-sec-bar" style="background: linear-gradient(180deg, #7c3aed, #a78bfa)"></span>
+          <div>
+            <div class="ig-sec-title">MCP Clients</div>
+            <div class="ig-sec-desc">
+              Connect AI assistants to UniDocVerse via Model Context Protocol.
+              Clients read intent, call UniDocVerse tools, and route decisions through the Agent Queue.
+            </div>
+          </div>
+        </div>
+
+        <!-- Server status bar -->
+        <div class="ig-mcp-bar">
+          <div class="ig-mcp-dot" [class.ig-mcp-dot--on]="mcpServerOnline"></div>
+          <span class="ig-mcp-url">MCP Server&nbsp;·&nbsp;<code>http://localhost:8000/mcp/sse</code></span>
+          <button class="ig-mcp-copy" (click)="copyMcpUrl()">{{ mcpCopied ? '✓ Copied' : '📋 Copy' }}</button>
+          <div class="ig-mcp-hitl">
+            <label class="ig-toggle-label">
+              <input type="checkbox" [(ngModel)]="mcpHitl" (change)="saveMcpSettings()">
+              <span class="ig-toggle-track" [class.on]="mcpHitl"></span>
+            </label>
+            <span>HITL Approval Queue {{ mcpHitl ? '— ON' : '— OFF' }}</span>
+            <span class="ig-mcp-hitl-hint">When ON, write actions pause for human review</span>
+          </div>
+        </div>
+
+        <!-- Client cards -->
+        <div class="ig-grid">
+
+          <ng-container *ngFor="let c of mcpClientDefs"
+            [ngTemplateOutlet]="mcpClientCard"
+            [ngTemplateOutletContext]="{ id: c.id, label: c.label, desc: c.desc, iconBg: c.iconBg, iconSvg: c.iconSvg }">
+          </ng-container>
+
+          <!-- Shared template for MCP client cards -->
+          <ng-template #mcpClientCard let-id="id" let-label="label" let-desc="desc" let-iconBg="iconBg" let-iconSvg="iconSvg">
+            <div class="ig-card" [class.ig-card--connected]="mcpClients[id] && mcpConnectResult[id] !== 'err'">
+              <div class="ig-card-icon" [style.background]="iconBg">
+                <svg viewBox="0 0 24 24" fill="white" width="26" height="26" [innerHTML]="iconSvg"></svg>
+              </div>
+              <div class="ig-card-body">
+                <div class="ig-card-name">{{ label }}</div>
+                <div class="ig-card-desc">{{ desc }}</div>
+              </div>
+
+              <!-- Connecting spinner -->
+              <div class="ig-mcp-connecting" *ngIf="mcpConnecting[id]">
+                <div class="ig-mcp-spinner"></div>
+                <span>Configuring &amp; restarting…</span>
+              </div>
+
+              <!-- Inline result badge -->
+              <div class="ig-mcp-result ig-mcp-result--ok" *ngIf="!mcpConnecting[id] && mcpConnectResult[id] === 'ok'">
+                ✅ Connected — {{ label }} restarted
+              </div>
+              <div class="ig-mcp-result ig-mcp-result--ok" *ngIf="!mcpConnecting[id] && mcpConnectResult[id] === 'already'">
+                ✅ Already configured &amp; active
+              </div>
+              <div class="ig-mcp-result ig-mcp-result--warn" *ngIf="!mcpConnecting[id] && mcpConnectResult[id] === 'manual'">
+                ⚠ Config written — restart {{ label }} manually
+                <button class="ig-mcp-copy ig-mcp-copy--sm" style="margin-left:8px" (click)="copySnippet(id)">
+                  {{ snippetCopied === id ? '✓ Copied' : '📋 Copy config' }}
+                </button>
+              </div>
+              <div class="ig-mcp-result ig-mcp-result--err" *ngIf="!mcpConnecting[id] && mcpConnectResult[id] === 'err'">
+                ❌ Failed — copy config manually
+                <button class="ig-mcp-copy ig-mcp-copy--sm" style="margin-left:8px" (click)="copySnippet(id)">📋 Copy</button>
+              </div>
+
+              <div class="ig-card-footer">
+                <span class="ig-badge ig-badge--connected" *ngIf="mcpClients[id] && !mcpConnecting[id]">● Enabled</span>
+                <button class="ig-connect-btn" *ngIf="!mcpClients[id] && !mcpConnecting[id]"
+                        (click)="enableMcpClient(id)">Enable</button>
+                <button class="ig-connect-btn ig-connect-btn--loading" *ngIf="mcpConnecting[id]" disabled>
+                  <span class="ig-btn-spinner"></span> Connecting…
+                </button>
+                <button class="ig-mcp-copy ig-mcp-copy--sm" *ngIf="mcpClients[id] && !mcpConnecting[id]"
+                        (click)="copySnippet(id)">{{ snippetCopied === id ? '✓' : '📋' }} Config</button>
+                <button class="ig-disconnect-btn" *ngIf="mcpClients[id] && !mcpConnecting[id]"
+                        (click)="disableMcpClient(id)">Disable</button>
+              </div>
+            </div>
+          </ng-template>
+
+          <!-- Generic / Custom -->
+          <div class="ig-card">
+            <div class="ig-card-icon" style="background:#334155">
+              <svg viewBox="0 0 24 24" fill="white" width="26" height="26"><path d="M12 2a10 10 0 1 0 0 20A10 10 0 0 0 12 2zm0 2a8 8 0 1 1 0 16A8 8 0 0 1 12 4zm-1 4v4H7l5 5 5-5h-4V8h-2z"/></svg>
+            </div>
+            <div class="ig-card-body">
+              <div class="ig-card-name">Any MCP Client</div>
+              <div class="ig-card-desc">Any client supporting MCP SSE transport can connect to <code>http://localhost:8000/mcp/sse</code>.</div>
+            </div>
+            <div class="ig-card-footer">
+              <button class="ig-mcp-copy ig-mcp-copy--sm" (click)="copyMcpUrl()">{{ mcpCopied ? '✓ Copied' : '📋 Copy SSE URL' }}</button>
+            </div>
+          </div>
+
+        </div>
+
+        <!-- HITL explanation -->
+        <div class="ig-mcp-flow" *ngIf="mcpHitl">
+          <div class="ig-mcp-flow-step">
+            <div class="ig-mcp-flow-icon">💬</div>
+            <div class="ig-mcp-flow-label">Client sends prompt</div>
+          </div>
+          <div class="ig-mcp-flow-arrow">→</div>
+          <div class="ig-mcp-flow-step">
+            <div class="ig-mcp-flow-icon">🔍</div>
+            <div class="ig-mcp-flow-label">Intent extracted by LLM</div>
+          </div>
+          <div class="ig-mcp-flow-arrow">→</div>
+          <div class="ig-mcp-flow-step">
+            <div class="ig-mcp-flow-icon">🧠</div>
+            <div class="ig-mcp-flow-label">Reasoning via tools</div>
+          </div>
+          <div class="ig-mcp-flow-arrow">→</div>
+          <div class="ig-mcp-flow-step ig-mcp-flow-step--highlight">
+            <div class="ig-mcp-flow-icon">⏸</div>
+            <div class="ig-mcp-flow-label">HITL — Agent Queue</div>
+          </div>
+          <div class="ig-mcp-flow-arrow">→</div>
+          <div class="ig-mcp-flow-step">
+            <div class="ig-mcp-flow-icon">✅</div>
+            <div class="ig-mcp-flow-label">Human approves &amp; executes</div>
+          </div>
+        </div>
+
+      </div>
+
+    </div>
+
+    <!-- ── MCP ACTIVATION MODAL ── -->
+    <div class="ig-modal-overlay" *ngIf="mcpActivation" (click)="closeMcpActivation()">
+      <div class="ig-modal ig-mcp-act-modal" (click)="$event.stopPropagation()">
+
+        <div class="ig-modal-header">
+          <div class="ig-modal-title">
+            <span class="ig-mcp-act-icon">{{ mcpActivation!.icon }}</span>
+            {{ mcpActivation!.autoConfigured ? '✅ Auto-configured' : '📋 Manual setup required' }} — {{ mcpActivation!.label }}
+          </div>
+          <button class="ig-modal-close" (click)="closeMcpActivation()">✕</button>
+        </div>
+
+        <div class="ig-modal-body ig-mcp-act-body">
+
+          <!-- Status banner -->
+          <div class="ig-mcp-act-banner ig-mcp-act-banner--ok" *ngIf="mcpActivation!.autoConfigured">
+            <strong>✅ Config written</strong> — <code>{{ mcpActivation!.configPath }}</code>
+          </div>
+          <div class="ig-mcp-act-banner ig-mcp-act-banner--warn" *ngIf="!mcpActivation!.autoConfigured">
+            <strong>📋 Manual step needed</strong> — paste the snippet below into <code>{{ mcpActivation!.configPath }}</code>
+          </div>
+
+          <!-- JSON snippet (always shown for reference / copy) -->
+          <div class="ig-mcp-act-block">
+            <div class="ig-mcp-act-block-label">Config snippet</div>
+            <div class="ig-mcp-act-code-wrap">
+              <pre class="ig-mcp-act-pre">{{ mcpActivation!.snippet }}</pre>
+              <button class="ig-mcp-act-copy" (click)="copyActivationSnippet()">
+                {{ activationCopied ? '✓ Copied' : '📋 Copy' }}
+              </button>
+            </div>
+          </div>
+
+          <!-- What to do next -->
+          <div class="ig-mcp-act-section-label">What to do next</div>
+          <div class="ig-mcp-act-steps">
+            <div class="ig-mcp-act-step" *ngFor="let step of mcpActivation!.steps; let i = index">
+              <div class="ig-mcp-act-step-num">{{ i + 1 }}</div>
+              <div class="ig-mcp-act-step-body">
+                <div class="ig-mcp-act-step-title">{{ step.title }}</div>
+                <div class="ig-mcp-act-step-desc" [innerHTML]="step.desc"></div>
+                <div class="ig-mcp-act-code-wrap ig-mcp-act-code-wrap--sm" *ngIf="step.cmd">
+                  <pre class="ig-mcp-act-pre ig-mcp-act-pre--sm">{{ step.cmd }}</pre>
+                  <button class="ig-mcp-act-copy ig-mcp-act-copy--sm" (click)="copyCmd(step.cmd!)">
+                    {{ copiedCmd === step.cmd ? '✓' : '📋' }}
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Test MCP server from Terminal -->
+          <div class="ig-mcp-act-section-label">Test the MCP server from Terminal</div>
+          <div class="ig-mcp-act-block ig-mcp-act-block--test">
+
+            <div class="ig-mcp-act-test-row">
+              <span class="ig-mcp-act-test-label">1 · Quick health check (SSE stream)</span>
+              <div class="ig-mcp-act-code-wrap">
+                <pre class="ig-mcp-act-pre ig-mcp-act-pre--sm">{{ curlSseCmd }}</pre>
+                <button class="ig-mcp-act-copy ig-mcp-act-copy--sm" (click)="copyCmd(curlSseCmd)">
+                  {{ copiedCmd === curlSseCmd ? '✓' : '📋' }}
+                </button>
+              </div>
+              <span class="ig-mcp-act-hint">You should see <code>data: &#123;"type":"endpoint",...&#125;</code> — that means the server is live.</span>
+            </div>
+
+            <div class="ig-mcp-act-test-row">
+              <span class="ig-mcp-act-test-label">2 · Browse all 67 tools (MCP Inspector UI)</span>
+              <div class="ig-mcp-act-code-wrap">
+                <pre class="ig-mcp-act-pre ig-mcp-act-pre--sm">{{ mcpInspectorCmd }}</pre>
+                <button class="ig-mcp-act-copy ig-mcp-act-copy--sm" (click)="copyCmd(mcpInspectorCmd)">
+                  {{ copiedCmd === mcpInspectorCmd ? '✓' : '📋' }}
+                </button>
+              </div>
+              <span class="ig-mcp-act-hint">Opens a browser UI — click <strong>Tools → List</strong> to see every tool name, schema, and run a live call.</span>
+            </div>
+
+            <div class="ig-mcp-act-test-row">
+              <span class="ig-mcp-act-test-label">3 · Raw <code>tools/list</code> via curl (2-terminal flow)</span>
+              <div class="ig-mcp-act-code-wrap">
+                <pre class="ig-mcp-act-pre ig-mcp-act-pre--sm">{{ toolsListCmd }}</pre>
+                <button class="ig-mcp-act-copy ig-mcp-act-copy--sm" (click)="copyCmd(toolsListCmd)">
+                  {{ copiedCmd === toolsListCmd ? '✓' : '📋' }}
+                </button>
+              </div>
+            </div>
+
+          </div>
+
+          <!-- Try it inside the client -->
+          <div class="ig-mcp-act-try-box">
+            <div class="ig-mcp-act-try-label">Try this prompt inside {{ mcpActivation!.label }}</div>
+            <div class="ig-mcp-act-code-wrap">
+              <pre class="ig-mcp-act-pre ig-mcp-act-pre--sm">{{ mcpActivation!.verifyPrompt }}</pre>
+              <button class="ig-mcp-act-copy ig-mcp-act-copy--sm" (click)="copyCmd(mcpActivation!.verifyPrompt || '')">
+                {{ copiedCmd === mcpActivation!.verifyPrompt ? '✓' : '📋' }}
+              </button>
+            </div>
+            <span class="ig-mcp-act-hint">Paste this into the chat after restarting — you should get a live response from UniDocVerse.</span>
+          </div>
+
+        </div>
+
+        <div class="ig-modal-footer">
+          <button class="ig-btn-cancel" (click)="closeMcpActivation()">Done</button>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- ── CONNECT MODAL ── -->
+    <div class="ig-modal-overlay" *ngIf="activeModal" (click)="closeModal()">
+      <div class="ig-modal" (click)="$event.stopPropagation()">
+        <div class="ig-modal-header">
+          <div class="ig-modal-title">Connect {{ getLabel(activeModal) }}</div>
+          <button class="ig-modal-close" (click)="closeModal()">✕</button>
+        </div>
+
+        <!-- Tabs (WhatsApp gets Scan / Manual; others just Manual) -->
+        <div class="ig-modal-tabs" *ngIf="activeModal === 'whatsapp'">
+          <button class="ig-tab" [class.ig-tab--active]="modalTab === 'scan'" (click)="setTab('scan')">
+            📷 Scan QR Code
+          </button>
+          <button class="ig-tab" [class.ig-tab--active]="modalTab === 'manual'" (click)="setTab('manual')">
+            ✏️ Manual / Twilio
+          </button>
+        </div>
+
+        <div class="ig-modal-body">
+
+          <!-- ── SCAN TAB (WhatsApp Web QR) ── -->
+          <ng-container *ngIf="activeModal === 'whatsapp' && modalTab === 'scan'">
+
+            <!-- Instructions -->
+            <div class="ig-scan-hint">
+              Open <strong>WhatsApp</strong> on your phone →
+              tap <strong>⋮ Menu</strong> (or Settings) →
+              <strong>Linked Devices</strong> → <strong>Link a Device</strong> →
+              then scan the QR code below. No Twilio account needed.
+            </div>
+
+            <!-- QR code display area -->
+            <div class="ig-wa-qr-box">
+
+              <!-- Loading state -->
+              <div class="ig-wa-qr-loading" *ngIf="waState === 'idle' || waState === 'starting'">
+                <div class="ig-wa-spinner"></div>
+                <div class="ig-wa-status-text">{{ waState === 'starting' ? 'Starting WhatsApp service…' : 'Tap "Generate QR Code" to begin' }}</div>
+              </div>
+
+              <!-- QR code image -->
+              <div class="ig-wa-qr-img-wrap" *ngIf="waState === 'qr' && waQR">
+                <img [src]="waQR" alt="WhatsApp QR Code" class="ig-wa-qr-img">
+                <div class="ig-wa-qr-expire">QR refreshes automatically · {{ waCountdown }}s</div>
+              </div>
+
+              <!-- Authenticated -->
+              <div class="ig-wa-success" *ngIf="waState === 'authenticated'">
+                <div class="ig-wa-success-icon">✓</div>
+                <div class="ig-wa-success-title">WhatsApp Connected!</div>
+                <div class="ig-wa-success-sub">Your phone is now linked. You can send and receive alerts.</div>
+              </div>
+
+              <!-- Disconnected / error -->
+              <div class="ig-wa-error" *ngIf="waState === 'disconnected'">
+                <div style="font-size:36px">⚠</div>
+                <div>Session disconnected. Generate a new QR code to reconnect.</div>
+              </div>
+            </div>
+
+            <!-- Controls -->
+            <div class="ig-scan-controls">
+              <button class="ig-scan-start-btn" (click)="startWaSession()"
+                      *ngIf="waState === 'idle' || waState === 'disconnected'">
+                📱 Generate QR Code
+              </button>
+              <!-- Starting spinner button (shown while Node service boots) -->
+              <button class="ig-scan-start-btn" *ngIf="waState === 'starting'" disabled>
+                ⏳ Starting…
+              </button>
+              <button class="ig-scan-stop-btn" (click)="logoutWa()"
+                      *ngIf="waState === 'authenticated'">
+                🔌 Disconnect
+              </button>
+              <button class="ig-scan-upload-btn" (click)="startWaSession()"
+                      *ngIf="waState === 'qr'">
+                🔄 Refresh QR
+              </button>
+            </div>
+
+            <div class="ig-scan-error" *ngIf="waError">⚠ {{ waError }}</div>
+          </ng-container>
+
+          <!-- ── MANUAL TAB / All other providers ── -->
+          <ng-container *ngIf="modalTab === 'manual' || activeModal !== 'whatsapp'">
+
+            <!-- Scan QR strip for non-WhatsApp providers -->
+            <div class="ig-qr-strip" *ngIf="activeModal !== 'whatsapp'">
+              <span class="ig-qr-strip-text">Have a QR code with credentials?</span>
+              <button class="ig-qr-strip-btn" (click)="toggleInlineScanner()">
+                {{ inlineScanOpen ? '✕ Close Scanner' : '📷 Scan QR Code' }}
+              </button>
+            </div>
+
+            <!-- Inline mini-scanner for non-WhatsApp -->
+            <div *ngIf="inlineScanOpen && activeModal !== 'whatsapp'" class="ig-mini-scan">
+              <div class="ig-scan-view ig-scan-view--mini" [class.ig-scan-view--active]="scanStreaming">
+                <video #modalVideo autoplay playsinline muted
+                       [style.display]="scanStreaming ? 'block' : 'none'"
+                       style="width:100%;height:100%;object-fit:cover;border-radius:10px;"></video>
+                <canvas #modalCanvas style="display:none;"></canvas>
+                <div class="ig-scan-frame" *ngIf="scanStreaming">
+                  <div class="ig-scan-corner ig-scan-corner--tl"></div>
+                  <div class="ig-scan-corner ig-scan-corner--tr"></div>
+                  <div class="ig-scan-corner ig-scan-corner--bl"></div>
+                  <div class="ig-scan-corner ig-scan-corner--br"></div>
+                  <div class="ig-scan-line"></div>
+                </div>
+                <div class="ig-scan-placeholder" *ngIf="!scanStreaming">
+                  <div style="font-size:32px">📷</div>
+                </div>
+              </div>
+              <div class="ig-mini-scan-controls">
+                <button class="ig-scan-start-btn" (click)="startModalScan()" *ngIf="!scanStreaming">▶ Start</button>
+                <button class="ig-scan-stop-btn" (click)="stopModalScan()" *ngIf="scanStreaming">⏹ Stop</button>
+                <button class="ig-scan-upload-btn" (click)="modalFileInput2.click()">📁 Upload</button>
+              </div>
+              <input #modalFileInput2 type="file" accept="image/*" style="display:none" (change)="onModalFileSelected($event)">
+              <div class="ig-scan-result ig-scan-result--mini" *ngIf="scannedValue">
+                <strong>Scanned:</strong> {{ scannedValue }}
+                <button class="ig-scan-use-btn ig-scan-use-btn--sm" (click)="useScannedValue()">Use →</button>
+              </div>
+            </div>
+
+            <!-- Instructions -->
+            <div class="ig-modal-hint" *ngIf="activeModal === 'telegram'">
+              <strong>How to get your credentials:</strong><br>
+              1. Open Telegram → search <code>&#64;BotFather</code><br>
+              2. Send <code>/newbot</code> and follow prompts → copy the <strong>Bot Token</strong><br>
+              3. Start a chat with your bot, then visit:<br>
+              <code>https://api.telegram.org/bot&lt;TOKEN&gt;/getUpdates</code><br>
+              to find your <strong>Chat ID</strong> (the "id" field under "chat").
+            </div>
+            <div class="ig-modal-hint" *ngIf="activeModal === 'discord'">
+              <strong>How to get a webhook:</strong><br>
+              1. Open Discord → Server Settings → Integrations → Webhooks<br>
+              2. Click <strong>New Webhook</strong>, pick a channel, copy the URL.
+            </div>
+            <div class="ig-modal-hint" *ngIf="activeModal === 'slack'">
+              <strong>How to get a webhook:</strong><br>
+              1. Go to <code>api.slack.com/apps</code> → Your App → Incoming Webhooks<br>
+              2. Toggle ON → Add New Webhook to Workspace → copy the URL.
+            </div>
+            <div class="ig-modal-hint" *ngIf="activeModal === 'teams'">
+              <strong>How to get a webhook:</strong><br>
+              1. In Teams, go to the channel → ··· → Connectors<br>
+              2. Add <strong>Incoming Webhook</strong> → configure → copy the URL.
+            </div>
+            <div class="ig-modal-hint" *ngIf="activeModal === 'whatsapp'">
+              <strong>Requires a Twilio account:</strong><br>
+              1. Sign up at <code>twilio.com</code> → get Account SID &amp; Auth Token<br>
+              2. Enable the <strong>WhatsApp Sandbox</strong> in Twilio Console<br>
+              3. Your From number: <code>whatsapp:+1XXX-XXX-XXXX</code> (sandbox) or your own number.
+            </div>
+
+            <!-- Telegram fields -->
+            <ng-container *ngIf="activeModal === 'telegram'">
+              <label class="ig-field-label">Bot Token <span class="req">*</span></label>
+              <input class="ig-field-input" type="password" placeholder="1234567890:ABCDEFGHijk..." [(ngModel)]="form['bot_token']">
+              <label class="ig-field-label">Chat ID <span class="req">*</span></label>
+              <input class="ig-field-input" placeholder="-1001234567890" [(ngModel)]="form['chat_id']">
+            </ng-container>
+
+            <!-- Discord / Slack / Teams -->
+            <ng-container *ngIf="activeModal === 'discord' || activeModal === 'slack' || activeModal === 'teams'">
+              <label class="ig-field-label">Webhook URL <span class="req">*</span></label>
+              <input class="ig-field-input" type="url" placeholder="https://hooks.slack.com/services/..." [(ngModel)]="form['webhook_url']">
+            </ng-container>
+
+            <!-- WhatsApp / Twilio -->
+            <ng-container *ngIf="activeModal === 'whatsapp'">
+              <label class="ig-field-label">Account SID <span class="req">*</span></label>
+              <input class="ig-field-input" placeholder="ACxxxxxxxxxxxxxxxx" [(ngModel)]="form['account_sid']">
+              <label class="ig-field-label">Auth Token <span class="req">*</span></label>
+              <input class="ig-field-input" type="password" placeholder="your auth token" [(ngModel)]="form['auth_token']">
+              <label class="ig-field-label">From Number <span class="req">*</span></label>
+              <input class="ig-field-input" placeholder="whatsapp:+14155238886" [(ngModel)]="form['from_number']">
+              <label class="ig-field-label">Your WhatsApp Number <span class="req">*</span></label>
+              <input class="ig-field-input" placeholder="whatsapp:+1XXXXXXXXXX" [(ngModel)]="form['phone_number']">
+            </ng-container>
+
+          </ng-container>
+
+          <div class="ig-modal-err" *ngIf="modalError">{{ modalError }}</div>
+        </div>
+
+        <div class="ig-modal-footer">
+          <button class="ig-btn-cancel" (click)="closeModal()">
+            {{ (activeModal === 'whatsapp' && modalTab === 'scan' && waState === 'authenticated') ? 'Done ✓' : 'Cancel' }}
+          </button>
+          <button class="ig-btn-save" (click)="saveIntegration()"
+                  *ngIf="!(activeModal === 'whatsapp' && modalTab === 'scan')"
+                  [disabled]="saving">
+            {{ saving ? 'Connecting…' : 'Save & Connect' }}
+          </button>
+        </div>
+      </div>
+    </div>
+
+
+    <!-- Toast -->
+    <div class="ig-toast" *ngIf="toast" [class.ig-toast--err]="toastErr">{{ toast }}</div>

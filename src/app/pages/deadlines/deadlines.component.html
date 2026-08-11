@@ -1,0 +1,140 @@
+<div class="dl-page">
+
+  <!-- Header -->
+  <div class="dl-header">
+    <div>
+      <h1 class="dl-title">Deadline Board</h1>
+      <p class="dl-sub">All upcoming and overdue dates across your documents</p>
+    </div>
+  </div>
+
+  <!-- Summary chips -->
+  <div class="dl-chips">
+    <button class="dl-chip" [class.active]="activeFilter==='all'" (click)="setFilter('all')">
+      All <span class="chip-n">{{ all.length }}</span>
+    </button>
+    <button class="dl-chip expired" [class.active]="activeFilter==='expired'" (click)="setFilter('expired')">
+      <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/></svg>
+      Expired <span class="chip-n">{{ countOf('expired') }}</span>
+    </button>
+    <button class="dl-chip critical" [class.active]="activeFilter==='critical'" (click)="setFilter('critical')">
+      <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+      Critical (≤7d) <span class="chip-n">{{ countOf('critical') }}</span>
+    </button>
+    <button class="dl-chip urgent" [class.active]="activeFilter==='urgent'" (click)="setFilter('urgent')">
+      <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+      Urgent (≤30d) <span class="chip-n">{{ countOf('urgent') }}</span>
+    </button>
+    <button class="dl-chip soon" [class.active]="activeFilter==='soon'" (click)="setFilter('soon')">
+      <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+      Soon (≤90d) <span class="chip-n">{{ countOf('soon') }}</span>
+    </button>
+  </div>
+
+  <!-- Loading -->
+  <div class="dl-loading" *ngIf="loading">
+    <div class="dl-spinner"></div>
+    <span>Scanning documents for deadlines…</span>
+  </div>
+
+  <!-- Empty -->
+  <div class="dl-empty" *ngIf="!loading && filtered.length === 0">
+    <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+    <p>No deadlines found for this filter</p>
+  </div>
+
+  <!-- Board columns -->
+  <div class="dl-board" *ngIf="!loading && all.length > 0">
+
+    <!-- Expired -->
+    <div class="dl-col" *ngIf="activeFilter === 'all' || activeFilter === 'expired'">
+      <div class="dl-col-header expired">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/></svg>
+        Expired
+        <span class="col-count">{{ countOf('expired') }}</span>
+      </div>
+      <div class="dl-cards">
+        <div class="dl-card expired" *ngFor="let d of all | slice:0:50" [hidden]="d.urgency !== 'expired'" (click)="openDoc(d)">
+          <div class="dl-card-top">
+            <span class="dl-type-badge">{{ d.doc_type || 'doc' }}</span>
+            <span class="dl-days expired">{{ Math.abs(d.daysLeft) }}d ago</span>
+          </div>
+          <div class="dl-fname">{{ d.filename }}</div>
+          <div class="dl-field-row">
+            <span class="dl-field-label">{{ d.label }}</span>
+            <span class="dl-field-val">{{ d.date | date:'mediumDate' }}</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Critical -->
+    <div class="dl-col" *ngIf="activeFilter === 'all' || activeFilter === 'critical'">
+      <div class="dl-col-header critical">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/></svg>
+        Critical — ≤7 days
+        <span class="col-count">{{ countOf('critical') }}</span>
+      </div>
+      <div class="dl-cards">
+        <div class="dl-card critical" *ngFor="let d of all" [hidden]="d.urgency !== 'critical'" (click)="openDoc(d)">
+          <div class="dl-card-top">
+            <span class="dl-type-badge">{{ d.doc_type || 'doc' }}</span>
+            <span class="dl-days critical">{{ d.daysLeft }}d left</span>
+          </div>
+          <div class="dl-fname">{{ d.filename }}</div>
+          <div class="dl-field-row">
+            <span class="dl-field-label">{{ d.label }}</span>
+            <span class="dl-field-val">{{ d.date | date:'mediumDate' }}</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Urgent -->
+    <div class="dl-col" *ngIf="activeFilter === 'all' || activeFilter === 'urgent'">
+      <div class="dl-col-header urgent">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+        Urgent — ≤30 days
+        <span class="col-count">{{ countOf('urgent') }}</span>
+      </div>
+      <div class="dl-cards">
+        <div class="dl-card urgent" *ngFor="let d of all" [hidden]="d.urgency !== 'urgent'" (click)="openDoc(d)">
+          <div class="dl-card-top">
+            <span class="dl-type-badge">{{ d.doc_type || 'doc' }}</span>
+            <span class="dl-days urgent">{{ d.daysLeft }}d left</span>
+          </div>
+          <div class="dl-fname">{{ d.filename }}</div>
+          <div class="dl-field-row">
+            <span class="dl-field-label">{{ d.label }}</span>
+            <span class="dl-field-val">{{ d.date | date:'mediumDate' }}</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Soon -->
+    <div class="dl-col" *ngIf="activeFilter === 'all' || activeFilter === 'soon'">
+      <div class="dl-col-header soon">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+        Soon — ≤90 days
+        <span class="col-count">{{ countOf('soon') }}</span>
+      </div>
+      <div class="dl-cards">
+        <div class="dl-card soon" *ngFor="let d of all" [hidden]="d.urgency !== 'soon'" (click)="openDoc(d)">
+          <div class="dl-card-top">
+            <span class="dl-type-badge">{{ d.doc_type || 'doc' }}</span>
+            <span class="dl-days soon">{{ d.daysLeft }}d left</span>
+          </div>
+          <div class="dl-fname">{{ d.filename }}</div>
+          <div class="dl-field-row">
+            <span class="dl-field-label">{{ d.label }}</span>
+            <span class="dl-field-val">{{ d.date | date:'mediumDate' }}</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<app-doc-sheet [doc]="selectedDoc" (closed)="selectedDoc=null" />

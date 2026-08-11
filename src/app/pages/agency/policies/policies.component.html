@@ -1,0 +1,427 @@
+<!-- policies.component.html -->
+<div class="page"
+     [class.panel-open]="selectedPolicy"
+     [class.ai-open]="aiOpen">
+
+  <!-- Topbar -->
+  <div class="topbar">
+    <div>
+      <div class="topbar-title">Policy Register</div>
+      <div class="topbar-sub">{{ filtered.length }} policies · ${{ totalPremium | number:'1.0-0' }} total premium</div>
+    </div>
+    <div class="tb-sp"></div>
+
+    <div class="tb-search">
+      <span style="color:#94a3b8;font-size:14px">🔍</span>
+      <input [(ngModel)]="searchQ" (ngModelChange)="applyFilter()"
+             placeholder="Search policy #, client, carrier…">
+      <button class="tb-clear" *ngIf="searchQ" (click)="searchQ=''; applyFilter()">✕</button>
+    </div>
+
+    <select class="tb-select" [(ngModel)]="filterLob" (ngModelChange)="applyFilter()">
+      <option value="">All Lines</option>
+      <option *ngFor="let l of LINES" [value]="l.id">{{ l.label }}</option>
+    </select>
+
+    <select class="tb-select" [(ngModel)]="filterStatus" (ngModelChange)="applyFilter()">
+      <option value="">All Status</option>
+      <option value="active">Active</option>
+      <option value="renewal_due">Renewal Due</option>
+      <option value="cancelled">Cancelled</option>
+    </select>
+
+    <select class="tb-select" [(ngModel)]="sortBy" (ngModelChange)="applyFilter()">
+      <option value="expiry">Sort: Expiry</option>
+      <option value="premium">Sort: Premium</option>
+      <option value="client">Sort: Client</option>
+    </select>
+
+    <button class="tb-btn tb-pri" (click)="showAddForm = !showAddForm">
+      {{ showAddForm ? '✕ Cancel' : '+ Add Policy' }}
+    </button>
+    <button class="tb-btn tb-ask-ai" [class.active]="aiOpen" (click)="toggleAI()">
+      ✦ {{ aiOpen ? 'Close AI' : 'Ask AI' }}
+    </button>
+
+    <button class="tb-chip" [class.on]="showDeleted"
+        (click)="toggleShowDeleted()">
+  🗑 {{ showDeleted ? 'Hide Deleted' : 'Show Deleted' }}
+    </button>
+
+  </div>
+
+  <div class="content">
+
+    <!-- Stats row -->
+    <div class="stats-row">
+      <div class="stat-card">
+        <div class="stat-lbl">Total Policies</div>
+        <div class="stat-val">{{ filtered.length }}</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-lbl">Annual Premium</div>
+        <div class="stat-val">${{ totalPremium | number:'1.0-0' }}</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-lbl">Expiring 30 Days</div>
+        <div class="stat-val" [style.color]="expiringCount > 0 ? '#d97706' : '#0f172a'">{{ expiringCount }}</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-lbl">Urgent (7 Days)</div>
+        <div class="stat-val" [style.color]="urgentCount > 0 ? '#dc2626' : '#0f172a'">{{ urgentCount }}</div>
+      </div>
+    </div>
+
+    <!-- Add Policy Form -->
+    <div class="add-card" *ngIf="showAddForm">
+      <div class="add-card-header">
+        <strong>New Policy</strong>
+        <button class="tb-btn tb-sec" style="height:30px" (click)="showAddForm=false">✕</button>
+      </div>
+      <div class="add-form-grid">
+        <div class="form-field">
+          <label>Policy Number *</label>
+          <input [(ngModel)]="newPolicy.policy_number" placeholder="e.g. HO-123456">
+        </div>
+        <div class="form-field">
+          <label>Client *</label>
+          <select [(ngModel)]="newPolicy.client_id">
+            <option value="">Select client…</option>
+            <option *ngFor="let c of clients" [value]="c.id">
+              {{ c.business_name || (c.first_name + ' ' + c.last_name) }} — {{ c.client_number }}
+            </option>
+          </select>
+        </div>
+        <div class="form-field">
+          <label>Line of Business</label>
+          <select [(ngModel)]="newPolicy.line_of_business">
+            <option *ngFor="let l of LINES" [value]="l.id">{{ l.label }}</option>
+          </select>
+        </div>
+        <div class="form-field">
+          <label>Carrier</label>
+          <input [(ngModel)]="newPolicy.carrier_name" placeholder="State Farm, Allstate…">
+        </div>
+        <div class="form-field">
+          <label>Premium ($)</label>
+          <input [(ngModel)]="newPolicy.premium_amount" type="number" placeholder="1200">
+        </div>
+        <div class="form-field">
+          <label>Frequency</label>
+          <select [(ngModel)]="newPolicy.premium_freq">
+            <option value="annual">Annual</option>
+            <option value="semi_annual">Semi-Annual</option>
+            <option value="quarterly">Quarterly</option>
+            <option value="monthly">Monthly</option>
+          </select>
+        </div>
+        <div class="form-field">
+          <label>Effective Date</label>
+          <input [(ngModel)]="newPolicy.effective_date" type="date">
+        </div>
+        <div class="form-field">
+          <label>Expiry Date</label>
+          <input [(ngModel)]="newPolicy.expiry_date" type="date">
+        </div>
+        <div class="form-field">
+          <label>Status</label>
+          <select [(ngModel)]="newPolicy.status">
+            <option *ngFor="let s of STATUSES" [value]="s">{{ s | titlecase }}</option>
+          </select>
+        </div>
+      </div>
+      <button class="tb-btn tb-pri" (click)="saveNewPolicy()" [disabled]="addSaving">
+        {{ addSaving ? 'Saving…' : '✓ Create Policy' }}
+      </button>
+    </div>
+
+    <!-- Loading -->
+    <div class="loading-row" *ngIf="loading">
+      <div class="spinner"></div><span>Loading policies…</span>
+    </div>
+
+    <!-- Empty -->
+    <div class="empty-state" *ngIf="!loading && filtered.length === 0 && !showAddForm">
+      <span class="empty-ico">📋</span>
+      <h3>{{ searchQ || filterLob || filterStatus ? 'No policies found' : 'No policies yet' }}</h3>
+      <p>{{ searchQ || filterLob || filterStatus ? 'Try adjusting your filters' : 'Add your first policy above' }}</p>
+    </div>
+
+    <!-- Policy table -->
+    <div class="policy-table-wrap" *ngIf="!loading && filtered.length > 0">
+      <table class="policy-table">
+        <thead>
+          <tr>
+            <th>Type</th>
+            <th>Policy #</th>
+            <th>Client</th>
+            <th>Carrier</th>
+            <th>Premium</th>
+            <th>Expiry</th>
+            <th>Status</th>
+            <th>Renewal</th>
+            <th></th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let p of filtered"
+          [class.row-selected]="selectedPolicy?.id === p.id"
+          [class.row-deleted]="p.status === 'deleted'"
+          (click)="p.status !== 'deleted' && selectPolicy(p, $event)">
+            <td><div class="lob-cell"><span class="lob-label">{{ lobLabel(p.line_of_business) }}</span></div></td>
+            <td><span class="mono-tag">{{ p.policy_number }}</span></td>
+            <td>
+              <div class="client-cell">
+                <span class="client-name">{{ p.client_name }}</span>
+                <span class="client-num">{{ p.client_number }}</span>
+              </div>
+            </td>
+            <td><span class="carrier-tag">{{ p.carrier_name }}</span></td>
+            <td><span class="premium-val">{{ fmtPremium(p.premium_amount, p.premium_freq) }}</span></td>
+            <td>
+              <span [class]="expiryClass(p.days_to_expiry)">
+                {{ p.expiry_date | date:'MMM d, y' }}
+                <span class="days-badge" *ngIf="p.days_to_expiry != null">{{ p.days_to_expiry }}d</span>
+              </span>
+            </td>
+            <td>
+              <span class="badge"
+                    [class.badge-green]="p.status==='active'"
+                    [class.badge-amber]="p.status==='renewal_due'"
+                    [class.badge-red]="p.status==='lapsed'||p.status==='cancelled'"
+                    [class.badge-slate]="p.status==='quoted'||p.status==='bound'">
+                {{ p.status | titlecase }}
+              </span>
+            </td>
+            <td>
+              <select class="renewal-sel"
+                      [(ngModel)]="p.renewal_status"
+                      (change)="updateRenewalStatus(p, p.renewal_status, $event)"
+                      (click)="$event.stopPropagation()">
+                <option value="not_started">Not Started</option>
+                <option value="contacted">Contacted</option>
+                <option value="in_progress">In Progress</option>
+                <option value="complete">Complete</option>
+                <option value="lost">Lost</option>
+              </select>
+            </td>
+            <td>
+              <div class="row-actions">
+                <ng-container *ngIf="p.status !== 'deleted'">
+                  <button class="ra-btn" title="View detail" (click)="selectPolicy(p, $event)">📋</button>
+                  <button class="ra-btn" title="Open client" (click)="openClient(p, $event)">👤</button>
+                </ng-container>
+                <button *ngIf="p.status === 'deleted'"
+                        class="ra-btn ra-restore"
+                        title="Restore policy"
+                        (click)="restorePolicy(p, $event)">↩ Restore</button>
+              </div>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+  </div>
+</div>
+<!-- END .page -->
+
+<!-- ── Overlay (closes detail panel) ──────────────────────────────────────── -->
+<div class="detail-overlay" *ngIf="selectedPolicy" (click)="closePanel()"></div>
+
+<!-- ── Detail / Edit Panel ────────────────────────────────────────────────── -->
+<div class="detail-panel" [class.open]="selectedPolicy">
+  <ng-container *ngIf="selectedPolicy">
+
+    <div class="dp-header">
+      <div class="dp-title">
+        <span class="dp-lob">{{ lobLabel(selectedPolicy.line_of_business) }}</span>
+        <span class="mono-tag">{{ selectedPolicy.policy_number }}</span>
+      </div>
+      <div class="dp-actions">
+        <button class="dp-btn dp-edit" (click)="startEdit()" *ngIf="!editing && !confirmingDelete">✏️ Edit</button>
+        <ng-container *ngIf="!confirmingDelete">
+          <button class="dp-btn dp-delete" (click)="deletePolicy()" [disabled]="deleting">🗑 Delete</button>
+        </ng-container>
+        <ng-container *ngIf="confirmingDelete">
+          <span style="font-size:12px;font-weight:600;color:#dc2626">Delete?</span>
+          <button class="dp-btn dp-delete" (click)="confirmDelete()" [disabled]="deleting">{{ deleting ? "…" : "Yes" }}</button>
+          <button class="dp-btn dp-cancel" (click)="cancelDelete()">No</button>
+        </ng-container>
+        <button class="dp-close" (click)="closePanel()">✕</button>
+      </div>
+    </div>   
+
+    <!-- View Mode -->
+    <div class="dp-body" *ngIf="!editing">
+      <div class="dp-section">
+        <div class="dp-row"><span class="dp-lbl">Client</span><span class="dp-val">{{ selectedPolicy.client_name }}</span></div>
+        <div class="dp-row"><span class="dp-lbl">Client #</span><span class="dp-val">{{ selectedPolicy.client_number }}</span></div>
+        <div class="dp-row"><span class="dp-lbl">Carrier</span><span class="dp-val">{{ selectedPolicy.carrier_name }}</span></div>
+        <div class="dp-row"><span class="dp-lbl">Line</span><span class="dp-val">{{ lobLabel(selectedPolicy.line_of_business) }}</span></div>
+      </div>
+      <div class="dp-divider"></div>
+      <div class="dp-section">
+        <div class="dp-row"><span class="dp-lbl">Premium</span><span class="dp-val dp-premium">{{ fmtPremium(selectedPolicy.premium_amount, selectedPolicy.premium_freq) }}</span></div>
+        <div class="dp-row"><span class="dp-lbl">Effective</span><span class="dp-val">{{ selectedPolicy.effective_date | date:'MMM d, y' }}</span></div>
+        <div class="dp-row">
+          <span class="dp-lbl">Expiry</span>
+          <span class="dp-val" [ngClass]="expiryClass(selectedPolicy.days_to_expiry)">
+            {{ selectedPolicy.expiry_date | date:'MMM d, y' }}
+            <span class="days-badge" *ngIf="selectedPolicy.days_to_expiry != null">{{ selectedPolicy.days_to_expiry }}d</span>
+          </span>
+        </div>
+        <div class="dp-row"><span class="dp-lbl">Renewal</span><span class="dp-val">{{ selectedPolicy.renewal_date | date:'MMM d, y' }}</span></div>
+      </div>
+      <div class="dp-divider"></div>
+      <div class="dp-section">
+        <div class="dp-row">
+          <span class="dp-lbl">Status</span>
+          <span class="badge"
+                [class.badge-green]="selectedPolicy.status==='active'"
+                [class.badge-amber]="selectedPolicy.status==='renewal_due'"
+                [class.badge-red]="selectedPolicy.status==='lapsed'||selectedPolicy.status==='cancelled'"
+                [class.badge-slate]="selectedPolicy.status==='quoted'||selectedPolicy.status==='bound'">
+            {{ selectedPolicy.status | titlecase }}
+          </span>
+        </div>
+        <div class="dp-row"><span class="dp-lbl">Renewal Status</span><span class="dp-val">{{ selectedPolicy.renewal_status | titlecase }}</span></div>
+        <div class="dp-row" *ngIf="selectedPolicy.assigned_agent"><span class="dp-lbl">Agent</span><span class="dp-val">{{ selectedPolicy.assigned_agent }}</span></div>
+        <div class="dp-row" *ngIf="selectedPolicy.risk_score"><span class="dp-lbl">Risk Score</span><span class="dp-val">{{ selectedPolicy.risk_score | number:'1.0-2' }}</span></div>
+      </div>
+      <div class="dp-divider" *ngIf="selectedPolicy.coverage_summary && (selectedPolicy.coverage_summary | json) !== '{}'"></div>
+      <div class="dp-section" *ngIf="selectedPolicy.coverage_summary">
+        <div class="dp-section-title">Coverage Details</div>
+        <div class="dp-row" *ngFor="let kv of $any(selectedPolicy.coverage_summary) | keyvalue">
+          <span class="dp-lbl">{{ $any(kv.key) | titlecase }}</span>
+          <span class="dp-val">${{ $any(kv.value) | number:'1.0-0' }}</span>
+        </div>
+      </div>
+      <div class="dp-divider" *ngIf="selectedPolicy.notes"></div>
+      <div class="dp-section" *ngIf="selectedPolicy.notes">
+        <div class="dp-section-title">Notes</div>
+        <p class="dp-notes">{{ selectedPolicy.notes }}</p>
+      </div>
+      <div class="dp-footer">
+        <button class="dp-nav-btn" (click)="openClient(selectedPolicy, $event)">
+          👤 Open Client Profile →
+        </button>
+        <button class="dp-nav-btn dp-nav-ai" (click)="toggleAI()">
+          ✦ Ask AI about this policy
+        </button>
+      </div>
+    </div>
+
+    <!-- Edit Mode -->
+    <div class="dp-body" *ngIf="editing">
+      <div class="dp-section-title" style="margin-bottom:12px">Edit Policy</div>
+      <div class="edit-form">
+        <div class="form-field"><label>Policy Number</label><input [(ngModel)]="editData.policy_number"></div>
+        <div class="form-field"><label>Carrier</label><input [(ngModel)]="editData.carrier_name"></div>
+        <div class="form-field">
+          <label>Line of Business</label>
+          <select [(ngModel)]="editData.line_of_business">
+            <option *ngFor="let l of LINES" [value]="l.id">{{ l.label }}</option>
+          </select>
+        </div>
+        <div class="form-field"><label>Premium ($)</label><input [(ngModel)]="editData.premium_amount" type="number"></div>
+        <div class="form-field">
+          <label>Frequency</label>
+          <select [(ngModel)]="editData.premium_freq">
+            <option value="annual">Annual</option>
+            <option value="semi_annual">Semi-Annual</option>
+            <option value="quarterly">Quarterly</option>
+            <option value="monthly">Monthly</option>
+          </select>
+        </div>
+        <div class="form-field"><label>Effective Date</label><input [(ngModel)]="editData.effective_date" type="date"></div>
+        <div class="form-field"><label>Expiry Date</label><input [(ngModel)]="editData.expiry_date" type="date"></div>
+        <div class="form-field">
+          <label>Status</label>
+          <select [(ngModel)]="editData.status">
+            <option *ngFor="let s of STATUSES" [value]="s">{{ s | titlecase }}</option>
+          </select>
+        </div>
+        <div class="form-field"><label>Assigned Agent</label><input [(ngModel)]="editData.assigned_agent"></div>
+        <div class="form-field full"><label>Notes</label><textarea [(ngModel)]="editData.notes" rows="3"></textarea></div>
+      </div>
+      <div class="edit-btns">
+        <button class="dp-btn dp-save" (click)="saveEdit()" [disabled]="saving">{{ saving ? 'Saving…' : '✓ Save Changes' }}</button>
+        <button class="dp-btn dp-cancel" (click)="cancelEdit()">Cancel</button>
+      </div>
+    </div>
+
+  </ng-container>
+</div>
+<!-- END .detail-panel -->
+
+<!-- ── Ask AI Panel — OUTSIDE everything ──────────────────────────────────── -->
+<div class="ai-panel" [class.open]="aiOpen">
+
+  <div class="ai-header">
+    <div class="ai-header-left">
+      <span class="ai-icon">✦</span>
+      <div>
+        <p class="ai-title">Ask AI</p>
+        <p class="ai-subtitle">phi3:mini · Local · Policy Intelligence</p>
+      </div>
+    </div>
+    <div class="ai-header-right">
+      <button (click)="clearAI()" title="Clear">🗑</button>
+      <button (click)="toggleAI()" title="Close">✕</button>
+    </div>
+  </div>
+
+  <div class="ai-context-pill">
+    📊 Analyzing: <span>{{ aiContext }}</span>
+  </div>
+
+  <div class="ai-messages">
+    <div *ngFor="let msg of aiMsgs"
+         class="ai-msg"
+         [class.ai-msg-user]="msg.role === 'user'"
+         [class.ai-msg-ai]="msg.role === 'ai'">
+      <div class="ai-avatar">{{ msg.role === 'user' ? '👤' : '✦' }}</div>
+      <div class="ai-bubble-wrap">
+        <div class="ai-bubble">
+          <span *ngIf="msg.text">{{ msg.text }}</span>
+          <span *ngIf="!msg.text && msg.role === 'ai' && aiLoading" class="typing-dots">
+            <span></span><span></span><span></span>
+          </span>
+        </div>
+        <div class="ai-time">{{ msg.time | date:'shortTime' }}</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="ai-suggestions" *ngIf="aiMsgs.length <= 1">
+    <div class="ai-sug-lbl">Try asking:</div>
+    <div class="ai-chips">
+      <button class="ai-chip" (click)="aiInput = 'Which policies are expiring soon?'; sendAI()">⏰ Expiring soon?</button>
+      <button class="ai-chip" (click)="aiInput = 'What is the renewal status summary?'; sendAI()">🔄 Renewal summary</button>
+      <button class="ai-chip" (click)="aiInput = 'Which clients need attention?'; sendAI()">⚠ Need attention?</button>
+      <button class="ai-chip" (click)="aiInput = 'Summarize this portfolio'; sendAI()">📋 Portfolio summary</button>
+    </div>
+  </div>
+
+  <div class="ai-input-area">
+    <div class="ai-input-wrap">
+      <textarea
+        [(ngModel)]="aiInput"
+        (keydown)="onAIKey($event)"
+        [disabled]="aiLoading"
+        placeholder="Ask about policies, renewals, coverage..."
+        class="ai-textarea"
+        rows="1">
+      </textarea>
+      <button class="ai-send"
+              [disabled]="!aiInput.trim() || aiLoading"
+              (click)="sendAI()">
+        {{ aiLoading ? '⏳' : '→' }}
+      </button>
+    </div>
+    <p class="ai-hint">Enter to send · Shift+Enter for new line</p>
+  </div>
+
+</div>
+<!-- END .ai-panel -->

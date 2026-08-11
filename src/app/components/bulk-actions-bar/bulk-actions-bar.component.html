@@ -1,0 +1,8 @@
+<div class="bulk-bar" *ngIf="count > 0">
+  <span class="bulk-bar__count">{{ count }} document{{ count !== 1 ? 's' : '' }} selected</span>
+  <button class="bulk-bar__btn" (click)="moveFolder.emit()">→ Move to Folder</button>
+  <button class="bulk-bar__btn" (click)="export.emit()">↓ Export</button>
+  <button class="bulk-bar__btn" (click)="compare.emit()">⇄ Compare</button>
+  <button class="bulk-bar__btn bulk-bar__btn--danger" (click)="delete.emit()">🗑 Delete</button>
+  <span class="bulk-bar__clear" (click)="clear.emit()">✕ Clear</span>
+</div>

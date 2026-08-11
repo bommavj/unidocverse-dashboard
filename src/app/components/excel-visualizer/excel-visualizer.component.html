@@ -1,0 +1,70 @@
+<div class="ev-wrap">
+  <div class="ev-head">
+    <h2>📊 Data Visualizations</h2>
+    <p class="ev-sub">{{ dataRows.length }} rows × {{ columns.length }} columns</p>
+  </div>
+
+  <div class="ev-controls">
+    <div class="ev-field">
+      <label>X-Axis</label>
+      <select [(ngModel)]="selectedXColumn">
+        <option *ngFor="let c of columns" [value]="c">{{ c }}</option>
+      </select>
+    </div>
+    <div class="ev-field">
+      <label>Y-Axis (numeric)</label>
+      <select multiple [(ngModel)]="selectedYColumns" size="3">
+        <option *ngFor="let c of numericColumns" [value]="c">{{ c }}</option>
+      </select>
+    </div>
+    <button class="ev-btn" (click)="updateCharts()" [disabled]="!selectedXColumn || !selectedYColumns.length">Update Charts</button>
+  </div>
+
+  <!-- Table preview: show columns & rows -->
+  <div class="ev-table" *ngIf="displayData.length">
+    <div class="ev-table-headline">Table preview</div>
+    <div class="ev-table-scroll">
+      <table>
+        <thead>
+          <tr>
+            <th *ngFor="let c of columns">{{ c }}</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let row of displayData">
+            <td *ngFor="let cell of row">
+              {{ cell }}
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="ev-table-note" *ngIf="dataRows.length > displayData.length">
+      Showing first {{ displayData.length }} of {{ dataRows.length }} rows
+    </div>
+  </div>
+
+  <div class="ev-charts" *ngIf="chartData.labels && chartData.labels.length">
+    <div class="ev-card"><h3>Bar</h3><canvas baseChart [data]="chartData" type="bar" [options]="chartOptions"></canvas></div>
+    <div class="ev-card"><h3>Line</h3><canvas baseChart [data]="chartData" type="line" [options]="lineChartOptions"></canvas></div>
+    <div class="ev-card"><h3>Pie</h3><canvas baseChart [data]="pieChartData" type="pie" [options]="pieChartOptions"></canvas></div>
+    <div class="ev-card"><h3>Doughnut</h3><canvas baseChart [data]="pieChartData" type="doughnut" [options]="pieChartOptions"></canvas></div>
+  </div>
+
+  <div class="ev-empty" *ngIf="!chartData.labels || !chartData.labels.length">
+    <span>📈</span><p>Select X and Y axes then click Update Charts</p>
+  </div>
+
+  <div class="ev-stats" *ngIf="numericColumns.length">
+    <h3>Statistics</h3>
+    <div class="ev-stats-grid">
+      <div class="ev-stat" *ngFor="let col of numericColumns">
+        <div class="ev-stat-name">{{ col }}</div>
+        <div class="ev-stat-row"><span>Sum</span><strong>{{ calculateSum(col) | number:'1.0-2' }}</strong></div>
+        <div class="ev-stat-row"><span>Avg</span><strong>{{ calculateAverage(col) | number:'1.0-2' }}</strong></div>
+        <div class="ev-stat-row"><span>Min</span><strong>{{ calculateMin(col) | number:'1.0-2' }}</strong></div>
+        <div class="ev-stat-row"><span>Max</span><strong>{{ calculateMax(col) | number:'1.0-2' }}</strong></div>
+      </div>
+    </div>
+  </div>
+</div>

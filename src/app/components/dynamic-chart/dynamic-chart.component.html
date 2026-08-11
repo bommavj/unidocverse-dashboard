@@ -1,0 +1,20 @@
+<div class="chart-container">
+    <!-- Loading State -->
+    <div *ngIf="isLoading" class="chart-loading">
+      <mat-spinner diameter="40"></mat-spinner>
+      <p>Loading chart...</p>
+    </div>
+  
+    <!-- Error State -->
+    <div *ngIf="hasError && !isLoading" class="chart-error">
+      <mat-icon>error_outline</mat-icon>
+      <p>{{ errorMessage }}</p>
+    </div>
+  
+    <!-- Chart Canvas -->
+    <canvas 
+      #chartCanvas 
+      *ngIf="!isLoading && !hasError"
+      [attr.aria-label]="config?.title || 'Chart'">
+    </canvas>
+  </div>

@@ -1,0 +1,106 @@
+<div class="audit-page">
+
+  <div class="audit-header">
+    <div>
+      <h1 class="audit-title">Audit Trail</h1>
+      <p class="audit-sub">Immutable log of every action taken on documents</p>
+    </div>
+    <div class="view-toggle">
+      <button [class.active]="view==='timeline'" (click)="view='timeline'">
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+        Timeline
+      </button>
+      <button [class.active]="view==='table'" (click)="view='table'">
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><rect x="3" y="3" width="18" height="18" rx="2"/><line x1="3" y1="9" x2="21" y2="9"/><line x1="3" y1="15" x2="21" y2="15"/><line x1="9" y1="3" x2="9" y2="21"/></svg>
+        Table
+      </button>
+    </div>
+  </div>
+
+  <!-- Summary stats -->
+  <div class="stat-row" *ngIf="summary">
+    <div class="stat-card" *ngFor="let a of ($any(summary).by_action | slice:0:5)">
+      <div class="stat-icon" [style.background]="color($any(a).action)+'20'" [style.color]="color($any(a).action)">{{ icon($any(a).action) }}</div>
+      <div class="stat-body">
+        <div class="stat-n">{{ $any(a).cnt }}</div>
+        <div class="stat-l">{{ $any(a).action }}</div>
+      </div>
+    </div>
+    <div class="stat-card total">
+      <div class="stat-icon" style="background:#f1f5f9;color:#6366f1">Σ</div>
+      <div class="stat-body">
+        <div class="stat-n">{{ events.length }}</div>
+        <div class="stat-l">Total events</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Filters -->
+  <div class="filter-row">
+    <udv-select [(ngModel)]="filterAction" (valueChange)="cdr.markForCheck()"
+      [options]="actionOptions" placeholder="All Actions" style="width:180px"></udv-select>
+    <input [(ngModel)]="filterActor" placeholder="Filter by actor…" (input)="cdr.markForCheck()" />
+    <span class="event-count">{{ filtered.length }} events</span>
+  </div>
+
+  <div class="loading-row" *ngIf="loading"><div class="spinner"></div>Loading audit log…</div>
+
+  <!-- ── TIMELINE VIEW ──────────────────────────────────────────────────── -->
+  <div class="timeline" *ngIf="!loading && view==='timeline'">
+    <div class="day-group" *ngFor="let g of groupByDay(filtered)">
+      <div class="day-label">{{ g.day }}</div>
+      <div class="tl-item" *ngFor="let e of g.items">
+        <div class="tl-icon" [style.background]="color(e.action)+'20'" [style.color]="color(e.action)">
+          {{ icon(e.action) }}
+        </div>
+        <div class="tl-line"></div>
+        <div class="tl-body">
+          <div class="tl-action-row">
+            <span class="tl-action" [style.color]="color(e.action)">{{ e.action }}</span>
+            <span class="tl-actor">by {{ e.actor }}</span>
+            <span class="tl-time">{{ fmtDate(e.created_at) }}</span>
+          </div>
+          <div class="tl-detail" *ngIf="e.detail">{{ e.detail }}</div>
+          <div class="tl-doc" *ngIf="e.filename">📄 {{ e.filename }}</div>
+        </div>
+      </div>
+      <div class="tl-empty" *ngIf="filtered.length===0">No events match the current filter.</div>
+    </div>
+    <div class="tl-empty big" *ngIf="filtered.length===0 && !loading">
+      <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="#cbd5e1" stroke-width="1.4"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+      <p>No audit events recorded yet.<br>Events appear automatically as users interact with documents.</p>
+    </div>
+  </div>
+
+  <!-- ── TABLE VIEW ────────────────────────────────────────────────────── -->
+  <div class="audit-table-wrap" *ngIf="!loading && view==='table'">
+    <table class="audit-table">
+      <thead>
+        <tr>
+          <th>Time</th>
+          <th>Action</th>
+          <th>Actor</th>
+          <th>Document</th>
+          <th>Detail</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let e of filtered">
+          <td class="td-time">{{ fmtDate(e.created_at) }}</td>
+          <td>
+            <span class="action-chip" [style.background]="color(e.action)+'18'" [style.color]="color(e.action)">
+              {{ icon(e.action) }} {{ e.action }}
+            </span>
+          </td>
+          <td class="td-actor">{{ e.actor }}</td>
+          <td class="td-doc">{{ e.filename || (e.doc_id ? e.doc_id.slice(0,8)+'…' : '—') }}</td>
+          <td class="td-detail">{{ e.detail || '—' }}</td>
+        </tr>
+        <tr *ngIf="filtered.length===0">
+          <td colspan="5" class="td-empty">No events</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+</div>

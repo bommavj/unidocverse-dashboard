@@ -1,0 +1,12 @@
+<div class="folder-grid">
+  <div *ngFor="let f of folders" class="folder-card" [attr.data-color]="f.color" (click)="folderClicked.emit(f.id)">
+    <div class="folder-card__emoji">{{ f.emoji }}</div>
+    <div class="folder-card__name">{{ f.name }}</div>
+    <div class="folder-card__count">{{ f.count }} document{{ f.count !== 1 ? 's' : '' }}</div>
+    <div class="folder-card__accent" [style.background]="f.color"></div>
+  </div>
+  <div class="folder-card folder-card--new" (click)="newFolder.emit()">
+    <div class="folder-card__emoji">＋</div>
+    <div class="folder-card__name">New Folder</div>
+  </div>
+</div>

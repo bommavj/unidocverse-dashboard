@@ -1,0 +1,541 @@
+<div class="wf-page">
+
+  <!-- Header -->
+  <div class="wf-topbar">
+    <div class="wf-topbar-left">
+      <div class="wf-topbar-title">Document Workflows</div>
+      <div class="wf-topbar-sub">Compare, match, and reconcile documents with human-in-the-loop review</div>
+    </div>
+  </div>
+
+  <!-- Workflow selector tabs -->
+  <div class="wf-nav">
+    <button class="wf-nav-btn" [class.active]="activeWorkflow==='compare'"   (click)="activeWorkflow='compare'">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
+      Compare &amp; Merge
+    </button>
+    <button class="wf-nav-btn" [class.active]="activeWorkflow==='threeway'"  (click)="activeWorkflow='threeway'">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 11 12 14 22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>
+      Three-Way Match
+    </button>
+    <button class="wf-nav-btn" [class.active]="activeWorkflow==='reconcile'" (click)="activeWorkflow='reconcile'">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>
+      Bank Reconciliation
+    </button>
+  </div>
+
+  <!-- ══════════════════════════════════════════════════════════════ -->
+  <!-- COMPARE & MERGE                                               -->
+  <!-- ══════════════════════════════════════════════════════════════ -->
+  <div *ngIf="activeWorkflow==='compare'" class="wf-body">
+
+    <div class="wf-layout">
+
+      <!-- LEFT: pipeline steps -->
+      <div class="wf-steps-col">
+        <div class="wf-steps-title">Pipeline Steps</div>
+        <div class="wf-steps">
+          <div *ngFor="let step of cmpSteps; let i = index"
+               class="wf-step" [ngClass]="'wf-step--' + step.status">
+            <div class="wf-step-left">
+              <div class="wf-step-dot">
+                <span *ngIf="step.status==='running'" class="wf-spin"></span>
+                <span *ngIf="step.status!=='running'">{{ step.index }}</span>
+              </div>
+              <div class="wf-step-line" *ngIf="i < cmpSteps.length - 1"></div>
+            </div>
+            <div class="wf-step-body">
+              <div class="wf-step-title">{{ step.title }}</div>
+              <div class="wf-step-log" *ngIf="step.log">{{ step.log }}</div>
+              <div class="wf-step-badge" *ngIf="step.status==='hitl'">
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+                Waiting for review
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- RIGHT: main panel -->
+      <div class="wf-main-col">
+
+        <!-- Inputs panel -->
+        <div class="wf-card" *ngIf="!cmpResult">
+          <div class="wf-card-title">Select Documents to Compare</div>
+          <div class="wf-inputs">
+            <div class="wf-input-group">
+              <label>Document A</label>
+              <udv-select [(ngModel)]="cmpDocA" [options]="docOptions" placeholder="— select document —"></udv-select>
+              <input placeholder="Label (optional)" [(ngModel)]="cmpLabelA" class="wf-label-input">
+            </div>
+            <div class="wf-vs-badge">VS</div>
+            <div class="wf-input-group">
+              <label>Document B</label>
+              <udv-select [(ngModel)]="cmpDocB" [options]="docOptions" placeholder="— select document —"></udv-select>
+              <input placeholder="Label (optional)" [(ngModel)]="cmpLabelB" class="wf-label-input">
+            </div>
+          </div>
+          <div class="wf-card-actions">
+            <button class="wf-run-btn" (click)="runCompare()" [disabled]="!cmpDocA || !cmpDocB || cmpRunning">
+              <svg *ngIf="!cmpRunning" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+              <span *ngIf="cmpRunning" class="wf-spin-sm"></span>
+              {{ cmpRunning ? 'Running…' : 'Run Comparison' }}
+            </button>
+          </div>
+        </div>
+
+        <!-- Compare result table -->
+        <div class="wf-card" *ngIf="cmpResult">
+          <div class="wf-card-header">
+            <div>
+              <div class="wf-card-title">Comparison Results</div>
+              <div class="wf-card-sub">
+                {{ cmpResult.stats.match }} match · {{ cmpResult.stats.mismatch }} mismatch · {{ cmpResult.stats.match_pct }}% aligned
+              </div>
+            </div>
+            <button class="wf-ghost-btn" (click)="resetCmp()">← New comparison</button>
+          </div>
+
+          <!-- Summary metrics -->
+          <div class="wf-metrics" *ngIf="cmpResult.summary_metrics?.length">
+            <div class="wf-metric" *ngFor="let m of cmpResult.summary_metrics">
+              <div class="wf-metric-label">{{ m.label }}</div>
+              <div class="wf-metric-vals">
+                <span class="wf-metric-a">{{ m.value_a }}</span>
+                <span class="wf-metric-arrow">→</span>
+                <span class="wf-metric-b">{{ m.value_b }}</span>
+                <span class="wf-metric-delta" [class.pos]="m.delta?.startsWith('+')" *ngIf="m.delta">{{ m.delta }}</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Filter chips -->
+          <div class="wf-filter-row">
+            <button class="wf-chip" [class.active]="cmpFilter==='all'"      (click)="cmpFilter='all'">All ({{ cmpResult.stats.total }})</button>
+            <button class="wf-chip wf-chip--miss" [class.active]="cmpFilter==='mismatch'" (click)="cmpFilter='mismatch'">Mismatch ({{ cmpResult.stats.mismatch }})</button>
+            <button class="wf-chip wf-chip--a"    [class.active]="cmpFilter==='only_a'"  (click)="cmpFilter='only_a'">Only in A ({{ cmpResult.stats.only_a }})</button>
+            <button class="wf-chip wf-chip--b"    [class.active]="cmpFilter==='only_b'"  (click)="cmpFilter='only_b'">Only in B ({{ cmpResult.stats.only_b }})</button>
+          </div>
+
+          <!-- Diff table -->
+          <div class="wf-table-wrap">
+            <table class="wf-table">
+              <thead>
+                <tr>
+                  <th>Field</th>
+                  <th>{{ cmpResult.label_a }}</th>
+                  <th>{{ cmpResult.label_b }}</th>
+                  <th>Status</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr *ngFor="let row of cmpRows" [ngClass]="'row--' + row.status">
+                  <td class="wf-td-field">{{ row.field }}</td>
+                  <td class="wf-td-val">{{ row.value_a || '—' }}</td>
+                  <td class="wf-td-val">{{ row.value_b || '—' }}</td>
+                  <td>
+                    <span class="wf-status-chip" [ngClass]="'chip--' + row.status">
+                      {{ row.status === 'match' ? '✓ Match' : row.status === 'mismatch' ? '≠ Mismatch' : row.status === 'only_a' ? 'Only A' : 'Only B' }}
+                    </span>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- Merge result -->
+        <div class="wf-card wf-card--success" *ngIf="mergeResult">
+          <div class="wf-card-header">
+            <div>
+              <div class="wf-card-title">Merge Complete</div>
+              <div class="wf-card-sub">{{ mergeResult.total_fields }} fields merged · strategy: {{ mergeResult.strategy }}</div>
+            </div>
+            <button class="wf-download-btn" (click)="downloadMerged()">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+              Download CSV
+            </button>
+          </div>
+          <div class="wf-merge-table">
+            <div class="wf-merge-row wf-merge-header">
+              <span>Field</span><span>Merged Value</span><span>Source</span>
+            </div>
+            <div class="wf-merge-row" *ngFor="let d of mergeResult.decisions | slice:0:12">
+              <span class="wf-merge-field">{{ $any(d).field }}</span>
+              <span class="wf-merge-val">{{ $any(d).chosen || '—' }}</span>
+              <span class="wf-merge-src" [ngClass]="'src--' + $any(d).source">{{ $any(d).source }}</span>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+
+  <!-- ══════════════════════════════════════════════════════════════ -->
+  <!-- THREE-WAY MATCH                                               -->
+  <!-- ══════════════════════════════════════════════════════════════ -->
+  <div *ngIf="activeWorkflow==='threeway'" class="wf-body">
+    <div class="wf-layout">
+      <div class="wf-steps-col">
+        <div class="wf-steps-title">Pipeline Steps</div>
+        <div class="wf-steps">
+          <div *ngFor="let step of twSteps; let i = index"
+               class="wf-step" [ngClass]="'wf-step--' + step.status">
+            <div class="wf-step-left">
+              <div class="wf-step-dot">
+                <span *ngIf="step.status==='running'" class="wf-spin"></span>
+                <span *ngIf="step.status!=='running'">{{ step.index }}</span>
+              </div>
+              <div class="wf-step-line" *ngIf="i < twSteps.length - 1"></div>
+            </div>
+            <div class="wf-step-body">
+              <div class="wf-step-title">{{ step.title }}</div>
+              <div class="wf-step-log" *ngIf="step.log">{{ step.log }}</div>
+              <div class="wf-step-badge" *ngIf="step.status==='hitl'">
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+                Waiting for review
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="wf-main-col">
+        <div class="wf-card" *ngIf="!twResult">
+          <div class="wf-card-title">Three-Way Match Setup</div>
+          <div class="wf-doc-inputs">
+            <div class="wf-doc-input">
+              <div class="wf-doc-badge inv">INV</div>
+              <div class="wf-doc-select-wrap">
+                <label>Invoice <span class="wf-req">*required</span></label>
+                <udv-select [(ngModel)]="twInvoiceId" [options]="docOptions" placeholder="— select invoice —"></udv-select>
+              </div>
+            </div>
+            <div class="wf-doc-input">
+              <div class="wf-doc-badge po">PO</div>
+              <div class="wf-doc-select-wrap">
+                <label>Purchase Order <span class="wf-opt">optional</span></label>
+                <udv-select [(ngModel)]="twPoId" [options]="docOptions" placeholder="— select PO —"></udv-select>
+              </div>
+            </div>
+            <div class="wf-doc-input">
+              <div class="wf-doc-badge rec">REC</div>
+              <div class="wf-doc-select-wrap">
+                <label>Receipt <span class="wf-opt">optional</span></label>
+                <udv-select [(ngModel)]="twReceiptId" [options]="docOptions" placeholder="— select receipt —"></udv-select>
+              </div>
+            </div>
+          </div>
+          <div class="wf-card-actions">
+            <button class="wf-run-btn" (click)="runThreeWay()" [disabled]="!twInvoiceId || twRunning">
+              <svg *ngIf="!twRunning" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+              <span *ngIf="twRunning" class="wf-spin-sm"></span>
+              {{ twRunning ? 'Matching…' : 'Run Three-Way Match' }}
+            </button>
+          </div>
+        </div>
+
+        <div class="wf-card" *ngIf="twResult">
+          <div class="wf-card-header">
+            <div>
+              <div class="wf-card-title">Match Results</div>
+              <div class="wf-card-sub">
+                <span class="wf-status-chip"
+                      [ngClass]="twResult.summary.status==='PASS' ? 'chip--match' : 'chip--mismatch'">
+                  {{ twResult.summary.status }}
+                </span>
+                &nbsp;{{ twResult.summary.matched }} matched · {{ twResult.summary.discrepancies }} discrepancies
+              </div>
+            </div>
+            <div class="wf-header-actions">
+              <button class="wf-ghost-btn" (click)="resetTw()">← New match</button>
+              <button class="wf-download-btn" (click)="downloadTwReport()" *ngIf="twSteps[4].status==='done'">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+                Download Report
+              </button>
+            </div>
+          </div>
+
+          <div class="wf-match-sections">
+            <div class="wf-match-section" *ngIf="twResult.matches?.length">
+              <div class="wf-match-section-title match">
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+                Matched Fields ({{ twResult.matches.length }})
+              </div>
+              <div class="wf-match-row" *ngFor="let m of twResult.matches">
+                <span class="wf-match-field">{{ m.field }}</span>
+                <span class="wf-match-vals">{{ m.values | json }}</span>
+              </div>
+            </div>
+            <div class="wf-match-section disc" *ngIf="twResult.discrepancies?.length">
+              <div class="wf-match-section-title disc">
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+                Discrepancies ({{ twResult.discrepancies.length }})
+              </div>
+              <div class="wf-disc-row" *ngFor="let d of twResult.discrepancies">
+                <span class="wf-match-field">{{ d.field }}</span>
+                <div class="wf-disc-vals">
+                  <span *ngFor="let kv of d.values | keyvalue" class="wf-disc-chip">
+                    <strong>{{ $any(kv.key) }}</strong>: {{ $any(kv.value) }}
+                  </span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══════════════════════════════════════════════════════════════ -->
+  <!-- BANK RECONCILIATION                                           -->
+  <!-- ══════════════════════════════════════════════════════════════ -->
+  <div *ngIf="activeWorkflow==='reconcile'" class="wf-body">
+    <div class="wf-layout">
+      <div class="wf-steps-col">
+        <div class="wf-steps-title">Pipeline Steps</div>
+        <div class="wf-steps">
+          <div *ngFor="let step of recSteps; let i = index"
+               class="wf-step" [ngClass]="'wf-step--' + step.status">
+            <div class="wf-step-left">
+              <div class="wf-step-dot">
+                <span *ngIf="step.status==='running'" class="wf-spin"></span>
+                <span *ngIf="step.status!=='running'">{{ step.index }}</span>
+              </div>
+              <div class="wf-step-line" *ngIf="i < recSteps.length - 1"></div>
+            </div>
+            <div class="wf-step-body">
+              <div class="wf-step-title">{{ step.title }}</div>
+              <div class="wf-step-log" *ngIf="step.log">{{ step.log }}</div>
+              <div class="wf-step-badge" *ngIf="step.status==='hitl'">
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+                Waiting for review
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="wf-main-col">
+        <div class="wf-card" *ngIf="!recResult">
+          <div class="wf-card-title">Bank Reconciliation Setup</div>
+          <div class="wf-inputs">
+            <div class="wf-input-group">
+              <label>Bank Statement</label>
+              <udv-select [(ngModel)]="recStatementId" [options]="docOptions" placeholder="— select statement —"></udv-select>
+            </div>
+            <div class="wf-vs-badge">VS</div>
+            <div class="wf-input-group">
+              <label>Internal Ledger / Invoice</label>
+              <udv-select [(ngModel)]="recLedgerId" [options]="docOptions" placeholder="— select ledger —"></udv-select>
+            </div>
+          </div>
+          <div class="wf-card-actions">
+            <button class="wf-run-btn" (click)="runReconcile()" [disabled]="!recStatementId || !recLedgerId || recRunning">
+              <svg *ngIf="!recRunning" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+              <span *ngIf="recRunning" class="wf-spin-sm"></span>
+              {{ recRunning ? 'Reconciling…' : 'Run Reconciliation' }}
+            </button>
+          </div>
+        </div>
+
+        <div class="wf-card" *ngIf="recResult">
+          <div class="wf-card-header">
+            <div>
+              <div class="wf-card-title">Reconciliation Results</div>
+              <div class="wf-card-sub">
+                <span class="wf-status-chip" [ngClass]="recResult.summary.status==='BALANCED' ? 'chip--match' : 'chip--mismatch'">
+                  {{ recResult.summary.status }}
+                </span>
+                &nbsp;Balance diff: {{ recResult.summary.balance_diff }}
+              </div>
+            </div>
+            <div class="wf-header-actions">
+              <button class="wf-ghost-btn" (click)="resetRec()">← New reconciliation</button>
+              <button class="wf-download-btn" (click)="downloadRecReport()" *ngIf="recSteps[4].status==='done'">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+                Download Report
+              </button>
+            </div>
+          </div>
+
+          <div class="wf-rec-summary">
+            <div class="wf-rec-metric"><span>Statement Balance</span><strong>{{ recResult.balance_statement ?? 'N/A' }}</strong></div>
+            <div class="wf-rec-metric"><span>Ledger Balance</span><strong>{{ recResult.balance_ledger ?? 'N/A' }}</strong></div>
+            <div class="wf-rec-metric"><span>Difference</span><strong [class.diff-red]="recResult.balance_diff && recResult.balance_diff !== 0">{{ recResult.summary.balance_diff }}</strong></div>
+          </div>
+
+          <div class="wf-unmatched-grid">
+            <div *ngIf="recResult.unmatched_statement?.length">
+              <div class="wf-unmatched-title">Unmatched in Statement ({{ recResult.unmatched_statement.length }})</div>
+              <div class="wf-unmatched-row" *ngFor="let t of recResult.unmatched_statement | slice:0:8">
+                <span class="wf-t-date">{{ $any(t).date }}</span>
+                <span class="wf-t-desc">{{ $any(t).description }}</span>
+                <span class="wf-t-amt">{{ $any(t).amount }}</span>
+              </div>
+            </div>
+            <div *ngIf="recResult.unmatched_ledger?.length">
+              <div class="wf-unmatched-title">Unmatched in Ledger ({{ recResult.unmatched_ledger.length }})</div>
+              <div class="wf-unmatched-row" *ngFor="let t of recResult.unmatched_ledger | slice:0:8">
+                <span class="wf-t-date">{{ $any(t).date }}</span>
+                <span class="wf-t-desc">{{ $any(t).description }}</span>
+                <span class="wf-t-amt">{{ $any(t).amount }}</span>
+              </div>
+            </div>
+            <div *ngIf="!recResult.unmatched_statement?.length && !recResult.unmatched_ledger?.length" class="wf-all-matched">
+              ✓ All transactions matched
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<!-- ══════════════════════════════════════════════════════════════════════ -->
+<!-- HITL MODAL — Compare & Merge                                          -->
+<!-- ══════════════════════════════════════════════════════════════════════ -->
+<div class="hitl-overlay" *ngIf="hitlOpen" (click)="$event.stopPropagation()">
+  <div class="hitl-modal">
+    <div class="hitl-header">
+      <div class="hitl-step-badge">Step 3 of 4</div>
+      <div class="hitl-title">Human Review Required</div>
+      <div class="hitl-sub">Review the comparison results before proceeding to merge</div>
+    </div>
+
+    <div class="hitl-body">
+      <div class="hitl-summary" *ngIf="cmpResult">
+        <div class="hitl-summary-row">
+          <span>Documents compared</span>
+          <strong>{{ cmpResult.label_a }} vs {{ cmpResult.label_b }}</strong>
+        </div>
+        <div class="hitl-summary-row">
+          <span>Fields matched</span>
+          <strong class="green">{{ cmpResult.stats.match }} / {{ cmpResult.stats.total }} ({{ cmpResult.stats.match_pct }}%)</strong>
+        </div>
+        <div class="hitl-summary-row" *ngIf="cmpResult.stats.mismatch > 0">
+          <span>Mismatches requiring attention</span>
+          <strong class="red">{{ cmpResult.stats.mismatch }} fields</strong>
+        </div>
+      </div>
+
+      <!-- Mismatch preview -->
+      <div class="hitl-mismatches" *ngIf="cmpResult?.stats?.mismatch > 0">
+        <div class="hitl-mismatches-title">Fields with differences:</div>
+        <div class="hitl-mismatch-row" *ngFor="let row of cmpResult.rows | slice:0:6">
+          <ng-container *ngIf="$any(row).status === 'mismatch'">
+            <span class="hitl-mf">{{ $any(row).field }}</span>
+            <span class="hitl-va">{{ $any(row).value_a || '—' }}</span>
+            <span class="hitl-arrow">→</span>
+            <span class="hitl-vb">{{ $any(row).value_b || '—' }}</span>
+            <udv-select (valueChange)="setOverride($any(row).field_key, $event)"
+              [options]="rowOverrideOptions($any(row))" placeholder="Use strategy" style="width:200px"></udv-select>
+          </ng-container>
+        </div>
+      </div>
+
+      <!-- Merge strategy -->
+      <div class="hitl-strategy">
+        <div class="hitl-strategy-label">Merge strategy for unresolved fields:</div>
+        <div class="hitl-strategy-opts">
+          <label class="hitl-radio">
+            <input type="radio" name="ms" value="prefer_a" [(ngModel)]="mergeStrategy"> Prefer Document A
+          </label>
+          <label class="hitl-radio">
+            <input type="radio" name="ms" value="prefer_b" [(ngModel)]="mergeStrategy"> Prefer Document B
+          </label>
+        </div>
+      </div>
+
+      <textarea class="hitl-feedback" [(ngModel)]="hitlFeedback"
+                placeholder="Add notes or feedback (optional)…" rows="2"></textarea>
+    </div>
+
+    <div class="hitl-footer">
+      <button class="hitl-reject-btn" (click)="hitlReject()">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+        Reject &amp; Stop
+      </button>
+      <button class="hitl-approve-btn" (click)="hitlApprove()">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+        Approve &amp; Merge
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- HITL Modal — Three-Way Match -->
+<div class="hitl-overlay" *ngIf="twHitlOpen" (click)="$event.stopPropagation()">
+  <div class="hitl-modal">
+    <div class="hitl-header">
+      <div class="hitl-step-badge">Step 4 of 5</div>
+      <div class="hitl-title">Discrepancies Found — Review Required</div>
+      <div class="hitl-sub">{{ twResult?.summary?.discrepancies }} field(s) did not match across documents</div>
+    </div>
+    <div class="hitl-body">
+      <div class="hitl-mismatches" *ngIf="twResult?.discrepancies?.length">
+        <div class="hitl-mismatch-row disc-row" *ngFor="let d of twResult.discrepancies">
+          <span class="hitl-mf">{{ d.field }}</span>
+          <div class="wf-disc-vals" style="margin-left:auto">
+            <span *ngFor="let kv of d.values | keyvalue" class="wf-disc-chip">
+              <strong>{{ $any(kv.key) }}</strong>: {{ $any(kv.value) }}
+            </span>
+          </div>
+        </div>
+      </div>
+      <div class="hitl-summary-row" style="margin-top:12px;">
+        <span>Matched fields</span>
+        <strong class="green">{{ twResult?.summary?.matched }}</strong>
+      </div>
+    </div>
+    <div class="hitl-footer">
+      <button class="hitl-reject-btn" (click)="twReject()">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+        Reject
+      </button>
+      <button class="hitl-approve-btn" (click)="twApprove()">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+        Accept &amp; Continue
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- HITL Modal — Reconciliation -->
+<div class="hitl-overlay" *ngIf="recHitlOpen" (click)="$event.stopPropagation()">
+  <div class="hitl-modal">
+    <div class="hitl-header">
+      <div class="hitl-step-badge">Step 4 of 5</div>
+      <div class="hitl-title">Reconciliation Discrepancies</div>
+      <div class="hitl-sub">Review unmatched transactions before signing off</div>
+    </div>
+    <div class="hitl-body">
+      <div class="hitl-summary">
+        <div class="hitl-summary-row">
+          <span>Balance difference</span>
+          <strong [class.red]="recResult?.balance_diff !== 0">{{ recResult?.summary?.balance_diff }}</strong>
+        </div>
+        <div class="hitl-summary-row">
+          <span>Unmatched in statement</span>
+          <strong>{{ recResult?.unmatched_statement?.length || 0 }}</strong>
+        </div>
+        <div class="hitl-summary-row">
+          <span>Unmatched in ledger</span>
+          <strong>{{ recResult?.unmatched_ledger?.length || 0 }}</strong>
+        </div>
+      </div>
+    </div>
+    <div class="hitl-footer">
+      <button class="hitl-reject-btn" (click)="recReject()">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+        Escalate
+      </button>
+      <button class="hitl-approve-btn" (click)="recApprove()">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+        Sign Off
+      </button>
+    </div>
+  </div>
+</div>

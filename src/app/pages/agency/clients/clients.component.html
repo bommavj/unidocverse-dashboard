@@ -1,0 +1,321 @@
+<!-- clients.component.html -->
+<div class="page" [class.ai-open]="globalAiOpen">
+
+  <!-- Topbar -->
+  <div class="topbar">
+    <div>
+      <div class="topbar-title">Clients</div>
+      <div class="topbar-sub">{{ filtered.length }} of {{ clients.length }} clients</div>
+    </div>
+    <div class="tb-sp"></div>
+
+    <div class="tb-search">
+      <span style="color:#94a3b8;font-size:14px">🔍</span>
+      <input [(ngModel)]="searchQ" (ngModelChange)="applyFilter()"
+             placeholder="Search name, email, phone…">
+      <button class="tb-clear" *ngIf="searchQ" (click)="searchQ=''; applyFilter()">✕</button>
+      <button class="tb-voice" (click)="startVoiceSearch()" title="Voice Search">🎤</button>
+    </div>
+
+    <button class="tb-chip" [class.on]="filterType===''"
+            (click)="filterType=''; applyFilter()">All</button>
+    <button class="tb-chip" [class.on]="filterType==='personal'"
+            (click)="filterType='personal'; applyFilter()">Personal</button>
+    <button class="tb-chip" [class.on]="filterType==='commercial'"
+            (click)="filterType='commercial'; applyFilter()">Commercial</button>
+    <button class="tb-chip amber" [class.on]="filterStatus==='prospect'"
+            (click)="filterStatus = filterStatus==='prospect' ? '' : 'prospect'; applyFilter()">Prospects</button>
+
+    <select class="tb-select" [(ngModel)]="sortBy" (ngModelChange)="applyFilter()" style="margin-left: 8px; margin-right: 8px;">
+      <option value="name_asc">🔤 Sort: Name (A-Z)</option>
+      <option value="name_desc">🔤 Sort: Name (Z-A)</option>
+      <option value="premium_desc">💰 Sort: Premium</option>
+      <option value="policies_desc">📋 Sort: Policies Count</option>
+    </select>
+    <button class="tb-btn tb-pri" (click)="openAddForm()">+ Add Client</button>
+  </div>
+
+  <div class="content">
+
+    <!-- Agency AI banner -->
+    <div class="agency-banner" *ngIf="unlinkedDocs.length > 0 && !bannerDismissed">
+      <span style="font-size:18px;flex-shrink:0">✦</span>
+      <div class="agency-banner-body">
+        <strong>{{ unlinkedDocs.length }} insurance document{{ unlinkedDocs.length > 1 ? 's' : '' }} ready to import</strong>
+        — AI has extracted client &amp; policy data. Review and create records in one click.
+      </div>
+      <button class="ab-btn ab-btn-pri" (click)="showImportPanel = !showImportPanel">
+        {{ showImportPanel ? 'Hide' : 'Review →' }}
+      </button>
+      <button class="ab-btn ab-btn-sec" (click)="bannerDismissed = true">✕</button>
+    </div>
+
+    <!-- Import panel -->
+    <div class="import-panel" *ngIf="showImportPanel">
+      <div class="import-row" *ngFor="let d of unlinkedDocs">
+        <div class="ir-left">
+          <span style="font-size:20px">📄</span>
+          <div>
+            <div class="ir-filename">{{ d.filename }}</div>
+            <div class="ir-meta" *ngIf="d.preview">
+              <span class="ir-pill">{{ d.preview.named_insured }}</span>
+              <span class="ir-pill">{{ d.preview.carrier }}</span>
+              <span class="ir-pill">{{ d.preview.policy_number }}</span>
+              <span class="ir-pill" *ngIf="d.preview.premium">${{ d.preview.premium | number:'1.0-0' }}/yr</span>
+              <span class="ir-pill ir-pill-warn" *ngIf="d.preview.days_to_expiry != null">
+                {{ d.preview.days_to_expiry }}d to expiry
+              </span>
+            </div>
+          </div>
+        </div>
+        <div class="ir-right">
+          <span class="ir-status loading" *ngIf="d.creating">Creating…</span>
+          <span class="ir-status done"    *ngIf="d.created">✓ Client &amp; policy created</span>
+          <span class="ir-status err"     *ngIf="d.error">{{ d.error }}</span>
+          <ng-container *ngIf="!d.creating && !d.created">
+            <button class="ab-btn ab-btn-pri" (click)="createFromDoc(d)">✦ Create</button>
+            <button class="ab-btn ab-btn-sec" (click)="dismissDoc(d)">Skip</button>
+          </ng-container>
+        </div>
+      </div>
+    </div>
+
+    <!-- Stats row -->
+    <div class="stats-row" *ngIf="clients.length > 0">
+      <div class="stat-card">
+        <div class="stat-lbl">Total Clients</div>
+        <div class="stat-val">{{ clients.length }}</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-lbl">Active</div>
+        <div class="stat-val" style="color:#16a34a">{{ activeCount }}</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-lbl">Renewal in 30d</div>
+        <div class="stat-val" style="color:#d97706">{{ renewalCount }}</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-lbl">Total Premium</div>
+        <div class="stat-val">${{ totalPremium | number:'1.0-0' }}</div>
+      </div>
+    </div>
+
+    <!-- Add client form -->
+    <div class="add-card" *ngIf="showAddForm">
+      <div class="add-card-header">
+        <span style="font-size:16px;font-weight:700;color:#0f172a">New Client</span>
+        <button class="tb-btn tb-sec" style="height:30px" (click)="showAddForm=false">✕ Cancel</button>
+      </div>
+      <div class="type-toggle">
+        <button [class.on]="newClient.client_type==='personal'"
+                (click)="newClient.client_type='personal'">👤 Personal</button>
+        <button [class.on]="newClient.client_type==='commercial'"
+                (click)="newClient.client_type='commercial'">🏢 Commercial</button>
+      </div>
+      <div class="add-form-grid">
+        <ng-container *ngIf="newClient.client_type==='personal'">
+          <div class="form-field"><label>First Name *</label><input [(ngModel)]="newClient.first_name" placeholder="Marcus"></div>
+          <div class="form-field"><label>Last Name</label><input [(ngModel)]="newClient.last_name" placeholder="Henderson"></div>
+        </ng-container>
+        <ng-container *ngIf="newClient.client_type==='commercial'">
+          <div class="form-field full"><label>Business Name *</label><input [(ngModel)]="newClient.business_name" placeholder="Rivera Landscaping LLC"></div>
+          <div class="form-field"><label>Business Type</label><input [(ngModel)]="newClient.business_type" placeholder="LLC, Corp…"></div>
+        </ng-container>
+        <div class="form-field"><label>Email</label><input [(ngModel)]="newClient.email" type="email" placeholder="email@example.com"></div>
+        <div class="form-field"><label>Phone</label><input [(ngModel)]="newClient.phone" placeholder="(555) 000-0000"></div>
+        <div class="form-field"><label>City</label><input [(ngModel)]="newClient.city" placeholder="Austin"></div>
+        <div class="form-field"><label>State</label><input [(ngModel)]="newClient.state" placeholder="TX"></div>
+        <div class="form-field"><label>Assigned Agent</label><input [(ngModel)]="newClient.assigned_agent" placeholder="Agent name"></div>
+        <div class="form-field"><label>Status</label>
+          <select [(ngModel)]="newClient.status">
+            <option value="active">Active</option>
+            <option value="prospect">Prospect</option>
+            <option value="inactive">Inactive</option>
+          </select>
+        </div>
+      </div>
+      <div class="color-row">
+        <label style="font-size:12px;color:#64748b;margin-right:10px">Avatar colour</label>
+        <button *ngFor="let col of AVATAR_COLORS" class="color-dot"
+                [style.background]="col"
+                [class.selected]="newClient.avatar_color === col"
+                (click)="newClient.avatar_color = col"></button>
+      </div>
+      <div style="display:flex;gap:8px;margin-top:16px">
+        <button class="tb-btn tb-pri" (click)="saveClient()" [disabled]="saving">{{ saving ? 'Saving…' : '✓ Create Client' }}</button>
+        <button class="tb-btn tb-sec" (click)="showAddForm=false">Cancel</button>
+      </div>
+    </div>
+
+    <!-- Loading -->
+    <div class="loading-row" *ngIf="loading">
+      <div class="spinner"></div><span>Loading clients…</span>
+    </div>
+
+    <!-- Empty -->
+    <div class="empty-state" *ngIf="!loading && filtered.length === 0 && !showAddForm">
+      <span class="empty-ico">👤</span>
+      <h3>{{ searchQ ? 'No clients found' : 'No clients yet' }}</h3>
+      <p>{{ searchQ ? 'Try a different search term' : 'Add your first client to get started' }}</p>
+      <button class="empty-btn" *ngIf="!searchQ" (click)="openAddForm()">+ Add Client</button>
+    </div>
+
+    <!-- Client grid -->
+    <div class="client-grid" *ngIf="!loading && filtered.length > 0">
+      <div class="client-card" *ngFor="let c of filtered">
+
+        <!-- Header -->
+        <div class="cc-header" (click)="openClient(c)">
+          <div class="cc-avatar" [style.background]="c.avatar_color || '#6366f1'">{{ initials(c) }}</div>
+          <div class="cc-info">
+            <div class="cc-name">{{ c.display_name }}</div>
+            <div class="cc-num">{{ c.client_number }} · {{ c.client_type | titlecase }}</div>
+          </div>
+          <span class="badge" [class.badge-green]="c.status==='active'"
+                              [class.badge-amber]="c.status==='prospect'"
+                              [class.badge-slate]="c.status==='inactive'">
+            {{ c.status | titlecase }}
+          </span>
+          <button class="cc-delete" title="Delete" *ngIf="!c._confirming"
+                  (click)="deleteClient(c, $event)">🗑</button>
+          <div class="cc-confirm" *ngIf="c._confirming" (click)="$event.stopPropagation()">
+            <span>Delete?</span>
+            <button class="cc-confirm-yes" (click)="confirmDelete(c, $event)"
+                    [disabled]="c._deleting">{{ c._deleting ? '…' : 'Yes' }}</button>
+            <button class="cc-confirm-no" (click)="cancelDelete(c, $event)">No</button>
+          </div>
+        </div>
+
+        <!-- Stats -->
+        <div class="cc-stats" (click)="openClient(c)">
+          <div class="cc-stat">
+            <span class="cc-stat-val">{{ c.policy_count || 0 }}</span>
+            <span class="cc-stat-lbl">Policies</span>
+          </div>
+          <div class="cc-stat">
+            <span class="cc-stat-val">${{ (c.total_premium || 0) | number:'1.0-0' }}</span>
+            <span class="cc-stat-lbl">Premium</span>
+          </div>
+          <div class="cc-stat" *ngIf="c.nearest_renewal_days != null">
+            <span class="cc-stat-val" [style.color]="renewalColor(c.nearest_renewal_days)">{{ c.nearest_renewal_days }}d</span>
+            <span class="cc-stat-lbl">Renewal</span>
+          </div>
+          <div class="cc-stat" *ngIf="c.nearest_renewal_days == null">
+            <span class="cc-stat-val">{{ c.doc_count || 0 }}</span>
+            <span class="cc-stat-lbl">Docs</span>
+          </div>
+        </div>
+
+        <!-- Action buttons -->
+        <div class="cc-actions">
+          <button class="cc-action-btn cc-action-gap" title="Run gap analysis"
+                  (click)="runGapAnalysis(c, $event)" [disabled]="c._analyzing">
+            {{ c._analyzing ? '…' : '🔎 Gap' }}
+          </button>
+          <button class="cc-action-btn cc-action-loss" title="Upload loss run"
+                  (click)="goToLossRun(c, $event)">📉 Loss Run</button>
+          <button class="cc-action-btn cc-action-coi" title="Generate COI"
+                  (click)="goToCOI(c, $event)">📜 COI</button>
+          <button class="cc-action-btn cc-action-ai"
+                  [class.active]="globalAiOpen && activeAiClient?.id === c.id"
+                  title="Ask AI about this client"
+                  (click)="askAI(c, $event)">✦ Ask AI</button>
+        </div>
+
+        <!-- Gap result inline -->
+        <div class="cc-gap-result" *ngIf="c._gapResult" (click)="$event.stopPropagation()">
+          <div class="cc-gap-score">
+            <span class="cc-grade" [ngClass]="'grade-' + (c._gapResult.grade || 'x').toLowerCase()">
+              {{ c._gapResult.grade }}
+            </span>
+            <span class="cc-gap-label">{{ c._gapResult.score }}/100 coverage score</span>
+            <span class="cc-gap-gaps" *ngIf="c._gapResult.critical_gaps > 0">
+              ⚠ {{ c._gapResult.critical_gaps }} critical gaps
+            </span>
+          </div>
+          <button class="cc-gap-view" (click)="viewGapDetail(c, $event)">View →</button>
+        </div>
+
+      </div>
+    </div>
+
+  </div>
+</div>
+<!-- END .page -->
+
+<!-- ── Ask AI Side Panel — outside .page, fixed right ────────────────────── -->
+<div class="client-ai-panel" [class.client-ai-panel-open]="globalAiOpen">
+
+  <div class="caip-header">
+    <div class="caip-header-left">
+      <span class="caip-icon">✦</span>
+      <div>
+        <h3 class="caip-title">Ask AI</h3>
+        <p class="caip-subtitle">
+          {{ activeAiClient ? activeAiClient.display_name : 'All Clients' }} · phi3:mini · Local
+        </p>
+      </div>
+    </div>
+    <div class="caip-header-right">
+      <button class="caip-icon-btn" (click)="exportChat()" title="Export chat" *ngIf="globalMsgs.length > 1">⬇</button>
+      <button class="caip-icon-btn" (click)="clearGlobalChat()" title="Clear chat">🗑</button>
+      <button class="caip-icon-btn" (click)="closeGlobalAI()" title="Close">✕</button>
+    </div>
+  </div>
+
+  <div class="caip-context" *ngIf="activeAiClient">
+    <span class="caip-context-label">Analyzing:</span>
+    <span class="caip-context-val">
+      {{ activeAiClient.display_name }} ·
+      {{ activeAiClient.policy_count || 0 }} policies ·
+      ${{ (activeAiClient.total_premium || 0) | number:'1.0-0' }} premium
+    </span>
+    <button class="caip-context-clear" (click)="activeAiClient = null; initGlobalChat()">× All</button>
+  </div>
+
+  <div class="caip-messages">
+    <div *ngFor="let msg of globalMsgs"
+         class="caip-msg"
+         [class.caip-msg-user]="msg.role === 'user'"
+         [class.caip-msg-ai]="msg.role === 'ai'">
+      <div class="caip-avatar">{{ msg.role === 'user' ? '👤' : '✦' }}</div>
+      <div class="caip-msg-body">
+        <div class="caip-bubble">
+          <span *ngIf="msg.text">{{ msg.text }}</span>
+          <span *ngIf="!msg.text && msg.role === 'ai' && globalAiLoading" class="caip-typing">
+            <span></span><span></span><span></span>
+          </span>
+        </div>
+        <div class="caip-time">{{ msg.time | date:'shortTime' }}</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="caip-suggestions" *ngIf="globalMsgs.length <= 1">
+    <p class="caip-sug-label">Try asking:</p>
+    <div class="caip-chips">
+      <button class="caip-chip" (click)="globalAiInput='Which policies are expiring soon?'; sendGlobalAI()">⏰ Expiring soon?</button>
+      <button class="caip-chip" (click)="globalAiInput='What coverage gaps exist?'; sendGlobalAI()">🔎 Coverage gaps?</button>
+      <button class="caip-chip" (click)="globalAiInput='Which clients need attention?'; sendGlobalAI()">⚠ Need attention?</button>
+      <button class="caip-chip" (click)="globalAiInput='Summarize this client portfolio'; sendGlobalAI()">📋 Portfolio summary</button>
+    </div>
+  </div>
+
+  <div class="caip-input-area">
+    <div class="caip-input-wrap">
+      <textarea [(ngModel)]="globalAiInput"
+                (keydown)="onGlobalAIKey($event)"
+                [disabled]="globalAiLoading"
+                placeholder="Ask about clients, policies, renewals..."
+                class="caip-textarea" rows="1">
+      </textarea>
+      <button class="caip-send"
+              [disabled]="!globalAiInput.trim() || globalAiLoading"
+              (click)="sendGlobalAI()">
+        {{ globalAiLoading ? '⏳' : '→' }}
+      </button>
+    </div>
+    <p class="caip-hint">Enter to send · Shift+Enter for new line</p>
+  </div>
+
+</div>

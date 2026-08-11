@@ -1,0 +1,179 @@
+<div class="document-details-container">
+    <!-- Loading State -->
+    <div *ngIf="loading" class="loading-container">
+      <mat-spinner></mat-spinner>
+      <p>Loading document details...</p>
+    </div>
+  
+    <!-- Tabs -->
+    <mat-tab-group *ngIf="!loading" [(selectedIndex)]="selectedTabIndex" animationDuration="300ms">
+      
+      <!-- SUMMARY TAB -->
+      <mat-tab>
+        <ng-template mat-tab-label>
+          <mat-icon>article</mat-icon>
+          Summary
+        </ng-template>
+        <div class="tab-content">
+          <mat-card>
+            <mat-card-content>
+              <p class="summary-text">{{ summary }}</p>
+            </mat-card-content>
+          </mat-card>
+        </div>
+      </mat-tab>
+  
+      <!-- AI INSIGHTS TAB -->
+      <mat-tab>
+        <ng-template mat-tab-label>
+          <mat-icon>lightbulb</mat-icon>
+          AI Insights
+          <mat-chip class="count-chip">{{ insights.length }}</mat-chip>
+        </ng-template>
+        <div class="tab-content">
+          <mat-list class="insights-list">
+            <mat-list-item *ngFor="let insight of insights; let i = index">
+              <mat-icon matListItemIcon class="insight-icon">check_circle</mat-icon>
+              <div matListItemTitle>{{ insight }}</div>
+            </mat-list-item>
+          </mat-list>
+  
+          <!-- Load More Button -->
+          <div class="load-more-container" *ngIf="insightsHasMore">
+            <button 
+              mat-stroked-button 
+              color="primary" 
+              (click)="loadMoreInsights()"
+              [disabled]="insightsLoading">
+              <mat-spinner *ngIf="insightsLoading" diameter="20"></mat-spinner>
+              <mat-icon *ngIf="!insightsLoading">expand_more</mat-icon>
+              {{ insightsLoading ? 'Loading...' : 'Load More Insights' }}
+            </button>
+          </div>
+  
+          <!-- No More Items -->
+          <div class="no-more-items" *ngIf="!insightsHasMore && insights.length > insightsLimit">
+            <mat-icon>check</mat-icon>
+            <span>All insights loaded</span>
+          </div>
+        </div>
+      </mat-tab>
+  
+      <!-- KEY POINTS TAB -->
+      <mat-tab>
+        <ng-template mat-tab-label>
+          <mat-icon>checklist</mat-icon>
+          Key Points
+          <mat-chip class="count-chip">{{ keyPoints.length }}</mat-chip>
+        </ng-template>
+        <div class="tab-content">
+          <mat-list class="key-points-list">
+            <mat-list-item *ngFor="let point of keyPoints; let i = index">
+              <mat-icon matListItemIcon class="key-point-icon">check_circle</mat-icon>
+              <div matListItemTitle class="key-point-text">{{ point }}</div>
+            </mat-list-item>
+          </mat-list>
+  
+          <!-- Load More Button -->
+          <div class="load-more-container" *ngIf="keyPointsHasMore">
+            <button 
+              mat-stroked-button 
+              color="primary" 
+              (click)="loadMoreKeyPoints()"
+              [disabled]="keyPointsLoading">
+              <mat-spinner *ngIf="keyPointsLoading" diameter="20"></mat-spinner>
+              <mat-icon *ngIf="!keyPointsLoading">expand_more</mat-icon>
+              {{ keyPointsLoading ? 'Loading...' : 'Load More Key Points' }}
+            </button>
+          </div>
+  
+          <!-- No More Items -->
+          <div class="no-more-items" *ngIf="!keyPointsHasMore && keyPoints.length > keyPointsLimit">
+            <mat-icon>check</mat-icon>
+            <span>All key points loaded</span>
+          </div>
+        </div>
+      </mat-tab>
+  
+      <!-- CLASSIFICATION TAB -->
+      <mat-tab>
+        <ng-template mat-tab-label>
+          <mat-icon>category</mat-icon>
+          Classification
+        </ng-template>
+        <div class="tab-content" *ngIf="classifications">
+          <mat-card>
+            <mat-card-content>
+              <div class="classification-row">
+                <span class="label">Document Type:</span>
+                <mat-chip highlighted>{{ classifications.document_type }}</mat-chip>
+              </div>
+              <div class="classification-row" *ngIf="classifications.primary_classification">
+                <span class="label">Primary Classification:</span>
+                <mat-chip color="primary">{{ classifications.primary_classification }}</mat-chip>
+              </div>
+              <div class="classification-row" *ngIf="classifications.confidence_score">
+                <span class="label">Confidence:</span>
+                <span>{{ (classifications.confidence_score * 100).toFixed(1) }}%</span>
+              </div>
+              <div class="classification-row" *ngIf="classifications.all_classifications?.length > 0">
+                <span class="label">All Classifications:</span>
+                <mat-chip-set>
+                  <mat-chip *ngFor="let cls of classifications.all_classifications">{{ cls }}</mat-chip>
+                </mat-chip-set>
+              </div>
+            </mat-card-content>
+          </mat-card>
+        </div>
+      </mat-tab>
+  
+      <!-- DETAILS TAB -->
+      <mat-tab>
+        <ng-template mat-tab-label>
+          <mat-icon>info</mat-icon>
+          Details
+        </ng-template>
+        <div class="tab-content" *ngIf="details">
+          <mat-card>
+            <mat-card-content>
+              <div class="detail-row">
+                <span class="label">Filename:</span>
+                <span>{{ details.filename }}</span>
+              </div>
+              <div class="detail-row">
+                <span class="label">File Size:</span>
+                <span>{{ formatFileSize(details.file_size) }}</span>
+              </div>
+              <div class="detail-row">
+                <span class="label">Type:</span>
+                <mat-chip>{{ details.doc_type }}</mat-chip>
+              </div>
+              <div class="detail-row">
+                <span class="label">Status:</span>
+                <mat-chip [color]="details.status === 'completed' ? 'primary' : 'accent'">
+                  {{ details.status }}
+                </mat-chip>
+              </div>
+              <div class="detail-row">
+                <span class="label">Created:</span>
+                <span>{{ details.created_at | date:'medium' }}</span>
+              </div>
+              <div class="detail-row">
+                <span class="label">Updated:</span>
+                <span>{{ details.updated_at | date:'medium' }}</span>
+              </div>
+              
+              <!-- Keywords -->
+              <div class="detail-row" *ngIf="details.keywords?.length > 0">
+                <span class="label">Keywords:</span>
+                <mat-chip-set>
+                  <mat-chip *ngFor="let keyword of details.keywords.slice(0, 10)">{{ keyword }}</mat-chip>
+                </mat-chip-set>
+              </div>
+            </mat-card-content>
+          </mat-card>
+        </div>
+      </mat-tab>
+  
+    </mat-tab-group>
+  </div>

@@ -1,0 +1,124 @@
+<div class="voice-backdrop" [class.active]="isOpen" (click)="closed.emit()"></div>
+
+<div class="voice-panel" [class.open]="isOpen">
+  <div class="voice-panel-header">
+    <div class="voice-title">
+      <div class="voice-active-indicator" [class.listening]="isListening && !wakeWordMode" [class.speaking]="isSpeaking"></div>
+      <span>Hey Bomma Voice Agent</span>
+    </div>
+    <div style="display: flex; align-items: center; gap: 0.5rem;">
+      <button class="btn-theme-toggle-header" (click)="theme.toggle()" title="Toggle Theme">
+        {{ theme.isDark ? '☀️' : '🌙' }}
+      </button>
+      <button class="btn-audio-toggle" (click)="autoReadAloud = !autoReadAloud" [class.active]="autoReadAloud" [title]="autoReadAloud ? 'Mute Auto Read Aloud' : 'Unmute Auto Read Aloud'">
+        {{ autoReadAloud ? '🔊' : '🔇' }}
+      </button>
+      <button class="btn-clear-history" *ngIf="chatHistory.length > 0 || activeDocument" (click)="clearActiveDocument()" title="Clear history & context">🧹 Clear</button>
+      <button class="btn-close" (click)="closed.emit()">×</button>
+    </div>
+  </div>
+  
+  <div class="voice-panel-body">
+    <!-- Siri-like Voice Wave Orb -->
+    <div class="voice-orb-container">
+      <div class="voice-orb" 
+           [class.listening]="isListening && !wakeWordMode" 
+           [class.speaking]="isSpeaking"
+           (click)="triggerManualListen()">
+        <div class="orb-ring ring-1"></div>
+        <div class="orb-ring ring-2"></div>
+        <div class="orb-ring ring-3"></div>
+        <span class="orb-mic-icon">🎙️</span>
+      </div>
+      <p class="voice-status">{{ status }}</p>
+      <div class="voice-transcript">"{{ transcript }}"</div>
+    </div>
+
+
+
+    <!-- Active Document Context Badge -->
+    <div class="active-doc-badge" *ngIf="activeDocument">
+      <span class="doc-badge-icon">📄</span>
+      <span class="doc-badge-name" title="{{ activeDocument.filename }}">Locked: {{ activeDocument.filename }}</span>
+      <button class="doc-badge-clear" (click)="clearActiveDocument()" title="Clear document lock">×</button>
+    </div>
+
+    <!-- Suggested Questions on active document -->
+    <div class="suggested-questions-sec" *ngIf="activeDocument && suggestedQuestions.length > 0">
+      <h4>Ask About This Document:</h4>
+      <div class="suggested-list">
+        <button class="suggested-q-btn" *ngFor="let q of suggestedQuestions" (click)="askSuggestedQuestion(q)">
+          ❓ {{ q }}
+        </button>
+      </div>
+    </div>
+
+    <!-- Action Output Area -->
+    <div class="voice-output-area" *ngIf="outputMode !== 'idle'">
+      
+      <!-- Schedule Feed -->
+      <ng-container *ngIf="outputMode === 'schedule'">
+        <div class="schedule-card" *ngFor="let event of eventsList" [class.gmail]="event.source === 'Gmail'" [class.teams]="event.source === 'Teams'">
+          <div class="schedule-meta">
+            <span class="meta-src">📁 {{ event.source || 'AMS Feed' }}</span>
+            <span class="meta-time">{{ event.time | date:'shortTime' || event.time }}</span>
+          </div>
+          <div class="schedule-title">{{ event.title }}</div>
+          <div class="schedule-sub" *ngIf="event.subtitle">{{ event.subtitle }}</div>
+        </div>
+      </ng-container>
+
+      <!-- Summaries Feed -->
+      <ng-container *ngIf="outputMode === 'summaries'">
+        <div class="summary-feed-card">
+          <div class="summary-feed-title">Today's Bullet Summaries</div>
+          <div class="feed-item" *ngFor="let summary of summariesList">
+            <div class="feed-text">{{ summary }}</div>
+          </div>
+        </div>
+      </ng-container>
+
+      <!-- AI Answer Feed -->
+      <ng-container *ngIf="outputMode === 'ai_answer'">
+        <div class="chat-history-container">
+          <div class="chat-history-item" *ngFor="let item of chatHistory; let i = index">
+            <!-- AI Bubble -->
+            <div class="ai-answer-card">
+              <div class="ai-answer-header">
+                <span class="ai-sparkle">✦</span>
+                <span>UniDocVerse Agent Answer</span>
+                <button class="btn-read-aloud" (click)="readAloudHistoryItem(item, i)">
+                  {{ activeSpeakingIndex === i ? '⏹ Stop' : '🔊 Read Aloud' }}
+                </button>
+              </div>
+              <div class="ai-answer-content" [innerHTML]="item.answer"></div>
+            </div>
+          </div>
+        </div>
+      </ng-container>
+
+    </div>
+
+    <!-- Text Input Box for Specific Questions -->
+    <div class="voice-text-input-container">
+      <input type="text" 
+             #textQueryInput 
+             placeholder="Type a specific question..." 
+             (keydown.enter)="onTextInput(textQueryInput.value); textQueryInput.value = ''" />
+      <button class="btn-send-text" (click)="onTextInput(textQueryInput.value); textQueryInput.value = ''">
+        <span>➡️</span>
+      </button>
+    </div>
+
+    <!-- Helper Prompts -->
+    <div class="voice-commands-help">
+      <h4>Try Saying:</h4>
+      <ul>
+        <li>🗣️ <em>"Hey Bomma, how my schedule looks like?"</em></li>
+        <li>📋 <em>"Hey Bomma, read the one line summaries of today"</em></li>
+        <li>📝 <em>"Hey Bomma, write a note audit lease agreements tomorrow"</em></li>
+        <li>🔍 <em>"Hey Bomma, search for Carlos"</em></li>
+      </ul>
+    </div>
+  </div>
+</div>

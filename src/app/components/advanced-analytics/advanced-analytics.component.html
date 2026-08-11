@@ -1,0 +1,445 @@
+<!-- ═══════════════════════════════════════════════════════════════
+     LOADING STATE
+═══════════════════════════════════════════════════════════════ -->
+<div *ngIf="loading" class="aa-loading">
+  <div class="aa-loading-orb">
+    <mat-spinner diameter="48"></mat-spinner>
+  </div>
+  <p class="aa-loading-text">Analyzing document&hellip;</p>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════════════
+     ERROR STATE
+═══════════════════════════════════════════════════════════════ -->
+<div *ngIf="!loading && error" class="aa-error">
+  <div class="aa-error-card">
+    <mat-icon class="aa-error-icon">error_outline</mat-icon>
+    <h2>Unable to Load Analytics</h2>
+    <p>{{ error }}</p>
+    <button mat-raised-button (click)="goBack()" class="aa-btn-primary">
+      <mat-icon>arrow_back</mat-icon> Back to Documents
+    </button>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════════════
+     MAIN SHELL
+═══════════════════════════════════════════════════════════════ -->
+<div *ngIf="!loading && !error && uiConfig"
+     class="aa-shell"
+     [class.aa-split]="qaOpen">
+
+  <!-- ── TOP NAV ───────────────────────────────────────────────── -->
+  <header class="aa-nav">
+    <div class="aa-nav-inner">
+
+      <!-- Left -->
+      <div class="aa-nav-left">
+        <button mat-icon-button (click)="goBack()" class="aa-icon-btn" matTooltip="Back">
+          <mat-icon>arrow_back</mat-icon>
+        </button>
+        <div class="aa-brand">
+          <span class="aa-brand-logo">
+            <mat-icon>analytics</mat-icon>
+          </span>
+          <div>
+            <div class="aa-brand-title">Advanced Analytics</div>
+            <div class="aa-brand-sub">Comprehensive insights &amp; visualizations</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Center — view toggle -->
+      <div class="aa-nav-center">
+        <div class="aa-toggle-group">
+          <button class="aa-toggle-btn"
+                  [class.active]="viewMode==='combined'"
+                  (click)="viewMode='combined'">
+            <mat-icon>dashboard</mat-icon><span>Combined</span>
+          </button>
+          <button class="aa-toggle-btn"
+                  [class.active]="viewMode==='charts'"
+                  (click)="viewMode='charts'">
+            <mat-icon>bar_chart</mat-icon><span>Charts</span>
+          </button>
+          <button class="aa-toggle-btn"
+                  [class.active]="viewMode==='tables'"
+                  (click)="viewMode='tables'">
+            <mat-icon>table_chart</mat-icon><span>Tables</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- Right — actions -->
+      <div class="aa-nav-right">
+        <button class="aa-action-btn aa-ai-btn"
+                [class.aa-ai-active]="qaOpen"
+                (click)="toggleQA()">
+          <mat-icon>{{ qaOpen ? 'close' : 'smart_toy' }}</mat-icon>
+          <span>{{ qaOpen ? 'Close AI' : 'Ask AI' }}</span>
+        </button>
+
+        <button class="aa-action-btn aa-v2-btn" (click)="tryV2Dashboard()">
+          <mat-icon>rocket_launch</mat-icon>
+          <span>Try V2</span>
+        </button>
+
+        <button class="aa-action-btn aa-export-btn" [matMenuTriggerFor]="exportMenu">
+          <mat-icon>file_download</mat-icon>
+          <span>Export</span>
+        </button>
+
+        <mat-menu #exportMenu="matMenu" class="aa-menu">
+          <button mat-menu-item (click)="exportToExcel()">
+            <mat-icon style="color:#10b981">table_chart</mat-icon><span>Excel</span>
+          </button>
+          <button mat-menu-item (click)="exportToPDF()">
+            <mat-icon style="color:#ef4444">picture_as_pdf</mat-icon><span>PDF Report</span>
+          </button>
+        </mat-menu>
+      </div>
+
+    </div>
+  </header>
+
+  <!-- ── SCROLLABLE CONTENT ────────────────────────────────────── -->
+  <div class="aa-content">
+
+    <!-- ── HERO METRIC CARDS ──────────────────────────────────── -->
+    <section *ngIf="getHeroMetrics().length > 0 && (viewMode==='combined' || viewMode==='charts')"
+             class="aa-metrics-row">
+      <div *ngFor="let m of getHeroMetrics(); let i = index"
+           class="aa-metric-card"
+           [style.animation-delay]="(i * 0.06) + 's'">
+        <div class="aa-metric-glow"></div>
+        <div class="aa-metric-icon-wrap">
+          <mat-icon>{{ m.icon || 'analytics' }}</mat-icon>
+        </div>
+        <div class="aa-metric-body">
+          <div class="aa-metric-label">{{ m.label }}</div>
+          <div class="aa-metric-value">{{ formatMetric(m) }}</div>
+
+          <!-- badge: percentage pill (e.g. "51%" from segments) -->
+          <span *ngIf="m.badge && !m.status" class="aa-metric-badge badge-neutral">
+            {{ m.badge }}
+          </span>
+
+          <!-- status: good / warn / bad from financial docs -->
+          <span *ngIf="m.status" class="aa-metric-badge"
+                [class.badge-good]="m.status === 'good' || m.status === 'positive'"
+                [class.badge-warn]="m.status === 'warning'"
+                [class.badge-bad]="m.status === 'bad'   || m.status === 'negative'">
+            {{ m.status }}
+          </span>
+        </div>
+      </div>
+    </section>
+
+    <!-- ── CHARTS GRID ────────────────────────────────────────── -->
+    <section *ngIf="getCharts().length > 0 && (viewMode==='combined' || viewMode==='charts')"
+             class="aa-section">
+      <div class="aa-section-head">
+        <mat-icon>bar_chart</mat-icon>
+        <h2>Visualizations</h2>
+        <span class="aa-section-count">{{ getCharts().length }}</span>
+      </div>
+
+      <div class="aa-charts-grid">
+        <div *ngFor="let chart of getCharts(); let i = index"
+             class="aa-chart-card"
+             [class.full]="chart.full_width"
+             [style.animation-delay]="(i * 0.05 + 0.1) + 's'">
+
+          <div class="aa-chart-card-head">
+            <span class="aa-chart-type-icon">
+              <mat-icon>{{
+                chart.type === 'pie'      || chart.type === 'doughnut' ? 'pie_chart'    :
+                chart.type === 'line'                                  ? 'show_chart'   :
+                chart.type === 'scatter' || chart.type === 'scatter_plot' ? 'scatter_plot' :
+                'bar_chart'
+              }}</mat-icon>
+            </span>
+            <div class="aa-chart-title-wrap">
+              <span class="aa-chart-title">{{ chart.title }}</span>
+              <span *ngIf="chart.subtitle" class="aa-chart-sub">{{ chart.subtitle }}</span>
+            </div>
+          </div>
+
+          <!-- Chart canvas -->
+          <div class="aa-chart-body" *ngIf="getChartData(chart) as cd">
+            <canvas baseChart
+                    [data]="cd.data"
+                    [type]="cd.type"
+                    [options]="cd.options">
+            </canvas>
+          </div>
+
+          <!-- No-data fallback -->
+          <div *ngIf="!getChartData(chart)" class="aa-no-data">
+            <mat-icon>info_outline</mat-icon>
+            <span>No data available</span>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ── PROGRESS CHARTS ────────────────────────────────────── -->
+    <ng-container *ngFor="let prog of getProgressCharts()">
+      <div class="aa-progress-card">
+        <div class="aa-progress-head">
+          <mat-icon>savings</mat-icon>
+          <span>{{ prog.title }}</span>
+        </div>
+        <ng-container *ngIf="getProgressValue(prog) > 0; else noProgress">
+          <div class="aa-progress-labels">
+            <span class="aa-progress-cur">{{ formatValue(getProgressValue(prog), 'currency') }}</span>
+            <span class="aa-progress-max">of {{ formatValue(getProgressMax(prog), 'currency') }} limit</span>
+          </div>
+          <div class="aa-progress-track">
+            <div class="aa-progress-fill"
+                 [style.width.%]="getProgressPct(prog)"
+                 [style.background]="prog.color || '#818cf8'">
+            </div>
+          </div>
+          <div class="aa-progress-pct">{{ getProgressPct(prog) }}% utilized</div>
+        </ng-container>
+        <ng-template #noProgress>
+          <div class="aa-no-data">
+            <mat-icon>info_outline</mat-icon>
+            <span>No contributions this period</span>
+          </div>
+        </ng-template>
+      </div>
+    </ng-container>
+
+    <!-- ── INSIGHTS ───────────────────────────────────────────── -->
+    <section *ngIf="getInsights().length > 0" class="aa-section">
+      <div class="aa-section-head">
+        <mat-icon>insights</mat-icon>
+        <h2>Key Insights</h2>
+        <span class="aa-section-count">{{ getInsights().length }}</span>
+      </div>
+      <div class="aa-insights-grid">
+        <div *ngFor="let ins of getInsights()" class="aa-insight-card">
+          <div class="aa-insight-icon">
+            <mat-icon>{{ getInsightIcon(ins.category) }}</mat-icon>
+          </div>
+          <div class="aa-insight-body">
+            <div class="aa-insight-title">{{ ins.title }}</div>
+            <div *ngIf="ins.description" class="aa-insight-desc">{{ ins.description }}</div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ── ALERTS ─────────────────────────────────────────────── -->
+    <section *ngIf="getAlerts().length > 0" class="aa-section">
+      <div class="aa-section-head">
+        <mat-icon>notifications_active</mat-icon>
+        <h2>Alerts</h2>
+        <span class="aa-section-count">{{ getAlerts().length }}</span>
+      </div>
+      <div class="aa-alerts-list">
+        <div *ngFor="let alert of getAlerts()"
+             class="aa-alert-item"
+             [ngClass]="getAlertClass(alert.type)">
+          <mat-icon class="aa-alert-icon">{{ getAlertIcon(alert.type) }}</mat-icon>
+          <div>
+            <div class="aa-alert-title">{{ alert.title }}</div>
+            <div *ngIf="alert.message" class="aa-alert-msg">{{ alert.message }}</div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ── ACTION PLAN ────────────────────────────────────────── -->
+    <section *ngIf="getActionPlan().length > 0" class="aa-section">
+      <div class="aa-section-head">
+        <mat-icon>task_alt</mat-icon>
+        <h2>Action Plan</h2>
+      </div>
+      <div class="aa-actions-list">
+        <div *ngFor="let action of getActionPlan()"
+             class="aa-action-item"
+             [ngClass]="getPriorityClass(action.priority)">
+          <div class="aa-action-badge">{{ action.priority | uppercase }}</div>
+          <div>
+            <div class="aa-action-title">{{ action.action }}</div>
+            <div *ngIf="action.detail"         class="aa-action-detail">{{ action.detail }}</div>
+            <div *ngIf="action.monthly_impact" class="aa-action-impact">
+              💰 ~${{ action.monthly_impact | number:'1.0-0' }}/month savings
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ── DATA TABLES ────────────────────────────────────────── -->
+    <section *ngIf="getTables().length > 0 && (viewMode==='combined' || viewMode==='tables')"
+             class="aa-section">
+      <div class="aa-section-head">
+        <mat-icon>table_chart</mat-icon>
+        <h2>Data Tables</h2>
+        <span class="aa-section-count">{{ getTables().length }}</span>
+      </div>
+
+      <div class="aa-tables-list">
+        <div *ngFor="let table of getTables(); let i = index"
+             class="aa-table-card"
+             [style.animation-delay]="(i * 0.07) + 's'">
+
+          <!-- Table header -->
+          <div class="aa-table-head">
+            <div class="aa-table-head-left">
+              <mat-icon class="aa-table-icon">dataset</mat-icon>
+              <span class="aa-table-title">{{ table.title }}</span>
+              <span class="aa-table-badge">{{ table.data?.length || 0 }} rows</span>
+            </div>
+            <button mat-icon-button [matMenuTriggerFor]="tblMenu" class="aa-icon-btn-sm">
+              <mat-icon>more_vert</mat-icon>
+            </button>
+            <mat-menu #tblMenu="matMenu" class="aa-menu">
+              <button mat-menu-item (click)="exportTable(table.id || table.name)">
+                <mat-icon style="color:#10b981">table_chart</mat-icon><span>Export Excel</span>
+              </button>
+              <button mat-menu-item (click)="exportTableAsCSV(table.id || table.name)">
+                <mat-icon style="color:#3b82f6">description</mat-icon><span>Export CSV</span>
+              </button>
+              <button mat-menu-item (click)="exportTableAsPDF(table.id || table.name)">
+                <mat-icon style="color:#ef4444">picture_as_pdf</mat-icon><span>Export PDF</span>
+              </button>
+            </mat-menu>
+          </div>
+
+          <!-- Table body -->
+          <div *ngIf="table.data && table.data.length > 0" class="aa-table-scroll">
+            <table mat-table [dataSource]="table.data" class="aa-mat-table">
+              <ng-container *ngFor="let col of table.columns" [matColumnDef]="col.field">
+                <th mat-header-cell *matHeaderCellDef [style.text-align]="col.align">
+                  {{ col.label }}
+                </th>
+                <td mat-cell *matCellDef="let row" [style.text-align]="col.align">
+                  {{ formatTableValue(row[col.field], col) }}
+                </td>
+              </ng-container>
+              <tr mat-header-row *matHeaderRowDef="getTableDisplayColumns(table); sticky: true"></tr>
+              <tr mat-row       *matRowDef="let row; columns: getTableDisplayColumns(table);"></tr>
+            </table>
+          </div>
+
+          <div *ngIf="!table.data || table.data.length === 0" class="aa-no-data">
+            <mat-icon>inbox</mat-icon><span>No data available</span>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ── EMPTY STATE ────────────────────────────────────────── -->
+    <div *ngIf="getHeroMetrics().length === 0 && getCharts().length === 0 && getTables().length === 0"
+         class="aa-empty">
+      <mat-icon>analytics</mat-icon>
+      <h2>No Analytics Available</h2>
+      <p>This document doesn't have advanced analytics data yet.</p>
+      <button class="aa-btn-primary" (click)="goBack()">
+        <mat-icon>arrow_back</mat-icon> Back to Documents
+      </button>
+    </div>
+
+  </div><!-- /aa-content -->
+</div><!-- /aa-shell -->
+
+<!-- ═══════════════════════════════════════════════════════════════
+     AI CHAT PANEL (fixed right drawer)
+═══════════════════════════════════════════════════════════════ -->
+<aside class="aa-qa-panel" [class.aa-qa-open]="qaOpen">
+
+  <!-- Panel Header -->
+  <div class="aa-qa-header">
+    <div class="aa-qa-header-left">
+      <div class="aa-qa-avatar-wrap">
+        <mat-icon class="aa-qa-bot-icon">smart_toy</mat-icon>
+        <span class="aa-qa-status-dot"></span>
+      </div>
+      <div>
+        <div class="aa-qa-title">AI Analytics Assistant</div>
+        <div class="aa-qa-subtitle">
+          <span class="aa-qa-dot-live"></span>
+          Powered by phi3:mini &middot; Local AI
+        </div>
+      </div>
+    </div>
+    <div class="aa-qa-header-right">
+      <button mat-icon-button (click)="clearChat()" matTooltip="Clear chat" class="aa-icon-btn">
+        <mat-icon>delete_sweep</mat-icon>
+      </button>
+      <button mat-icon-button (click)="toggleQA()" matTooltip="Close" class="aa-icon-btn">
+        <mat-icon>close</mat-icon>
+      </button>
+    </div>
+  </div>
+
+  <!-- Messages -->
+  <div class="aa-qa-messages" #chatScroll>
+    <div *ngFor="let msg of msgs"
+         class="aa-qa-msg"
+         [class.aa-qa-user]="msg.role === 'user'"
+         [class.aa-qa-ai]="msg.role === 'ai'">
+      <div class="aa-qa-msg-avatar">
+        <mat-icon>{{ msg.role === 'user' ? 'person' : 'smart_toy' }}</mat-icon>
+      </div>
+      <div class="aa-qa-msg-wrap">
+        <div class="aa-qa-bubble">
+          <span *ngIf="msg.text">{{ msg.text }}</span>
+          <span *ngIf="!msg.text && msg.role === 'ai' && chatLoading" class="aa-typing">
+            <span></span><span></span><span></span>
+          </span>
+        </div>
+        <div class="aa-qa-time">{{ msg.timestamp | date:'shortTime' }}</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Suggested chips (only at conversation start) -->
+  <div *ngIf="msgs.length <= 1" class="aa-qa-chips-wrap">
+    <p class="aa-qa-chips-label">Quick commands</p>
+    <div class="aa-qa-chips">
+      <button class="aa-chip"
+              (click)="chatInput='Which products have the highest total sales?'; sendChat()">
+        📊 Top products
+      </button>
+      <button class="aa-chip"
+              (click)="chatInput='Which regions generate the most revenue?'; sendChat()">
+        🌍 Best regions
+      </button>
+      <button class="aa-chip"
+              (click)="chatInput='Summarize this document'; sendChat()">
+        📋 Summarize
+      </button>
+      <button class="aa-chip"
+              (click)="chatInput='What action do I need to take?'; sendChat()">
+        ✅ Action items
+      </button>
+    </div>
+  </div>
+
+  <!-- Input bar -->
+  <div class="aa-qa-input-area">
+    <div class="aa-qa-input-wrap">
+      <textarea
+        [(ngModel)]="chatInput"
+        (keydown)="onChatKey($event)"
+        [disabled]="chatLoading"
+        placeholder="Ask anything about this document..."
+        class="aa-qa-textarea"
+        rows="1">
+      </textarea>
+      <button class="aa-qa-send"
+              [disabled]="!chatInput.trim() || chatLoading"
+              (click)="sendChat()">
+        <mat-icon>{{ chatLoading ? 'hourglass_empty' : 'send' }}</mat-icon>
+      </button>
+    </div>
+    <p class="aa-qa-hint">Enter to send &nbsp;·&nbsp; Shift+Enter for new line</p>
+  </div>
+
+</aside>

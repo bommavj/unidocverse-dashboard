@@ -1,0 +1,37 @@
+<div class="page">
+
+  <div class="tl-head">
+    <h1>Timeline</h1>
+    <p>Your documents organized by date</p>
+  </div>
+
+  <div *ngIf="loading" class="tl-loading">
+    <div class="tl-spin"></div> Loading timeline…
+  </div>
+
+  <div *ngIf="!loading && months.length === 0" class="tl-empty">
+    <span>📅</span><p>No documents yet</p>
+  </div>
+
+  <div *ngFor="let m of months" class="tl-month">
+    <div class="tl-month-lbl">{{ m.label }}</div>
+    <div class="tl-items">
+      <div *ngFor="let e of m.entries" class="tl-item" [ngClass]="'tl-item--'+e.status"
+           (click)="openDoc(e)" style="cursor:pointer">
+        <div class="tl-day"><span>{{ e.day }}</span>{{ e.month }}</div>
+        <div class="tl-ico" [style.background]="e.color">{{ e.icon }}</div>
+        <div class="tl-body">
+          <div class="tl-name">{{ e.name }}</div>
+          <div class="tl-meta">
+            <span>{{ e.type }}</span>
+            <span class="tl-tag" [ngClass]="'tl-tag--'+e.status">
+              {{ e.status==='done' ? 'Analyzed' : e.status==='up' ? 'Upcoming' : 'Pending' }}
+            </span>
+          </div>
+        </div>
+        <div class="tl-amt">{{ e.amount }}</div>
+      </div>
+    </div>
+  </div>
+
+</div>

@@ -1,0 +1,87 @@
+<div class="table-container">
+    <!-- Table Header with Search & Export -->
+    <div class="table-header" *ngIf="!isLoading && !hasError">
+      <mat-form-field appearance="outline" class="search-field">
+        <mat-label>Search</mat-label>
+        <input matInput (keyup)="applyFilter($event)" placeholder="Search table..." />
+        <mat-icon matPrefix>search</mat-icon>
+      </mat-form-field>
+  
+      <button 
+        mat-stroked-button 
+        *ngIf="config?.show_export"
+        (click)="exportToCSV()"
+        class="export-button">
+        <mat-icon>download</mat-icon>
+        Export CSV
+      </button>
+    </div>
+  
+    <!-- Loading State -->
+    <div *ngIf="isLoading" class="table-loading">
+      <mat-spinner diameter="40"></mat-spinner>
+      <p>Loading data...</p>
+    </div>
+  
+    <!-- Error State -->
+    <div *ngIf="hasError && !isLoading" class="table-error">
+      <mat-icon>error_outline</mat-icon>
+      <p>{{ errorMessage }}</p>
+    </div>
+  
+    <!-- Table -->
+    <div class="table-wrapper" *ngIf="!isLoading && !hasError">
+      <table mat-table [dataSource]="dataSource" matSort class="dynamic-table">
+        
+        <!-- Dynamic Columns -->
+        <ng-container *ngFor="let column of columns" [matColumnDef]="column.field">
+          <th mat-header-cell *matHeaderCellDef 
+              [mat-sort-header]="column.sortable !== false ? column.field : undefined"
+              [style.text-align]="getCellAlignment(column)"
+              [style.width]="column.width">
+            {{ column.label }}
+          </th>
+          <td mat-cell *matCellDef="let row" 
+              [style.text-align]="getCellAlignment(column)"
+              [class.number-cell]="column.type === 'number' || column.type === 'currency'">
+            {{ formatCellValue(row, column) }}
+          </td>
+        </ng-container>
+  
+        <!-- Header Row -->
+        <tr mat-header-row *matHeaderRowDef="displayedColumns; sticky: true"></tr>
+        
+        <!-- Data Rows -->
+        <tr mat-row *matRowDef="let row; columns: displayedColumns;" class="data-row"></tr>
+  
+        <!-- No Data Row -->
+        <tr class="mat-row" *matNoDataRow>
+          <td class="mat-cell no-data-cell" [attr.colspan]="displayedColumns.length">
+            <div class="no-data">
+              <mat-icon>inbox</mat-icon>
+              <p>No data matches your search</p>
+            </div>
+          </td>
+        </tr>
+      </table>
+  
+      <!-- Totals Row -->
+      <div *ngIf="config?.show_totals && getTotalRow()" class="totals-row">
+        <div class="totals-label">Totals:</div>
+        <div class="totals-values">
+          <span *ngFor="let column of columns" 
+                [style.text-align]="getCellAlignment(column)"
+                [style.width]="column.width">
+            {{ formatCellValue(getTotalRow(), column) }}
+          </span>
+        </div>
+      </div>
+  
+      <!-- Paginator -->
+      <mat-paginator 
+        [pageSizeOptions]="pageSizeOptions"
+        [pageSize]="pageSize"
+        showFirstLastButtons>
+      </mat-paginator>
+    </div>
+  </div>

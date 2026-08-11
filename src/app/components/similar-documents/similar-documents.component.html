@@ -1,0 +1,51 @@
+<div class="sim-backdrop" *ngIf="isOpen" (click)="closed.emit()">
+  <div class="sim-modal" (click)="$event.stopPropagation()">
+    <div class="sim-header">
+      <div class="sim-header__left">
+        <div class="sim-header__ico">⇄</div>
+        <div>
+          <div class="sim-header__title">Similar Documents</div>
+          <div class="sim-header__sub">Based on: {{ sourceDoc?.filename || sourceDoc?.name }}</div>
+        </div>
+      </div>
+      <button class="sim-header__close" (click)="closed.emit()">✕</button>
+    </div>
+    <div class="sim-body">
+      <div *ngIf="loading" class="sim-loading">
+        <div *ngFor="let i of [1,2,3]" class="sim-skeleton"></div>
+      </div>
+      <div *ngIf="!loading">
+        <div class="sim-found">Found {{ results.length }} similar document{{ results.length !== 1 ? 's' : '' }}</div>
+        <div *ngFor="let r of results; let i = index" class="sim-card">
+          <div class="sim-card__top">
+            <div class="sim-card__num">{{ i + 1 }}</div>
+            <div class="sim-card__ico">📄</div>
+            <div class="sim-card__name">{{ r.name }}</div>
+          </div>
+          <div class="sim-card__tags">
+            <span class="sim-tag sim-tag--type">{{ r.type }}</span>
+            <span class="sim-tag" [ngClass]="'sim-tag--' + r.tag">{{ r.tag }}</span>
+          </div>
+          <div class="sim-card__score-wrap">
+            <div class="sim-card__score-track">
+              <div class="sim-card__score-fill" [class.sim-card__score-fill--high]="r.score >= 80" [style.width.%]="r.score"></div>
+            </div>
+            <div class="sim-card__score-pct">{{ r.score }}% similarity · pgvector cosine distance</div>
+          </div>
+          <div class="sim-card__snippet">{{ r.snippet }}</div>
+          <div class="sim-card__view" (click)="openDoc.emit(r.id); closed.emit()">
+            <div class="sim-card__view-ico">👁</div> View Document
+          </div>
+        </div>
+        <div class="sim-empty" *ngIf="results.length === 0">
+          <div class="sim-empty__ico">🔍</div>
+          <div>No similar documents found. Upload more documents to enable semantic matching.</div>
+        </div>
+      </div>
+    </div>
+    <div class="sim-footer">
+      <span class="sim-footer__note">🔒 Powered by pgvector · 768-dim embeddings · local</span>
+      <button class="sim-footer__close" (click)="closed.emit()">Close</button>
+    </div>
+  </div>
+</div>

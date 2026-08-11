@@ -1,0 +1,134 @@
+<div class="ams-page">
+    <div class="ams-header">
+      <div>
+        <h1>💰 Commission Reconciliation</h1>
+        <p>Upload carrier statements · Match to policies · Flag discrepancies</p>
+      </div>
+      <div class="header-stats" *ngIf="discrepancies.length > 0">
+        <div class="stat-pill stat-red">{{ discrepancies.length }} Discrepancies</div>
+      </div>
+    </div>
+  
+    <!-- Tabs -->
+    <div class="tabs">
+      <button [class.active]="activeTab==='statements'" (click)="activeTab='statements'">Statements</button>
+      <button [class.active]="activeTab==='discrepancies'" (click)="activeTab='discrepancies'">
+        Discrepancies
+        <span class="tab-badge" *ngIf="discrepancies.length">{{ discrepancies.length }}</span>
+      </button>
+    </div>
+  
+    <!-- Upload Card -->
+    <div class="upload-card" *ngIf="activeTab==='statements'">
+      <h3>Upload Carrier Statement</h3>
+      <div class="upload-form">
+        <input type="text" [(ngModel)]="carrierName" placeholder="Carrier name (e.g. State Farm)" class="input">
+        <label class="file-btn">
+          <input type="file" accept=".pdf,.csv,.xlsx" (change)="onFileSelect($event)" hidden>
+          {{ selectedFile ? selectedFile.name : 'Choose PDF / CSV / Excel' }}
+        </label>
+        <button class="btn-primary" (click)="upload()" [disabled]="uploading">
+          {{ uploading ? 'Uploading...' : 'Upload & Extract' }}
+        </button>
+      </div>
+    </div>
+  
+    <!-- Statements List + Detail -->
+    <div class="split-layout" *ngIf="activeTab==='statements'">
+      <div class="list-panel">
+        <div *ngIf="loading" class="loading">Loading...</div>
+        <div class="stmt-card"
+             *ngFor="let s of statements"
+             [class.selected]="selectedStatement?.id === s.id"
+             (click)="selectStatement(s)">
+          <div class="stmt-header">
+            <strong>{{ s.carrier_name }}</strong>
+            <span class="badge" [ngClass]="s.status === 'reconciled' ? 'badge-green' : s.status === 'discrepancy' ? 'badge-red' : 'badge-gray'">
+              {{ s.status }}
+            </span>
+          </div>
+          <div class="stmt-meta">
+            <span>{{ s.line_count }} lines</span>
+            <span>{{ formatCurrency(s.total_amount) }}</span>
+            <span *ngIf="s.discrepancy_count > 0" class="text-red">{{ s.discrepancy_count }} issues</span>
+          </div>
+          <div class="stmt-date">{{ s.created_at | date:'MMM d, y' }}</div>
+        </div>
+        <div *ngIf="!loading && statements.length === 0" class="empty-state">
+          No statements yet — upload one above
+        </div>
+      </div>
+  
+      <!-- Detail Panel -->
+      <div class="detail-panel" *ngIf="selectedStatement">
+        <div class="detail-header">
+          <div>
+            <h2>{{ selectedStatement.carrier_name }}</h2>
+            <p>{{ lines.length }} line items</p>
+          </div>
+          <button class="btn-primary" (click)="reconcile(selectedStatement.id)" [disabled]="reconciling">
+            {{ reconciling ? 'Reconciling...' : '⚡ Reconcile' }}
+          </button>
+        </div>
+  
+        <!-- Reconcile Result Banner -->
+        <div class="reconcile-banner" *ngIf="reconcileResult">
+          <div class="rb-item rb-green">✓ {{ reconcileResult.matched }} Matched</div>
+          <div class="rb-item rb-red" *ngIf="reconcileResult.discrepancy > 0">⚠ {{ reconcileResult.discrepancy }} Discrepancies</div>
+          <div class="rb-item rb-gray" *ngIf="reconcileResult.unmatched > 0">? {{ reconcileResult.unmatched }} Unmatched</div>
+          <div class="rb-item rb-blue">
+            Variance: {{ formatCurrency(reconcileResult.total_variance) }}
+          </div>
+        </div>
+  
+        <!-- Lines Table -->
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>Policy #</th>
+                <th>Insured</th>
+                <th>LOB</th>
+                <th>Premium</th>
+                <th>Commission</th>
+                <th>Expected</th>
+                <th>Variance</th>
+                <th>Status</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr *ngFor="let line of lines" [class.row-issue]="line.match_status === 'discrepancy' || line.match_status === 'unmatched'">
+                <td>{{ line.policy_number || '—' }}</td>
+                <td>{{ line.insured_name || '—' }}</td>
+                <td>{{ line.line_of_business || '—' }}</td>
+                <td>{{ formatCurrency(line.premium_amount) }}</td>
+                <td>{{ formatCurrency(line.commission_amount) }}</td>
+                <td>{{ formatCurrency(line.expected_commission) }}</td>
+                <td [class.text-red]="line.variance && line.variance != 0">
+                  {{ line.variance ? formatCurrency(line.variance) : '—' }}
+                </td>
+                <td><span class="badge" [ngClass]="getStatusClass(line.match_status)">{{ line.match_status }}</span></td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  
+    <!-- Discrepancies Tab -->
+    <div class="disc-list" *ngIf="activeTab==='discrepancies'">
+      <div *ngIf="discrepancies.length === 0" class="empty-state">✅ No discrepancies found</div>
+      <div class="disc-card" *ngFor="let d of discrepancies">
+        <div class="disc-header">
+          <strong>{{ d.carrier_name }}</strong>
+          <span class="badge badge-red">{{ d.match_status }}</span>
+        </div>
+        <div class="disc-detail">
+          <span>Policy: {{ d.policy_number || 'Unknown' }}</span>
+          <span>Insured: {{ d.insured_name || '—' }}</span>
+          <span>Commission: {{ formatCurrency(d.commission_amount) }}</span>
+          <span *ngIf="d.variance">Variance: <strong class="text-red">{{ formatCurrency(d.variance) }}</strong></span>
+        </div>
+      </div>
+    </div>
+  </div>

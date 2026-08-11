@@ -1,0 +1,178 @@
+<div class="ams-page">
+    <div class="ams-header">
+      <div>
+        <h1>📜 COI Automation</h1>
+        <p>Generate Certificates of Insurance · Track expiration · Email holders</p>
+      </div>
+      <div class="header-stats" *ngIf="expiring.length > 0">
+        <div class="stat-pill stat-orange">{{ expiring.length }} Expiring Soon</div>
+      </div>
+    </div>
+  
+    <div class="tabs">
+      <button [class.active]="activeTab==='certificates'" (click)="activeTab='certificates'">Certificates</button>
+      <button [class.active]="activeTab==='generate'" (click)="activeTab='generate'">Generate New</button>
+      <button [class.active]="activeTab==='expiring'" (click)="activeTab='expiring'">
+        Expiring
+        <span class="tab-badge" *ngIf="expiring.length">{{ expiring.length }}</span>
+      </button>
+    </div>
+  
+    <!-- Certificates Tab -->
+    <div *ngIf="activeTab==='certificates'">
+      <div class="selector-bar">
+        <select class="input input-wide" (change)="loadClientCerts($any($event.target).value)">
+          <option value="">Select client to view certificates...</option>
+          <option *ngFor="let c of clients" [value]="c.id">
+            {{ c.business_name || (c.first_name + ' ' + c.last_name) }} — {{ c.client_number }}
+          </option>
+        </select>
+      </div>
+  
+      <div class="split-layout">
+        <div class="list-panel">
+          <div *ngIf="loading" class="loading">Loading...</div>
+          <div class="cert-card" *ngFor="let cert of certificates"
+               [class.selected]="selectedCert?.id === cert.id"
+               (click)="viewCert(cert.id)">
+            <div class="cert-header">
+              <strong>{{ cert.certificate_number }}</strong>
+              <span class="badge" [ngClass]="cert.is_expired ? 'badge-red' : 'badge-green'">
+                {{ cert.is_expired ? 'Expired' : 'Active' }}
+              </span>
+            </div>
+            <div class="cert-meta">
+              <span>Holder: {{ cert.holder_name }}</span>
+              <span>Valid until: {{ cert.valid_until | date:'MM/dd/yy' }}</span>
+            </div>
+            <div class="cert-date">Issued {{ cert.issued_at | date:'MMM d, y' }}</div>
+          </div>
+          <div *ngIf="!loading && certificates.length === 0" class="empty-state">
+            No certificates found — generate one above
+          </div>
+        </div>
+  
+        <!-- Certificate Preview -->
+        <div class="cert-preview" *ngIf="selectedCert?.certificate_data">
+          <div class="cert-preview-header">
+            <h2>{{ selectedCert.certificate_number }}</h2>
+            <button class="btn-sm btn-gray" (click)="printCert()">🖨 Print</button>
+          </div>
+  
+          <div class="acord-cert" id="print-area">
+            <div class="acord-header">
+              <div class="acord-title">CERTIFICATE OF LIABILITY INSURANCE</div>
+              <div class="acord-date">DATE: {{ selectedCert.certificate_data.issue_date }}</div>
+            </div>
+  
+            <div class="acord-grid">
+              <div class="acord-section">
+                <div class="acord-label">PRODUCER</div>
+                <div class="acord-value">{{ selectedCert.certificate_data.producer?.name }}</div>
+              </div>
+              <div class="acord-section">
+                <div class="acord-label">INSURED</div>
+                <div class="acord-value">
+                  <strong>{{ selectedCert.certificate_data.insured?.name }}</strong><br>
+                  {{ selectedCert.certificate_data.insured?.address }}
+                </div>
+              </div>
+            </div>
+  
+            <div class="acord-coverages">
+              <div class="acord-cov-header">COVERAGES</div>
+              <table class="acord-table">
+                <thead>
+                  <tr>
+                    <th>Type</th><th>Carrier</th><th>Policy #</th>
+                    <th>Effective</th><th>Expiry</th><th>Limits</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr *ngFor="let cov of selectedCert.certificate_data.coverages">
+                    <td>{{ cov.type }}</td>
+                    <td>{{ cov.carrier }}</td>
+                    <td>{{ cov.policy_number }}</td>
+                    <td>{{ cov.effective }}</td>
+                    <td>{{ cov.expiry }}</td>
+                    <td>
+                      <span *ngFor="let l of cov.limits | keyvalue">
+                        {{ l.key }}: {{ $any(l.value) | number:'1.0-0' }}<br>
+                      </span>
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+  
+            <div class="acord-holder">
+              <div class="acord-label">CERTIFICATE HOLDER</div>
+              <div class="acord-value">
+                <strong>{{ selectedCert.certificate_data.certificate_holder?.name }}</strong><br>
+                {{ selectedCert.certificate_data.certificate_holder?.address }}<br>
+                {{ selectedCert.certificate_data.certificate_holder?.email }}
+              </div>
+            </div>
+  
+            <div class="acord-footer">
+              ACORD 25 (2016/03) · Generated by UniDocVerse · {{ selectedCert.certificate_number }}
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  
+    <!-- Generate Tab -->
+    <div *ngIf="activeTab==='generate'" class="upload-card">
+      <h3>Generate Certificate of Insurance</h3>
+      <div class="gen-form">
+        <div class="form-row">
+          <label>Client *</label>
+          <select [(ngModel)]="form.client_id" class="input">
+            <option value="">Select client...</option>
+            <option *ngFor="let c of clients" [value]="c.id">
+              {{ c.business_name || (c.first_name + ' ' + c.last_name) }}
+            </option>
+          </select>
+        </div>
+        <div class="form-row">
+          <label>Certificate Holder *</label>
+          <input type="text" [(ngModel)]="form.holder_name" placeholder="Company or person name" class="input">
+        </div>
+        <div class="form-row">
+          <label>Holder Address</label>
+          <input type="text" [(ngModel)]="form.holder_address" placeholder="123 Main St, City, State" class="input">
+        </div>
+        <div class="form-row">
+          <label>Holder Email</label>
+          <input type="email" [(ngModel)]="form.holder_email" placeholder="holder@company.com" class="input">
+        </div>
+        <div class="form-row">
+          <label>Purpose / Description</label>
+          <input type="text" [(ngModel)]="form.purpose" placeholder="Lease agreement, Contract requirement..." class="input">
+        </div>
+        <div class="form-row">
+          <label>Additional Insured</label>
+          <input type="text" [(ngModel)]="form.additional_insured" placeholder="If applicable" class="input">
+        </div>
+        <button class="btn-primary btn-lg" (click)="generate()" [disabled]="generating">
+          {{ generating ? 'Generating...' : '📜 Generate COI' }}
+        </button>
+      </div>
+    </div>
+  
+    <!-- Expiring Tab -->
+    <div *ngIf="activeTab==='expiring'">
+      <div *ngIf="expiring.length === 0" class="empty-state">✅ No certificates expiring in the next 30 days</div>
+      <div class="cert-card" *ngFor="let cert of expiring">
+        <div class="cert-header">
+          <strong>{{ cert.certificate_number }}</strong>
+          <span class="badge badge-orange">Expires {{ cert.valid_until | date:'MM/dd/yy' }}</span>
+        </div>
+        <div class="cert-meta">
+          <span>{{ cert.business_name || (cert.first_name + ' ' + cert.last_name) }}</span>
+          <span>Holder: {{ cert.holder_name }}</span>
+        </div>
+      </div>
+    </div>
+  </div>

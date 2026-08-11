@@ -1,0 +1,18 @@
+# Dependencies
+node_modules/
+
+# Build output
+dist/
+.angular/
+
+# Environment
+.env
+*.env
+
+# macOS
+.DS_Store
+
+# IDE
+.idea/
+.vscode/
+.claude/

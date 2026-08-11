@@ -1,0 +1,102 @@
+<div class="page">
+  <div class="upload-wrap">
+
+    <!-- Dropzone -->
+    <div class="dropzone" [class.drag]="dragging"
+      (dragenter)="onDragEnter($event)"
+      (dragover)="$event.preventDefault()"
+      (dragleave)="onDragLeave($event)"
+      (drop)="onDrop($event)"
+      (click)="fileInput.click()">
+      <div class="dz-ico-wrap">📄</div>
+      <div class="dz-title"><strong>Click here</strong> to upload or drag and drop</div>
+      <div class="dz-sub">All common file types supported · Max 50 MB per file · Up to {{ MAX_BATCH }} files at once</div>
+      <div class="dz-groups">
+        <div *ngFor="let g of groups" class="dz-group">
+          <div class="dz-group-label">{{ g.label }}</div>
+          <div class="dz-group-types">
+            <span *ngFor="let t of g.types" class="dz-type">{{ t }}</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <input #fileInput type="file" multiple style="display:none" (change)="onFiles($event)">
+
+    <!-- Upload Progress List -->
+    <div class="up-list">
+      <div *ngFor="let f of uploads" class="up-fi">
+        <div class="up-fi-top">
+          <div class="up-fi-ico" [ngClass]="f.state">
+            {{ f.state==='done' ? '✅' : f.state==='error' ? '❌' : '📄' }}
+          </div>
+          <div class="up-fi-name">{{ f.name }}</div>
+          <button class="up-fi-action" [ngClass]="f.state" (click)="remove(f)">
+            {{ f.state==='done' ? '✓' : f.state==='error' ? '↺' : '🗑' }}
+          </button>
+        </div>
+        <div class="up-track">
+          <div class="up-fill" [ngClass]="f.state" [style.width.%]="f.pct"></div>
+        </div>
+        <div class="up-fi-foot">
+          <span class="up-fi-status">{{ f.status }}</span>
+          <span class="up-fi-pct" [ngClass]="f.state">{{ f.pct }}%</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- CONTINUE BUTTON - Shows after all uploads are successful -->
+    <div *ngIf="allDone" class="continue-section">
+      <button class="btn-continue" (click)="continueToDocuments()">
+        Continue to Documents
+        <span class="arrow">→</span>
+      </button>
+      <p class="success-note">All files have been successfully uploaded and analyzed.</p>
+    </div>
+
+  </div>
+</div>
+
+<!-- <div class="page"><div class="upload-wrap">
+
+  <div class="dropzone" [class.drag]="dragging"
+    (dragover)="$event.preventDefault();dragging=true"
+    (dragleave)="dragging=false"
+    (drop)="onDrop($event)"
+    (click)="fileInput.click()">
+    <div class="dz-ico-wrap">📄</div>
+    <div class="dz-title"><strong>Click here</strong> to upload or drag and drop</div>
+    <div class="dz-sub">All common file types supported · Max 50 MB per file</div>
+    <div class="dz-groups">
+      <div *ngFor="let g of groups" class="dz-group">
+        <div class="dz-group-label">{{ g.label }}</div>
+        <div class="dz-group-types">
+          <span *ngFor="let t of g.types" class="dz-type">{{ t }}</span>
+        </div>
+      </div>
+    </div>
+  </div>
+  <input #fileInput type="file" multiple style="display:none" (change)="onFiles($event)">
+
+  <div class="up-list">
+    <div *ngFor="let f of uploads" class="up-fi">
+      <div class="up-fi-top">
+        <div class="up-fi-ico" [ngClass]="f.state">
+          {{ f.state==='done' ? '✅' : f.state==='error' ? '❌' : '📄' }}
+        </div>
+        <div class="up-fi-name">{{ f.name }}</div>
+        <button class="up-fi-action" [ngClass]="f.state" (click)="remove(f)">
+          {{ f.state==='done' ? '✓' : f.state==='error' ? '↺' : '🗑' }}
+        </button>
+      </div>
+      <div class="up-track">
+        <div class="up-fill" [ngClass]="f.state" [style.width.%]="f.pct"></div>
+      </div>
+      <div class="up-fi-foot">
+        <span class="up-fi-status">{{ f.status }}</span>
+        <span class="up-fi-pct" [ngClass]="f.state">{{ f.pct }}%</span>
+      </div>
+    </div>
+  </div>
+
+</div></div> -->

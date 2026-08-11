@@ -1,0 +1,126 @@
+<div class="page">
+
+  <!-- Header -->
+  <div class="imm-header">
+    <div class="imm-header-left">
+      <div class="imm-header-icon">🛂</div>
+      <div>
+        <h1 class="imm-title">Visa & Immigration Tracker</h1>
+        <div class="imm-subtitle">All client immigration documents · expiry tracking · renewal alerts</div>
+      </div>
+    </div>
+    <button class="imm-refresh" (click)="load()" [disabled]="loading">
+      {{ loading ? 'Loading…' : '↻ Refresh' }}
+    </button>
+  </div>
+
+  <!-- Loading -->
+  <div class="imm-loading" *ngIf="loading">
+    <div class="spinner"></div> Loading immigration records…
+  </div>
+
+  <ng-container *ngIf="!loading">
+
+    <!-- Stat cards -->
+    <div class="imm-stats">
+      <div class="imm-sc imm-sc--exp" (click)="activeTab='expired'">
+        <div class="imm-sc-ico">🔴</div>
+        <div class="imm-sc-val">{{ counts.expired || 0 }}</div>
+        <div class="imm-sc-lbl">Expired</div>
+      </div>
+      <div class="imm-sc imm-sc--crit" (click)="activeTab='critical'">
+        <div class="imm-sc-ico">⚠️</div>
+        <div class="imm-sc-val">{{ counts.critical || 0 }}</div>
+        <div class="imm-sc-lbl">Critical (&lt;7 days)</div>
+      </div>
+      <div class="imm-sc imm-sc--high" (click)="activeTab='high'">
+        <div class="imm-sc-ico">🟠</div>
+        <div class="imm-sc-val">{{ counts.high || 0 }}</div>
+        <div class="imm-sc-lbl">Expiring Soon (&lt;30d)</div>
+      </div>
+      <div class="imm-sc imm-sc--med" (click)="activeTab='medium'">
+        <div class="imm-sc-ico">🟡</div>
+        <div class="imm-sc-val">{{ counts.medium || 0 }}</div>
+        <div class="imm-sc-lbl">Renew Soon (&lt;90d)</div>
+      </div>
+      <div class="imm-sc imm-sc--low" (click)="activeTab='low'">
+        <div class="imm-sc-ico">🟢</div>
+        <div class="imm-sc-val">{{ counts.low || 0 }}</div>
+        <div class="imm-sc-lbl">Valid</div>
+      </div>
+    </div>
+
+    <!-- Filter tabs -->
+    <div class="imm-tabs">
+      <button [class.active]="activeTab==='all'"      (click)="activeTab='all'">All <span class="tc">{{ total }}</span></button>
+      <button [class.active]="activeTab==='expired'"  (click)="activeTab='expired'"  *ngIf="counts.expired">Expired <span class="tc tc-red">{{ counts.expired }}</span></button>
+      <button [class.active]="activeTab==='critical'" (click)="activeTab='critical'" *ngIf="counts.critical">Critical <span class="tc tc-red">{{ counts.critical }}</span></button>
+      <button [class.active]="activeTab==='high'"     (click)="activeTab='high'"     *ngIf="counts.high">Expiring Soon <span class="tc tc-amber">{{ counts.high }}</span></button>
+      <button [class.active]="activeTab==='medium'"   (click)="activeTab='medium'"   *ngIf="counts.medium">Renew Soon <span class="tc tc-amber">{{ counts.medium }}</span></button>
+      <button [class.active]="activeTab==='low'"      (click)="activeTab='low'"      *ngIf="counts.low">Valid <span class="tc tc-green">{{ counts.low }}</span></button>
+    </div>
+
+    <!-- Empty -->
+    <div class="imm-empty" *ngIf="visibleRecords.length === 0">
+      <div class="imm-empty-ico">🛂</div>
+      <div class="imm-empty-title">No immigration records found</div>
+      <div class="imm-empty-sub">
+        Upload H-1B, I-94, EAD, passport, or any USCIS notice and link it to a client.<br>
+        The system will extract expiry dates automatically and track them here.
+      </div>
+      <a class="imm-empty-btn" routerLink="/clients">Go to Clients →</a>
+    </div>
+
+    <!-- Table -->
+    <div class="imm-table-wrap" *ngIf="visibleRecords.length > 0">
+      <table class="imm-table">
+        <thead>
+          <tr>
+            <th>Status</th>
+            <th>Document</th>
+            <th>Beneficiary</th>
+            <th>Visa Class</th>
+            <th>Employer / Sponsor</th>
+            <th>Receipt #</th>
+            <th>Visa Expiry</th>
+            <th>I-94 Until</th>
+            <th>Days Left</th>
+            <th></th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let r of visibleRecords" [ngClass]="urgencyClass(r.urgency)">
+            <td>
+              <span class="imm-pill" [ngClass]="'imm-pill--' + r.urgency">
+                {{ urgencyIcon(r.urgency) }} {{ r.urgency_label }}
+              </span>
+            </td>
+            <td class="imm-doc-label">{{ r.doc_label }}</td>
+            <td>{{ r.beneficiary_name || '—' }}</td>
+            <td>
+              <span class="imm-class-chip" *ngIf="r.visa_class">{{ r.visa_class }}</span>
+              <span *ngIf="!r.visa_class">—</span>
+            </td>
+            <td>{{ r.employer_sponsor || '—' }}</td>
+            <td class="mono">{{ r.document_number || '—' }}</td>
+            <td [class.imm-date--warn]="r.urgency==='high' || r.urgency==='critical'" [class.imm-date--danger]="r.urgency==='expired'">
+              {{ r.valid_until ? (r.valid_until | date:'MMM d, y') : '—' }}
+            </td>
+            <td [class.imm-date--warn]="r.urgency==='high' || r.urgency==='critical'" [class.imm-date--danger]="r.urgency==='expired'">
+              {{ r.authorized_stay_until ? (r.authorized_stay_until | date:'MMM d, y') : '—' }}
+            </td>
+            <td>
+              <span class="imm-days" [ngClass]="urgencyClass(r.urgency)">{{ daysLabel(r) }}</span>
+            </td>
+            <td>
+              <a class="imm-view-btn" [routerLink]="['/clients', r.client_id]" [queryParams]="{tab:'immigration'}">
+                View →
+              </a>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+  </ng-container>
+</div>

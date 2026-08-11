@@ -1,0 +1,143 @@
+<div class="calendar-page">
+
+    <!-- ── Urgent banner ───────────────────────────────────────────────────── -->
+    <div class="urgent-banner" *ngIf="upcomingUrgent.length > 0">
+      <span class="urgent-icon">🚨</span>
+      <span class="urgent-label">Urgent:</span>
+      <span *ngFor="let e of upcomingUrgent; let last = last" class="urgent-item"
+            (click)="openEvent(e)">
+        {{ e.title }} ({{ e.date }}){{ last ? '' : ' · ' }}
+      </span>
+    </div>
+  
+    <!-- ── Header ──────────────────────────────────────────────────────────── -->
+    <div class="cal-header">
+      <div class="cal-header-left">
+        <h1 class="cal-title">📅 Calendar</h1>
+        <p class="cal-sub">{{ filteredEvents.length }} events · {{ monthLabel }}</p>
+      </div>
+      <div class="cal-header-right">
+        <select class="cal-filter" [(ngModel)]="filterType" (ngModelChange)="onFilterChange()">
+          <option *ngFor="let t of EVENT_TYPES" [value]="t.value">{{ t.label }}</option>
+        </select>
+        <button class="cal-nav-btn" (click)="prevMonth()">‹</button>
+        <button class="cal-today-btn" (click)="goToday()">Today</button>
+        <button class="cal-nav-btn" (click)="nextMonth()">›</button>
+      </div>
+    </div>
+  
+    <div class="cal-body">
+  
+      <!-- ── Month grid ──────────────────────────────────────────────────── -->
+      <div class="cal-grid-wrap">
+        <!-- Day headers -->
+        <div class="cal-dow-row">
+          <div class="cal-dow" *ngFor="let d of ['Sun','Mon','Tue','Wed','Thu','Fri','Sat']">{{ d }}</div>
+        </div>
+  
+        <!-- Loading -->
+        <div class="cal-loading" *ngIf="loading">
+          <div class="spinner"></div> Loading events…
+        </div>
+  
+        <!-- Weeks -->
+        <div class="cal-week" *ngFor="let week of weeks">
+          <div class="cal-cell"
+               *ngFor="let day of week"
+               [class.cal-empty]="!day"
+               [class.cal-today]="isToday(day)"
+               [class.cal-selected]="isSelected(day)"
+               [class.cal-has-urgent]="hasUrgent(day)"
+               (click)="selectDate(day)">
+  
+            <div class="cal-day-num" *ngIf="day">{{ day.getDate() }}</div>
+  
+            <!-- Event dots — show up to 3 -->
+            <div class="cal-dots" *ngIf="day && eventsOnDay(day).length > 0">
+              <span class="cal-dot"
+                    *ngFor="let e of eventsOnDay(day).slice(0,3)"
+                    [style.background]="e.color"
+                    [title]="e.title">
+              </span>
+              <span class="cal-more" *ngIf="eventsOnDay(day).length > 3">
+                +{{ eventsOnDay(day).length - 3 }}
+              </span>
+            </div>
+          </div>
+        </div>
+      </div>
+  
+      <!-- ── Event detail panel ──────────────────────────────────────────── -->
+      <div class="cal-detail">
+  
+        <!-- Quick Schedule Form -->
+        <div class="cal-quick-schedule" *ngIf="selectedDate" style="background: #f8fafc; padding: 16px; border-radius: 12px; border: 1.5px dashed #e2e8f0; margin-bottom: 16px;">
+          <h4 style="margin: 0 0 10px; font-size: 12px; font-weight: 700; color: #4f46e5; text-transform: uppercase; letter-spacing: 0.5px;">⚡ Quick Schedule for {{ selectedDate }}</h4>
+          <div style="display: flex; flex-direction: column; gap: 8px;">
+            <input 
+              style="padding: 8px; border: 1.5px solid #e2e8f0; border-radius: 6px; font-size: 13px; outline: none;" 
+              [(ngModel)]="quickEventTitle" 
+              (keyup.enter)="addQuickEvent()"
+              placeholder="e.g. Audit W-2 Tax filing forms" 
+            />
+            <div style="display: flex; gap: 6px;">
+              <select 
+                style="flex: 1; padding: 6px; border: 1.5px solid #e2e8f0; border-radius: 6px; font-size: 12px;" 
+                [(ngModel)]="quickEventPriority"
+              >
+                <option value="low">🟢 Low Priority</option>
+                <option value="medium">🟡 Medium Priority</option>
+                <option value="high">🔴 High Priority</option>
+              </select>
+              <button 
+                style="padding: 6px 14px; background: #6366f1; color: white; border: none; border-radius: 6px; font-size: 12px; font-weight: 600; cursor: pointer;" 
+                (click)="addQuickEvent()"
+                [disabled]="scheduling"
+              >
+                Schedule
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- No date selected -->
+        <div class="cal-detail-empty" *ngIf="!selectedDate">
+          <span class="cal-detail-empty-icon">📅</span>
+          <p>Click a date to see events or quick schedule</p>
+        </div>
+  
+        <!-- Date selected, no events -->
+        <div class="cal-detail-empty" *ngIf="selectedDate && selectedEvents.length === 0">
+          <span class="cal-detail-empty-icon">✓</span>
+          <p>No other events scheduled</p>
+        </div>
+  
+        <!-- Events list -->
+        <ng-container *ngIf="selectedDate && selectedEvents.length > 0">
+          <div class="cal-detail-date">{{ selectedDate }}</div>
+          <div class="cal-event-card"
+               *ngFor="let e of selectedEvents"
+               [class.cal-event-urgent]="e.urgent"
+               (click)="openEvent(e)">
+            <div class="cal-event-stripe" [style.background]="e.color"></div>
+            <div class="cal-event-body">
+              <div class="cal-event-title">{{ e.title }}</div>
+              <div class="cal-event-sub" *ngIf="e.subtitle">{{ e.subtitle }}</div>
+              <div class="cal-event-meta">
+                <span class="cal-event-type" [style.background]="e.color + '22'" [style.color]="e.color">
+                  {{ e.type.replace('_',' ') }}
+                </span>
+                <span class="cal-event-urgent-badge" *ngIf="e.urgent">🚨 Urgent</span>
+                <span class="cal-event-days" *ngIf="e.days_away != null">
+                  {{ e.days_away >= 0 ? e.days_away + 'd away' : daysAgo(e.days_away) }}
+                </span>
+              </div>
+            </div>
+            <div class="cal-event-arrow">›</div>
+          </div>
+        </ng-container>
+  
+      </div>
+  
+    </div>
+  </div>

@@ -1,0 +1,124 @@
+<div class="page">
+
+  <!-- TOPBAR -->
+  <div class="topbar">
+    <div>
+      <div class="topbar-title">Report Issue</div>
+      <div class="topbar-sub">Submit bugs, feature requests or questions</div>
+    </div>
+  </div>
+
+  <div class="content">
+    <div class="layout">
+
+      <!-- FORM PANEL -->
+      <div class="form-panel">
+
+        <!-- SUCCESS STATE -->
+        <div *ngIf="submitted" class="success-card">
+          <div class="success-icon">✓</div>
+          <div class="success-key">{{ issueKey }}</div>
+          <div class="success-title">Issue submitted successfully</div>
+          <div class="success-sub">You'll receive a confirmation email. We typically respond to critical &amp; high priority issues within 24 hours.</div>
+          <button class="btn-primary" (click)="reset()">Submit Another Issue</button>
+        </div>
+
+        <!-- FORM STATE -->
+        <form *ngIf="!submitted" (ngSubmit)="submit()">
+          <div class="section-label">Issue Details</div>
+
+          <div class="field">
+            <label>Title <span class="req">*</span></label>
+            <input [(ngModel)]="form.title" name="title"
+                   placeholder="Short, descriptive summary of the issue"
+                   maxlength="200" required>
+          </div>
+
+          <div class="field-row">
+            <div class="field">
+              <label>Type</label>
+              <select [(ngModel)]="form.type" name="type">
+                <option *ngFor="let t of typeOptions" [value]="t.value">{{ t.label }}</option>
+              </select>
+            </div>
+            <div class="field">
+              <label>Priority</label>
+              <select [(ngModel)]="form.priority" name="priority">
+                <option *ngFor="let p of priorityOptions" [value]="p.value">{{ p.label }}</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="field">
+            <label>Description <span class="req">*</span></label>
+            <textarea [(ngModel)]="form.description" name="description"
+                      placeholder="Steps to reproduce, expected vs actual behaviour, error messages…"
+                      rows="6" maxlength="5000" required></textarea>
+            <div class="char-count">{{ form.description.length }}/5000</div>
+          </div>
+
+          <div class="section-label" style="margin-top:24px">Your Info</div>
+
+          <div class="field-row">
+            <div class="field">
+              <label>Name <span class="req">*</span></label>
+              <input [(ngModel)]="form.reporter_name" name="reporter_name"
+                     placeholder="Full name" required>
+            </div>
+            <div class="field">
+              <label>Email <span class="req">*</span></label>
+              <input [(ngModel)]="form.reporter_email" name="reporter_email"
+                     type="email" placeholder="your@email.com" required>
+            </div>
+          </div>
+
+          <div class="field-row">
+            <div class="field">
+              <label>App Version</label>
+              <input [(ngModel)]="form.version" name="version" placeholder="e.g. 1.0.0">
+            </div>
+            <div class="field">
+              <label>Operating System</label>
+              <input [(ngModel)]="form.os" name="os" placeholder="e.g. macOS, Windows">
+            </div>
+          </div>
+
+          <button type="submit" class="btn-primary" [disabled]="submitting">
+            <span *ngIf="!submitting">Submit Issue</span>
+            <span *ngIf="submitting" class="spinner"></span>
+          </button>
+        </form>
+      </div>
+
+      <!-- RECENT ISSUES PANEL -->
+      <div class="recent-panel">
+        <div class="recent-header">Recent Issues</div>
+
+        <div *ngIf="loadingIssues" class="recent-loading">
+          <span class="analyzing-dots"><span></span><span></span><span></span></span>
+        </div>
+
+        <div *ngIf="!loadingIssues && recentIssues.length === 0" class="recent-empty">
+          No issues reported yet
+        </div>
+
+        <div *ngFor="let issue of recentIssues" class="issue-card">
+          <div class="issue-card-top">
+            <span class="issue-key">{{ issue.issue_key }}</span>
+            <span class="issue-status" [ngClass]="statusBadge(issue.status)">{{ issue.status | titlecase }}</span>
+          </div>
+          <div class="issue-title">{{ issue.title }}</div>
+          <div class="issue-meta">
+            <span class="prio-dot" [style.background]="prioColor(issue.priority)"></span>
+            <span>{{ issue.priority | titlecase }}</span>
+            <span class="sep">·</span>
+            <span>{{ issue.type | titlecase }}</span>
+            <span class="sep">·</span>
+            <span>{{ issue.created_at | date:'MMM d' }}</span>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>

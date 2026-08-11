@@ -1,0 +1,113 @@
+<div class="preview-container">
+  
+    <!-- Header -->
+    <div class="preview-header" mat-dialog-title>
+      <div class="header-left">
+        <mat-icon class="file-icon">{{ preview ? getFileIcon(preview) : 'description' }}</mat-icon>
+        <div class="header-info">
+          <h2>{{ preview?.filename || 'Loading...' }}</h2>
+          <p class="file-meta" *ngIf="preview">
+            {{ formatFileSize(preview.file_size) }} • 
+            {{ formatDate(preview.created_at) }}
+          </p>
+        </div>
+      </div>
+      
+      <div class="header-actions">
+        <button mat-icon-button (click)="download()" matTooltip="Download" [disabled]="!preview">
+          <mat-icon>download</mat-icon>
+        </button>
+        <button mat-icon-button (click)="close()" matTooltip="Close">
+          <mat-icon>close</mat-icon>
+        </button>
+      </div>
+    </div>
+  
+    <!-- Content -->
+    <div class="preview-content" mat-dialog-content>
+      
+      <!-- Loading State -->
+      <div *ngIf="loading" class="loading-state">
+        <mat-spinner diameter="60"></mat-spinner>
+        <p>Loading preview...</p>
+      </div>
+  
+      <!-- Error State -->
+      <div *ngIf="!loading && error" class="error-state">
+        <mat-icon>error</mat-icon>
+        <h3>Failed to Load Preview</h3>
+        <p>{{ error }}</p>
+        <button mat-raised-button color="primary" (click)="loadPreview()">
+          <mat-icon>refresh</mat-icon>
+          Retry
+        </button>
+      </div>
+  
+      <!-- PDF Preview -->
+      <div *ngIf="!loading && !error && preview?.preview_type === 'pdf'" class="pdf-preview">
+        <iframe [src]="safeUrl" frameborder="0"></iframe>
+      </div>
+  
+      <!-- Image Preview -->
+      <div *ngIf="!loading && !error && preview?.preview_type === 'image'" class="image-preview">
+        <img [src]="safeUrl" [alt]="preview?.filename">
+      </div>
+  
+      <!-- Spreadsheet Preview -->
+      <div *ngIf="!loading && !error && preview?.preview_type === 'spreadsheet'" class="spreadsheet-preview">
+        <mat-tab-group>
+          <mat-tab label="Table View">
+            <div class="table-container">
+              <table mat-table [dataSource]="spreadsheetData" class="preview-table">
+                
+                <!-- Dynamic Columns -->
+                <ng-container *ngFor="let col of spreadsheetHeaders" [matColumnDef]="col">
+                  <th mat-header-cell *matHeaderCellDef>{{ col }}</th>
+                  <td mat-cell *matCellDef="let row">{{ row[col] }}</td>
+                </ng-container>
+  
+                <tr mat-header-row *matHeaderRowDef="spreadsheetHeaders"></tr>
+                <tr mat-row *matRowDef="let row; columns: spreadsheetHeaders;"></tr>
+              </table>
+            </div>
+            
+            <div class="table-info">
+              Showing {{ spreadsheetData.length }} rows
+            </div>
+          </mat-tab>
+  
+          <mat-tab label="Raw Data">
+            <pre class="raw-data">{{ preview?.content | json }}</pre>
+          </mat-tab>
+        </mat-tab-group>
+      </div>
+  
+      <!-- Text Preview -->
+      <div *ngIf="!loading && !error && (preview?.preview_type === 'text' || preview?.preview_type === 'document')" 
+           class="text-preview">
+        <pre>{{ textContent }}</pre>
+      </div>
+  
+      <!-- Unsupported -->
+      <div *ngIf="!loading && !error && preview?.preview_type === 'unsupported'" class="unsupported-state">
+        <mat-icon>insert_drive_file</mat-icon>
+        <h3>Preview Not Available</h3>
+        <p>{{ preview?.message }}</p>
+        <button mat-raised-button color="primary" (click)="download()">
+          <mat-icon>download</mat-icon>
+          Download File
+        </button>
+      </div>
+  
+    </div>
+  
+    <!-- Footer -->
+    <div class="preview-footer" mat-dialog-actions>
+      <button mat-button (click)="close()">Close</button>
+      <button mat-raised-button color="primary" (click)="download()" [disabled]="!preview">
+        <mat-icon>download</mat-icon>
+        Download
+      </button>
+    </div>
+  
+  </div>

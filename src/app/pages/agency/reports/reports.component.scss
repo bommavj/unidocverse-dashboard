@@ -1,0 +1,144 @@
+.page { display:flex; flex-direction:column; height:100%; }
+
+.topbar {
+  padding: 20px 28px 16px;
+  border-bottom: 1px solid #e2e8f0;
+  background: rgba(255,255,255,.95);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+.topbar-title { font-size:20px; font-weight:700; color:#1e293b; }
+.topbar-sub   { font-size:13px; color:#64748b; margin-top:2px; }
+
+.btn-run {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 18px;
+  background: #6366f1;
+  color: #fff;
+  border: none;
+  border-radius: 10px;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background .15s, opacity .15s;
+  min-width: 110px;
+  justify-content: center;
+  &:hover:not(:disabled) { background: #4f46e5; }
+  &:disabled { opacity: .6; cursor: default; }
+}
+
+.content { flex:1; overflow:hidden; padding:20px 28px; }
+
+.empty-state {
+  display:flex; flex-direction:column; align-items:center;
+  justify-content:center; gap:12px; height:100%;
+  color:#64748b; text-align:center;
+}
+.empty-icon  { font-size:48px; }
+.empty-title { font-size:18px; font-weight:600; color:#1e293b; }
+.empty-sub   { font-size:13px; max-width:360px; }
+
+/* Two-column layout */
+.layout {
+  display:grid;
+  grid-template-columns: 300px 1fr;
+  gap:20px;
+  height:100%;
+  overflow:hidden;
+}
+
+/* Report list */
+.report-list {
+  overflow-y:auto;
+  display:flex;
+  flex-direction:column;
+  gap:8px;
+}
+
+.report-item {
+  background: rgba(255,255,255,.92);
+  border: 1px solid #e2e8f0;
+  border-radius:12px;
+  padding:14px 16px;
+  cursor:pointer;
+  transition:border-color .15s, box-shadow .15s;
+
+  &:hover { border-color:#6366f1; }
+  &.active { border-color:#6366f1; box-shadow:0 0 0 3px rgba(99,102,241,.12); }
+}
+.report-item-date    { font-size:11px; color:#94a3b8; margin-bottom:4px; }
+.report-item-title   { font-size:13px; font-weight:600; color:#1e293b; margin-bottom:4px; }
+.report-item-summary { font-size:12px; color:#64748b; line-height:1.5; margin-bottom:8px; }
+
+/* Report detail */
+.report-detail { overflow-y:auto; display:flex; flex-direction:column; gap:16px; }
+
+.detail-header {
+  background: rgba(255,255,255,.95);
+  border:1px solid #e2e8f0;
+  border-radius:16px;
+  padding:20px 24px;
+}
+.detail-title   { font-size:18px; font-weight:700; color:#1e293b; margin-bottom:6px; }
+.detail-meta    { font-size:12px; color:#94a3b8; margin-bottom:10px; display:flex; align-items:center; gap:4px; }
+.detail-summary { font-size:14px; color:#475569; line-height:1.6; }
+
+/* Section cards */
+.section-card {
+  background: rgba(255,255,255,.92);
+  border:1px solid #e2e8f0;
+  border-radius:14px;
+  padding:18px 22px;
+}
+.section-title {
+  font-size:13px; font-weight:700; color:#6366f1;
+  text-transform:uppercase; letter-spacing:.06em;
+  margin-bottom:14px;
+}
+.section-empty { font-size:13px; color:#94a3b8; }
+
+/* KPI grid */
+.kpi-grid {
+  display:grid;
+  grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+  gap:12px;
+}
+.kpi-item {
+  background:#f8fafc;
+  border-radius:10px;
+  padding:12px 14px;
+}
+.kpi-label { font-size:11px; color:#94a3b8; margin-bottom:4px; }
+.kpi-value { font-size:22px; font-weight:700; color:#1e293b; font-variant-numeric:tabular-nums; }
+
+/* Table */
+.table-wrap { overflow-x:auto; }
+table { width:100%; border-collapse:collapse; font-size:13px; }
+th { text-align:left; padding:8px 12px; background:#f1f5f9; color:#64748b; font-weight:600; font-size:11px; text-transform:uppercase; letter-spacing:.04em; }
+td { padding:10px 12px; border-bottom:1px solid #f1f5f9; color:#1e293b; }
+tr:last-child td { border-bottom:none; }
+
+/* Badges */
+.badge { display:inline-block; padding:2px 8px; border-radius:20px; font-size:11px; font-weight:600; }
+.badge-ok   { background:#dcfce7; color:#16a34a; }
+.badge-err  { background:#fee2e2; color:#dc2626; }
+.badge-info { background:#e0e7ff; color:#4f46e5; }
+
+/* Scrollbar */
+.report-list::-webkit-scrollbar,
+.report-detail::-webkit-scrollbar { width:4px; }
+.report-list::-webkit-scrollbar-thumb,
+.report-detail::-webkit-scrollbar-thumb { background:#e2e8f0; border-radius:4px; }
+
+/* analyzing dots reuse */
+.analyzing-dots { display:inline-flex; gap:4px; }
+.analyzing-dots span {
+  width:8px; height:8px; border-radius:50%; background:#6366f1;
+  animation: dot-bounce .9s infinite ease-in-out;
+}
+.analyzing-dots span:nth-child(2) { animation-delay:.15s; }
+.analyzing-dots span:nth-child(3) { animation-delay:.3s; }
+@keyframes dot-bounce { 0%,80%,100%{transform:scale(0)} 40%{transform:scale(1)} }
