@@ -1,4 +1,5 @@
 import { Component, Inject, OnInit, ViewChild, ElementRef } from '@angular/core';
+import { authFetch } from '../../lib/api';
 import { CommonModule } from '@angular/common';
 import { MAT_DIALOG_DATA, MatDialogModule } from '@angular/material/dialog';
 import { MatButtonModule } from '@angular/material/button';
@@ -1214,7 +1215,7 @@ async loadDeepSummary(): Promise<void> {
   if (this.deepSummaryDone || this.deepSummaryLoading) return;
   this.deepSummaryLoading = true;
   try {
-    const result: any = await fetch(
+    const result: any = await authFetch(
       `http://localhost:8000/api/documents/${this.document.id}/analyze-deep/summary`,
       { method: 'POST' }
     ).then(r => r.json());

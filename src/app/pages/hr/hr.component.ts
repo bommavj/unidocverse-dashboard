@@ -1,4 +1,5 @@
 import { Component, OnInit, NgZone } from '@angular/core';
+import { authFetch } from '../../lib/api';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { ActivatedRoute, RouterModule } from '@angular/router';
@@ -1143,7 +1144,7 @@ export class HRComponent implements OnInit {
       feedbacks: candidate.feedbacks?.map((f: any) => `${f.interviewer} (${f.rating}/5): ${f.note}`).join('; ')
     } : {};
 
-    fetch('http://localhost:8000/api/documents/ask/with-context', {
+    authFetch('http://localhost:8000/api/documents/ask/with-context', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ question: q, context_data: context })

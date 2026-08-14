@@ -1,4 +1,5 @@
 import { Component, OnInit, ViewChildren, QueryList, ChangeDetectorRef } from '@angular/core';
+import { authFetch } from '../../lib/api';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
@@ -193,7 +194,7 @@ export class AdvancedAnalyticsComponent implements OnInit {
     this.msgs.push({ role: 'ai', text: '', timestamp: new Date() });
     this.cdr.detectChanges();
 
-    fetch(`http://localhost:8000/api/documents/${this.documentId}/ask`, {
+    authFetch(`http://localhost:8000/api/documents/${this.documentId}/ask`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ question: q })

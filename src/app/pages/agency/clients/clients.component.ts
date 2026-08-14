@@ -1,4 +1,5 @@
 import { Component, OnInit, OnDestroy, NgZone } from '@angular/core';
+import { authFetch } from '../../../lib/api';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { RouterModule, Router } from '@angular/router';
@@ -353,7 +354,7 @@ export class ClientsComponent implements OnInit, OnDestroy {
       ? this._buildClientContext(this.activeAiClient)
       : this._buildPortfolioContext();
 
-    fetch(`${this.api}/api/documents/ask/with-context`, {
+    authFetch(`${this.api}/api/documents/ask/with-context`, {
       method:  'POST',
       headers: { 'Content-Type': 'application/json' },
       body:    JSON.stringify({ question: q, context_data: context }),

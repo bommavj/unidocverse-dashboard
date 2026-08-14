@@ -1,4 +1,5 @@
 import { Component, OnInit, ChangeDetectionStrategy, ChangeDetectorRef } from '@angular/core';
+import { authFetch } from '../../lib/api';
 import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
 import { DocSheetComponent } from '../../components/doc-sheet/doc-sheet.component';
@@ -62,13 +63,13 @@ export class DeadlinesComponent implements OnInit {
   }
 
   openDoc(item: DeadlineItem): void {
-    fetch(`http://localhost:8000/api/documents/${item.id}`)
+    authFetch(`http://localhost:8000/api/documents/${item.id}`)
       .then(r => r.json()).then(d => { this.selectedDoc = d; this.cdr.markForCheck(); });
   }
 
   private async load(): Promise<void> {
     try {
-      const res = await fetch('http://localhost:8000/api/alerts/proactive');
+      const res = await authFetch('http://localhost:8000/api/alerts/proactive');
       const data = await res.json();
       const alerts: any[] = data.alerts || [];
 
@@ -100,7 +101,7 @@ export class DeadlinesComponent implements OnInit {
       }
 
       // Also pull from documents directly for any missed date fields
-      const docsRes = await fetch('http://localhost:8000/api/documents?limit=100');
+      const docsRes = await authFetch('http://localhost:8000/api/documents?limit=100');
       const docsData = await docsRes.json();
       const docs: any[] = Array.isArray(docsData) ? docsData : (docsData.documents || docsData.items || []);
 

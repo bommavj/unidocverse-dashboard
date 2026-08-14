@@ -1,4 +1,5 @@
 import { Component, Inject, ViewChild, ElementRef, AfterViewChecked, OnInit, ChangeDetectorRef } from '@angular/core';
+import { authFetch } from '../../lib/api';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { MAT_DIALOG_DATA, MatDialogModule } from '@angular/material/dialog';
@@ -542,7 +543,7 @@ export class DocumentQaDialogComponent implements OnInit, AfterViewChecked {
     };
 
     try {
-      const response = await fetch(
+      const response = await authFetch(
         `http://localhost:8000/api/documents/${this.document.id}/ask`,
         {
           method: 'POST',

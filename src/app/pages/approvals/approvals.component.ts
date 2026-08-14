@@ -1,4 +1,5 @@
 import { Component, OnInit, ChangeDetectionStrategy, ChangeDetectorRef } from '@angular/core';
+import { authFetch } from '../../lib/api';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { DocSheetComponent } from '../../components/doc-sheet/doc-sheet.component';
@@ -79,8 +80,8 @@ export class ApprovalsComponent implements OnInit {
   async load() {
     try {
       const [reqRes, docsRes] = await Promise.all([
-        fetch(`${this.api}/api/approvals`).then(r => r.json()),
-        fetch(`${this.api}/api/documents?limit=100`).then(r => r.json()),
+        authFetch(`${this.api}/api/approvals`).then(r => r.json()),
+        authFetch(`${this.api}/api/documents?limit=100`).then(r => r.json()),
       ]);
       this.requests = reqRes || [];
       const docs = Array.isArray(docsRes) ? docsRes : (docsRes.documents || []);
@@ -100,7 +101,7 @@ export class ApprovalsComponent implements OnInit {
     if (!this.draft.doc_id || !this.draft.title) return;
     const approvers = this.draft.approvers.split(',').map(s => s.trim()).filter(Boolean);
     if (!approvers.length) approvers.push('Admin User');
-    const res = await fetch(`${this.api}/api/approvals`, {
+    const res = await authFetch(`${this.api}/api/approvals`, {
       method: 'POST', headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ ...this.draft, approvers })
     }).then(r => r.json());
@@ -116,7 +117,7 @@ export class ApprovalsComponent implements OnInit {
   }
 
   async openRequest(r: ApprovalRequest) {
-    const full = await fetch(`${this.api}/api/approvals/${r.id}`).then(x => x.json());
+    const full = await authFetch(`${this.api}/api/approvals/${r.id}`).then(x => x.json());
     this.selected = full;
     this.decisionDraft = { decision: 'approve', comment: '', approver: 'Admin User' };
     this.commentDraft = { author: 'Admin User', text: '' };
@@ -125,7 +126,7 @@ export class ApprovalsComponent implements OnInit {
 
   async submitDecision() {
     if (!this.selected) return;
-    const res = await fetch(`${this.api}/api/approvals/${this.selected.id}/decide`, {
+    const res = await authFetch(`${this.api}/api/approvals/${this.selected.id}/decide`, {
       method: 'POST', headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(this.decisionDraft)
     }).then(r => r.json());
@@ -142,7 +143,7 @@ export class ApprovalsComponent implements OnInit {
 
   async submitComment() {
     if (!this.selected || !this.commentDraft.text.trim()) return;
-    await fetch(`${this.api}/api/approvals/${this.selected.id}/comment`, {
+    await authFetch(`${this.api}/api/approvals/${this.selected.id}/comment`, {
       method: 'POST', headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(this.commentDraft)
     });
@@ -154,14 +155,14 @@ export class ApprovalsComponent implements OnInit {
 
   async deleteRequest(id: string) {
     if (!await this.confirm.ask({ title: 'Delete Request', message: 'This approval request will be permanently deleted.', danger: true })) return;
-    await fetch(`${this.api}/api/approvals/${id}`, { method: 'DELETE' });
+    await authFetch(`${this.api}/api/approvals/${id}`, { method: 'DELETE' });
     this.requests = this.requests.filter(r => r.id !== id);
     this.selected = null;
     this.cdr.markForCheck();
   }
 
   async openDoc(docId: string) {
-    this.selectedDoc = await fetch(`${this.api}/api/documents/${docId}`).then(r => r.json());
+    this.selectedDoc = await authFetch(`${this.api}/api/documents/${docId}`).then(r => r.json());
     this.cdr.markForCheck();
   }
 
@@ -178,7 +179,7 @@ export class ApprovalsComponent implements OnInit {
   }
 
   private logAudit(docId: string, action: string, detail: string) {
-    fetch(`${this.api}/api/audit`, {
+    authFetch(`${this.api}/api/audit`, {
       method: 'POST', headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ doc_id: docId, action, detail, actor: 'user' })
     }).catch(() => {});

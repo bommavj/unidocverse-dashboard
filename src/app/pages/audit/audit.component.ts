@@ -1,4 +1,5 @@
 import { Component, OnInit, ChangeDetectionStrategy, ChangeDetectorRef } from '@angular/core';
+import { authFetch } from '../../lib/api';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { UdvSelectComponent, SelectOption } from '../../components/udv-select/udv-select.component';
@@ -69,9 +70,9 @@ export class AuditComponent implements OnInit {
   async load() {
     try {
       const [eventsRes, summaryRes, actionsRes] = await Promise.all([
-        fetch(`${this.api}/api/audit?limit=200`).then(r => r.json()),
-        fetch(`${this.api}/api/audit/summary`).then(r => r.json()),
-        fetch(`${this.api}/api/audit/actions`).then(r => r.json()),
+        authFetch(`${this.api}/api/audit?limit=200`).then(r => r.json()),
+        authFetch(`${this.api}/api/audit/summary`).then(r => r.json()),
+        authFetch(`${this.api}/api/audit/actions`).then(r => r.json()),
       ]);
       this.events  = eventsRes.events  || [];
       this.summary = summaryRes;
