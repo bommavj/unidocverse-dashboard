@@ -1,4 +1,5 @@
 import { Component, Input, Output, EventEmitter, OnInit, OnDestroy, OnChanges, SimpleChanges, ChangeDetectorRef, ChangeDetectionStrategy } from '@angular/core';
+import { authFetch } from '../../lib/api';
 import { CommonModule } from '@angular/common';
 import { HttpClient } from '@angular/common/http';
 import { Router } from '@angular/router';
@@ -523,7 +524,7 @@ export class VoiceAssistantComponent implements OnInit, OnDestroy, OnChanges {
       ? `http://localhost:8000/api/documents/${this.activeDocument.id}/ask`
       : 'http://localhost:8000/api/documents/ask';
 
-    fetch(url, {
+    authFetch(url, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ question: phrase })

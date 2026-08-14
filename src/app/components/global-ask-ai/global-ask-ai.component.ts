@@ -4,6 +4,7 @@ import {
   ChangeDetectorRef, ChangeDetectionStrategy
 } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { authFetch } from '../../lib/api';
 import { FormsModule } from '@angular/forms';
 import { ApiService } from '../../services/api.service';
 
@@ -142,7 +143,7 @@ export class GlobalAskAiComponent implements OnChanges {
     this.cdr.detectChanges();
     this.scrollToBottom();
 
-    fetch('http://localhost:8000/api/documents/ask', {
+    authFetch('http://localhost:8000/api/documents/ask', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({

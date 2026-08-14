@@ -1,4 +1,5 @@
 import { Component, OnInit, OnDestroy } from '@angular/core';
+import { authFetch } from '../../../lib/api';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { RouterModule, Router } from '@angular/router';
@@ -417,9 +418,10 @@ sendAI(): void {
 }
 
 private _streamSSE(url: string, body: any, aiIdx: number): void {
+  const jwt = localStorage.getItem('udv_access_token') || '';
   fetch(url, {
     method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
+    headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${jwt}` },
     body: JSON.stringify(body),
   })
   .then(res => {

@@ -1,4 +1,5 @@
 import { Component, Input, Output, EventEmitter, OnChanges, SimpleChanges, ChangeDetectorRef, NgZone } from '@angular/core';
+import { authFetch } from '../../lib/api';
 import { Router } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
@@ -378,7 +379,7 @@ export class DocSheetComponent implements OnChanges {
     const aiIdx = this.msgs.length;
     this.msgs.push({ role: 'ai', text: '' });
 
-    fetch(`http://localhost:8000/api/documents/${this.d.id}/ask`, {
+    authFetch(`http://localhost:8000/api/documents/${this.d.id}/ask`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ question: q })

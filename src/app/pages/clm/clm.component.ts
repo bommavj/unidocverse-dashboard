@@ -1,4 +1,5 @@
 import { Component, OnInit, ChangeDetectionStrategy, ChangeDetectorRef } from '@angular/core';
+import { authFetch } from '../../lib/api';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { DocSheetComponent } from '../../components/doc-sheet/doc-sheet.component';
@@ -75,8 +76,8 @@ export class ClmComponent implements OnInit {
   async load() {
     try {
       const [entriesRes, docsRes] = await Promise.all([
-        fetch(`${this.api}/api/clm`).then(r => r.json()),
-        fetch(`${this.api}/api/documents?limit=100`).then(r => r.json()),
+        authFetch(`${this.api}/api/clm`).then(r => r.json()),
+        authFetch(`${this.api}/api/documents?limit=100`).then(r => r.json()),
       ]);
       this.entries = entriesRes || [];
       const docs = Array.isArray(docsRes) ? docsRes : (docsRes.documents || docsRes.items || []);
@@ -101,7 +102,7 @@ export class ClmComponent implements OnInit {
     entry.stage = stageKey;
     this.dragging = null;
     this.cdr.markForCheck();
-    await fetch(`${this.api}/api/clm/${entry.id}/move`, {
+    await authFetch(`${this.api}/api/clm/${entry.id}/move`, {
       method: 'PATCH', headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ stage: stageKey, moved_by: 'user' })
     });
@@ -112,7 +113,7 @@ export class ClmComponent implements OnInit {
   openAdd() { this.addOpen = true; this.addDraft = { doc_id: '', stage: 'draft', counterparty: '', contract_value: '', governing_law: '', notes: '' }; this.cdr.markForCheck(); }
   async submitAdd() {
     if (!this.addDraft.doc_id) return;
-    const res = await fetch(`${this.api}/api/clm`, {
+    const res = await authFetch(`${this.api}/api/clm`, {
       method: 'POST', headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ ...this.addDraft, contract_value: this.addDraft.contract_value ? +this.addDraft.contract_value : null })
     }).then(r => r.json());
@@ -129,7 +130,7 @@ export class ClmComponent implements OnInit {
 
   // ── Detail ──────────────────────────────────────────────────────────────
   async openEntry(entry: CLMEntry) {
-    const full = await fetch(`${this.api}/api/clm/${entry.id}`).then(r => r.json());
+    const full = await authFetch(`${this.api}/api/clm/${entry.id}`).then(r => r.json());
     this.selected = full;
     this.editDraft = { ...full };
     this.historyOpen = false;
@@ -138,13 +139,13 @@ export class ClmComponent implements OnInit {
   }
 
   async openDoc(docId: string) {
-    this.selectedDoc = await fetch(`${this.api}/api/documents/${docId}`).then(r => r.json());
+    this.selectedDoc = await authFetch(`${this.api}/api/documents/${docId}`).then(r => r.json());
     this.cdr.markForCheck();
   }
 
   async saveEdit() {
     if (!this.selected) return;
-    await fetch(`${this.api}/api/clm/${this.selected.id}`, {
+    await authFetch(`${this.api}/api/clm/${this.selected.id}`, {
       method: 'PATCH', headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(this.editDraft)
     });
@@ -157,7 +158,7 @@ export class ClmComponent implements OnInit {
 
   async deleteEntry(id: string) {
     if (!await this.confirm.ask({ title: 'Remove from Pipeline', message: 'This item will be removed from the CLM pipeline.', danger: true })) return;
-    await fetch(`${this.api}/api/clm/${id}`, { method: 'DELETE' });
+    await authFetch(`${this.api}/api/clm/${id}`, { method: 'DELETE' });
     this.entries = this.entries.filter(e => e.id !== id);
     this.selected = null;
     this.cdr.markForCheck();
@@ -168,7 +169,7 @@ export class ClmComponent implements OnInit {
   fmtDate(d?: string) { return d ? new Date(d).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) : '—'; }
 
   private logAudit(docId: string, action: string, detail: string) {
-    fetch(`${this.api}/api/audit`, {
+    authFetch(`${this.api}/api/audit`, {
       method: 'POST', headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ doc_id: docId, action, detail, actor: 'user' })
     }).catch(() => {});
