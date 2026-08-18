@@ -2,7 +2,7 @@
 
   <div class="topbar">
     <div>
-      <div class="topbar-title">AI Reports</div>
+      <div class="topbar-title">{{ pageTitle }}</div>
       <div class="topbar-sub">AI-generated daily intelligence · runs at 4:00 AM</div>
     </div>
     <button class="btn-run" (click)="runNow()" [disabled]="running">
@@ -45,11 +45,16 @@
       <!-- Report detail -->
       <div class="report-detail" *ngIf="selected">
         <div class="detail-header">
-          <div class="detail-title">{{ selected.title }}</div>
-          <div class="detail-meta">
-            Generated {{ selected.created_at | date:'MMM d, y, h:mm a' }}
-            &nbsp;·&nbsp;
-            <span class="badge" [ngClass]="statusClass(selected.run_status)">{{ selected.run_status }}</span>
+          <div class="detail-header-row">
+            <div>
+              <div class="detail-title">{{ selected.title }}</div>
+              <div class="detail-meta">
+                Generated {{ selected.created_at | date:'MMM d, y, h:mm a' }}
+                &nbsp;·&nbsp;
+                <span class="badge" [ngClass]="statusClass(selected.run_status)">{{ selected.run_status }}</span>
+              </div>
+            </div>
+            <button class="btn-download" (click)="downloadPdf()">⬇ Download PDF</button>
           </div>
           <div class="detail-summary">{{ selected.summary }}</div>
         </div>
@@ -75,11 +80,19 @@
                 </tr>
               </thead>
               <tbody>
-                <tr *ngFor="let row of sec.data">
+                <tr *ngFor="let row of pagedRows(sec.label, sec.data)">
                   <td *ngFor="let entry of objectEntries(row)">{{ entry.v }}</td>
                 </tr>
               </tbody>
             </table>
+            <div *ngIf="sec.data.length > pageSize" class="pagination">
+              <button class="pg-btn" (click)="prevPage(sec.label)" [disabled]="currentPage(sec.label) === 0">‹ Prev</button>
+              <span class="pg-info">
+                {{ currentPage(sec.label) + 1 }} / {{ totalPages(sec.data) }}
+                &nbsp;({{ sec.data.length }} total)
+              </span>
+              <button class="pg-btn" (click)="nextPage(sec.label, sec.data)" [disabled]="currentPage(sec.label) >= totalPages(sec.data) - 1">Next ›</button>
+            </div>
           </div>
 
           <!-- Empty array -->
