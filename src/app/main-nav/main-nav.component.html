@@ -86,13 +86,14 @@
       <a class="sb-a" routerLink="/loss-runs"   routerLinkActive="on"><span class="sbi">📉</span>{{ 'Loss Runs' | translate }}</a>
       <a class="sb-a" routerLink="/gap-analysis" routerLinkActive="on"><span class="sbi">🔎</span>{{ 'Gap Analysis' | translate }}</a>
       <a class="sb-a" routerLink="/coi"            routerLinkActive="on"><span class="sbi">📜</span>{{ 'COI' | translate }}</a>
-      <a class="sb-a" routerLink="/agency-reports" routerLinkActive="on"><span class="sbi">📊</span>{{ 'AI Reports' | translate }}</a>
+      <a class="sb-a" routerLink="/agency-reports" [queryParams]="{ type: 'insurance' }" routerLinkActive="on"><span class="sbi">📊</span>{{ 'AI Reports' | translate }}</a>
     </div>
 
     <!-- Immigration -->
     <div class="sb-sec" *ngIf="features.hrMode()">
       <div class="sb-lbl">{{ 'Immigration' | translate }}</div>
       <a class="sb-a" routerLink="/immigration" routerLinkActive="on"><span class="sbi">🛂</span>{{ 'Visa Tracker' | translate }}</a>
+      <a class="sb-a" routerLink="/agency-reports" [queryParams]="{ type: 'immigration' }" routerLinkActive="on"><span class="sbi">📊</span>{{ 'AI Reports' | translate }}</a>
     </div>
 
     <!-- Legal & Compliance -->
@@ -102,6 +103,7 @@
       <a class="sb-a" routerLink="/legal" [queryParams]="{ tab: 'obligations' }" routerLinkActive="on"><span class="sbi">🔒</span>{{ 'NDAs' | translate }}</a>
       <a class="sb-a" routerLink="/legal" [queryParams]="{ tab: 'renewals' }" routerLinkActive="on"><span class="sbi">🏠</span>{{ 'Lease Agmt' | translate }}</a>
       <a class="sb-a" routerLink="/legal" [queryParams]="{ tab: 'counterparties' }" routerLinkActive="on"><span class="sbi">📋</span>{{ 'Reg Filings' | translate }}</a>
+      <a class="sb-a" routerLink="/agency-reports" [queryParams]="{ type: 'legal' }" routerLinkActive="on"><span class="sbi">📊</span>{{ 'AI Reports' | translate }}</a>
     </div>
 
     <!-- Healthcare & Medical -->
@@ -110,6 +112,7 @@
       <a class="sb-a" routerLink="/healthcare" [queryParams]="{ tab: 'prescriptions' }" routerLinkActive="on"><span class="sbi">🩺</span>{{ 'Medical Charts' | translate }}</a>
       <a class="sb-a" routerLink="/healthcare" [queryParams]="{ tab: 'diagnoses' }" routerLinkActive="on"><span class="sbi">📝</span>{{ 'Intake Forms' | translate }}</a>
       <a class="sb-a" routerLink="/healthcare" [queryParams]="{ tab: 'procedures' }" routerLinkActive="on"><span class="sbi">🔬</span>{{ 'Lab Reports' | translate }}</a>
+      <a class="sb-a" routerLink="/agency-reports" [queryParams]="{ type: 'medical' }" routerLinkActive="on"><span class="sbi">📊</span>{{ 'AI Reports' | translate }}</a>
     </div>
 
     <!-- Finance, Tax & Auditing -->
@@ -118,6 +121,7 @@
       <a class="sb-a" routerLink="/finance" [queryParams]="{ tab: 'reconciliation' }" routerLinkActive="on"><span class="sbi">🏦</span>{{ 'Bank Stmts' | translate }}</a>
       <a class="sb-a" routerLink="/finance" [queryParams]="{ tab: 'tax' }" routerLinkActive="on"><span class="sbi">📅</span>{{ 'Tax Returns' | translate }}</a>
       <a class="sb-a" routerLink="/finance" [queryParams]="{ tab: 'expenses' }" routerLinkActive="on"><span class="sbi">🧾</span>{{ 'Invoices' | translate }}</a>
+      <a class="sb-a" routerLink="/agency-reports" [queryParams]="{ type: 'finance' }" routerLinkActive="on"><span class="sbi">📊</span>{{ 'AI Reports' | translate }}</a>
     </div>
 
     <!-- Real Estate & Mortgages -->
@@ -126,6 +130,7 @@
       <a class="sb-a" routerLink="/real-estate" [queryParams]="{ tab: 'leases' }" routerLinkActive="on"><span class="sbi">📉</span>{{ 'Appraisals' | translate }}</a>
       <a class="sb-a" routerLink="/real-estate" [queryParams]="{ tab: 'inspections' }" routerLinkActive="on"><span class="sbi">📜</span>{{ 'Title Deeds' | translate }}</a>
       <a class="sb-a" routerLink="/real-estate" [queryParams]="{ tab: 'closing' }" routerLinkActive="on"><span class="sbi">📑</span>{{ 'Disclosures' | translate }}</a>
+      <a class="sb-a" routerLink="/agency-reports" [queryParams]="{ type: 'real_estate' }" routerLinkActive="on"><span class="sbi">📊</span>{{ 'AI Reports' | translate }}</a>
     </div>
 
     <!-- Human Resources -->
@@ -134,6 +139,7 @@
       <a class="sb-a" routerLink="/hr" [queryParams]="{ tab: 'talent' }" routerLinkActive="on"><span class="sbi">👤</span>{{ 'Resumes' | translate }}</a>
       <a class="sb-a" routerLink="/hr" [queryParams]="{ tab: 'onboarding' }" routerLinkActive="on"><span class="sbi">📘</span>{{ 'Handbooks' | translate }}</a>
       <a class="sb-a" routerLink="/hr" [queryParams]="{ tab: 'policies' }" routerLinkActive="on"><span class="sbi">📈</span>{{ 'Reviews' | translate }}</a>
+      <a class="sb-a" routerLink="/agency-reports" [queryParams]="{ type: 'hr' }" routerLinkActive="on"><span class="sbi">📊</span>{{ 'AI Reports' | translate }}</a>
     </div>
 
     <!-- Supply Chain & Logistics -->
@@ -142,6 +148,7 @@
       <a class="sb-a" routerLink="/supply-chain" [queryParams]="{ tab: 'logistics' }" routerLinkActive="on"><span class="sbi">📦</span>{{ 'PO Register' | translate }}</a>
       <a class="sb-a" routerLink="/supply-chain" [queryParams]="{ tab: 'carriers' }" routerLinkActive="on"><span class="sbi">🚚</span>{{ 'Bills of Lading' | translate }}</a>
       <a class="sb-a" routerLink="/supply-chain" [queryParams]="{ tab: 'sanctions' }" routerLinkActive="on"><span class="sbi">🚢</span>{{ 'Manifests' | translate }}</a>
+      <a class="sb-a" routerLink="/agency-reports" [queryParams]="{ type: 'supply_chain' }" routerLinkActive="on"><span class="sbi">📊</span>{{ 'AI Reports' | translate }}</a>
     </div>
 
     <!-- Compliance & Risk -->
@@ -151,6 +158,7 @@
       <a class="sb-a" routerLink="/risk"          routerLinkActive="on"><span class="sbi">⚠️</span>{{ 'Risk' | translate }}</a>
       <a class="sb-a" routerLink="/audit"         routerLinkActive="on"><span class="sbi">🔍</span>{{ 'Audit' | translate }}</a>
       <a class="sb-a" routerLink="/deadlines"     routerLinkActive="on"><span class="sbi">⏰</span>{{ 'Deadlines' | translate }}</a>
+      <a class="sb-a" routerLink="/agency-reports" [queryParams]="{ type: 'compliance' }" routerLinkActive="on"><span class="sbi">📊</span>{{ 'AI Reports' | translate }}</a>
     </div>
 
     <!-- Operations -->
@@ -162,6 +170,7 @@
       <a class="sb-a" routerLink="/quotes"        routerLinkActive="on"><span class="sbi">💬</span>{{ 'Quotes' | translate }}</a>
       <a class="sb-a" routerLink="/clm"           routerLinkActive="on"><span class="sbi">📝</span>{{ 'CLM' | translate }}</a>
       <a class="sb-a" routerLink="/jurisdiction"  routerLinkActive="on"><span class="sbi">🗺️</span>{{ 'Jurisdiction' | translate }}</a>
+      <a class="sb-a" routerLink="/agency-reports" [queryParams]="{ type: 'operations' }" routerLinkActive="on"><span class="sbi">📊</span>{{ 'AI Reports' | translate }}</a>
     </div>
 
     <!-- Tools -->

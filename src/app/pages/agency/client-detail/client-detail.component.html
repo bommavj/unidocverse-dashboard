@@ -40,10 +40,6 @@
         <div class="stat-lbl">Total Premium</div>
         <div class="stat-val">{{ fmtCurrency(totalPremium) }}</div>
       </div>
-      <div class="stat-card" *ngIf="nearestRenewal != null">
-        <div class="stat-lbl">Next Renewal</div>
-        <div class="stat-val" [ngClass]="expiryClass(nearestRenewal)">{{ nearestRenewal }}d</div>
-      </div>
       <div class="stat-card" *ngIf="gapAnalysis">
         <div class="stat-lbl">Coverage Score</div>
         <div class="stat-val grade-inline" [ngClass]="getGradeClass(gapAnalysis.overall_grade || gapAnalysis.grade)">
@@ -116,7 +112,7 @@
       <button [class.active]="activeTab==='notes'" (click)="activeTab='notes'; loadNotes()">
         Notes <span class="tab-ct" *ngIf="notes.length">{{ notes.length }}</span>
       </button>
-      <button [class.active]="activeTab==='immigration'" (click)="activeTab='immigration'">
+      <button *ngIf="client?.client_type === 'immigration' || immigration.length > 0" [class.active]="activeTab==='immigration'" (click)="activeTab='immigration'">
         🛂 Immigration
         <span class="tab-ct tab-ct-red" *ngIf="immigrationSummary.critical > 0">{{ immigrationSummary.critical }} critical</span>
         <span class="tab-ct tab-ct-amber" *ngIf="immigrationSummary.critical === 0 && immigrationSummary.high > 0">{{ immigrationSummary.high }} expiring</span>
