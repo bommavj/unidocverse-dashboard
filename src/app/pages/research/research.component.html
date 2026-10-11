@@ -86,6 +86,10 @@
         <div class="main-title">🔬 Document Research Agent</div>
         <div class="main-sub">ReAct loop · {{ activeModel }} · Reason → Search → Answer</div>
       </div>
+      <button class="review-btn" (click)="reviewReturn()" [disabled]="running"
+              title="Check every tax form against the return: W-2s, 1099s, 1099-B / 8949, K-1s, missing forms">
+        📋 Review {{ reviewYear }} tax return
+      </button>
       <div class="scope-badge">
         <span class="scope-ico">📂</span>
         {{ selectedLabel }}
@@ -109,22 +113,7 @@
     <div class="result-area" *ngIf="activeSession && !running">
 
       <!-- ── Prior turns thread ── -->
-      <div class="thread-history" *ngIf="activeSession.thread?.length">
-        <div *ngFor="let turn of activeSession.thread; let i = index" class="thread-turn">
-          <div class="thread-turn-q">
-            <span class="thread-turn-idx">{{ i + 1 }}</span>
-            <span class="thread-q-ico">❓</span>
-            <span class="thread-q-text">{{ turn.question }}</span>
-          </div>
-          <div class="thread-turn-a" [innerHTML]="md(turn.answer)"></div>
-          <div class="thread-turn-src" *ngIf="turn.sources?.length">
-            <span *ngFor="let s of turn.sources" class="source-chip">{{ s }}</span>
-          </div>
-        </div>
-        <div class="thread-divider">
-          <span>↩ Follow-up · Turn {{ (activeSession.thread?.length || 0) + 1 }}</span>
-        </div>
-      </div>
+      <ng-container *ngTemplateOutlet="threadTpl"></ng-container>
 
       <div class="result-question">
         <span class="q-ico">❓</span>
@@ -205,7 +194,8 @@
           <span class="answer-ico">✅</span>
           <span class="answer-title">Answer</span>
           <div class="answer-actions">
-            <button class="viz-action-btn" (click)="goToAnalytics(activeSession)" title="Open in Analytics">
+            <button class="viz-action-btn" (click)="goToAnalytics(activeSession)" title="Open in Analytics"
+                    [disabled]="!hasChart(activeSession)" [class.viz-disabled]="!hasChart(activeSession)">
               📊 Visualize
             </button>
             <div class="download-wrap">
@@ -259,11 +249,11 @@
       </div>
 
       <!-- Follow-up question input -->
-      <div class="followup-bar" *ngIf="!running && activeSession?.matchedDocIds?.length">
+      <div class="followup-bar" *ngIf="!running && activeSession?.answer">
         <div class="followup-header">
           <div class="followup-header-left">
             <span class="followup-pill">↩ Follow-up</span>
-            <span class="followup-ctx">Same {{ activeSession!.matchedDocIds!.length }} document{{ activeSession!.matchedDocIds!.length !== 1 ? 's' : '' }} · no re-search needed</span>
+            <span class="followup-ctx">Continues this conversation · {{ (activeSession!.thread?.length || 0) + 1 }} turn{{ (activeSession!.thread?.length || 0) ? 's' : '' }} so far</span>
           </div>
           <span class="followup-hint">Shift+Enter for newline</span>
         </div>
@@ -271,7 +261,7 @@
           <textarea
             class="followup-input"
             [(ngModel)]="followUpQuestion"
-            placeholder="Ask another question on the same dataset… e.g. 'who did the most sales?' or 'show by region'"
+            placeholder="Ask a follow-up… e.g. 'and for 2024?', 'who got the biggest one?', 'explain that'"
             rows="2"
             (keydown.enter)="submitFollowUpEnter($event)"
           ></textarea>
@@ -286,8 +276,9 @@
       <button class="new-query-btn" (click)="closeSession()">+ New Query</button>
     </div>
 
-    <!-- Running / thinking state -->
-    <div class="thinking-area" *ngIf="running">
+    <!-- Running / thinking state — earlier turns stay visible while a follow-up runs -->
+    <div class="thinking-area" *ngIf="running" [class.with-thread]="activeSession?.thread?.length">
+      <ng-container *ngTemplateOutlet="threadTpl"></ng-container>
       <div class="thinking-question" *ngIf="activeSession?.question">
         <span class="q-ico">❓</span>
         <span>{{ activeSession?.question }}</span>
@@ -337,3 +328,25 @@
     </div>
   </div>
 </div>
+
+<!-- Conversation history (earlier turns), shared by the answer view and the
+     "thinking" view so it never disappears while a follow-up runs. -->
+<ng-template #threadTpl>
+      <div class="thread-history" *ngIf="activeSession?.thread?.length">
+        <div *ngFor="let turn of activeSession?.thread; let i = index" class="thread-turn">
+          <div class="thread-turn-q">
+            <span class="thread-turn-idx">{{ i + 1 }}</span>
+            <span class="thread-q-ico">❓</span>
+            <span class="thread-q-text">{{ turn.question }}</span>
+          </div>
+          <div class="thread-turn-a" [innerHTML]="md(turn.answer)"></div>
+          <div class="thread-turn-src" *ngIf="turn.sources?.length">
+            <span *ngFor="let s of turn.sources" class="source-chip">{{ s }}</span>
+          </div>
+        </div>
+        <div class="thread-divider">
+          <span>↩ Follow-up · Turn {{ (activeSession?.thread?.length || 0) + 1 }}</span>
+        </div>
+      </div>
+
+</ng-template>

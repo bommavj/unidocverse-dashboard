@@ -1,0 +1,332 @@
+<div class="cp" *ngIf="c; else loadingTpl">
+
+  <!-- ── Case header ── -->
+  <header class="hd">
+    <nav class="crumbs" aria-label="Breadcrumb">
+      <a routerLink="/immigration">Immigration</a><span>/</span>
+      <a routerLink="/immigration" [queryParams]="{ section: 'cases' }">Cases</a><span>/</span>
+      <span>{{ c.beneficiary }}</span>
+    </nav>
+
+    <div class="hd-main">
+      <div class="who">
+        <span class="av">{{ initials }}</span>
+        <div>
+          <h1>{{ c.beneficiary }} <span class="pill p-neutral">{{ c.case_label }}</span></h1>
+          <p class="meta">
+            <span *ngIf="c.petitioner">Petitioner {{ c.petitioner }}</span>
+            <span *ngIf="c.visa_class">{{ c.visa_class }}</span>
+            <span *ngIf="c.form">Form {{ c.form }}</span>
+            <span *ngIf="c.receipt_number" class="mono">Receipt {{ c.receipt_number }}</span>
+          </p>
+        </div>
+      </div>
+      <div class="hd-actions">
+        <label class="status-select">
+          <span>Status</span>
+          <select [ngModel]="c.status" (ngModelChange)="setStatus($event)" aria-label="Case status">
+            <option *ngFor="let s of statuses" [value]="s">{{ label(s) }}</option>
+          </select>
+        </label>
+        <button class="btn btn-sec" (click)="sendIntake()" [disabled]="busy === 'intake'"><i class="ti ti-forms"></i>{{ busy === 'intake' ? 'Creating…' : 'Send intake' }}</button>
+        <button class="btn btn-sec" (click)="draftLetter()" [disabled]="busy === 'draft'"><i class="ti ti-file-text"></i>{{ busy === 'draft' ? 'Drafting…' : 'Draft letter' }}</button>
+        <button class="btn btn-pri" (click)="buildPacket()" [disabled]="busy === 'packet'"><i class="ti ti-files"></i>{{ busy === 'packet' ? 'Building…' : 'Build packet' }}</button>
+      </div>
+    </div>
+
+    <!-- Status stepper -->
+    <ol class="stepper" aria-label="Case progress">
+      <li *ngFor="let s of stages; let i = index" [class.done]="i < stage" [class.now]="i === stage">
+        <span class="bar"></span><span class="lbl">{{ i === 5 ? decision : s }}</span>
+      </li>
+    </ol>
+  </header>
+
+  <!-- Shareable link / drafted letter -->
+  <div class="banner" *ngIf="link">
+    <i class="ti ti-link"></i>
+    <div class="banner-body">
+      <b>{{ link.label }}</b>
+      <code>{{ link.url }}</code>
+      <span class="warn-text" *ngIf="link.warning">{{ link.warning }}</span>
+    </div>
+    <button class="btn btn-sec btn-sm" (click)="copy(link.url)">Copy</button>
+    <a class="btn btn-sec btn-sm" [href]="link.url" target="_blank" rel="noopener">Open</a>
+    <button class="x" (click)="link = null" aria-label="Dismiss"><i class="ti ti-x"></i></button>
+  </div>
+
+  <section class="panel letter" *ngIf="letter">
+    <div class="panel-h">
+      <h2>Draft — {{ label(letter.kind) }}</h2>
+      <div class="row-actions">
+        <select #kind (change)="draftLetter(kind.value)" aria-label="Draft type">
+          <option value="cover_letter" [selected]="letter.kind === 'cover_letter'">Cover letter</option>
+          <option value="client_update" [selected]="letter.kind === 'client_update'">Client update email</option>
+          <option value="case_summary" [selected]="letter.kind === 'case_summary'">Internal case summary</option>
+          <option value="support_letter" [selected]="letter.kind === 'support_letter'">Employer support letter outline</option>
+          <option value="rfe_outline" [selected]="letter.kind === 'rfe_outline'">RFE response outline</option>
+        </select>
+        <button class="btn btn-sec btn-sm" (click)="copy(letter.text)">Copy</button>
+        <button class="x" (click)="letter = null" aria-label="Close draft"><i class="ti ti-x"></i></button>
+      </div>
+    </div>
+    <textarea [(ngModel)]="letter.text" rows="12" aria-label="Draft text"></textarea>
+    <p class="hint" *ngIf="letter.kind === 'cover_letter'">This cover letter is included when you build the packet. Review and edit it first — it's an AI draft.</p>
+  </section>
+
+  <!-- Tabs -->
+  <div class="tabs" role="tablist">
+    <button role="tab" [attr.aria-selected]="tab === 'overview'" [class.on]="tab === 'overview'" (click)="setTab('overview')">Overview</button>
+    <button role="tab" [attr.aria-selected]="tab === 'tasks'" [class.on]="tab === 'tasks'" (click)="setTab('tasks')">Tasks <span class="n" *ngIf="openTasks.length">{{ openTasks.length }}</span></button>
+    <button role="tab" [attr.aria-selected]="tab === 'forms'" [class.on]="tab === 'forms'" (click)="setTab('forms')">Forms <span class="n">{{ forms.length }}</span></button>
+    <button role="tab" [attr.aria-selected]="tab === 'documents'" [class.on]="tab === 'documents'" (click)="setTab('documents')">Documents <span class="n">{{ evidenceDone }}/{{ c.checklist?.length || 0 }}</span></button>
+    <button role="tab" [attr.aria-selected]="tab === 'signatures'" [class.on]="tab === 'signatures'" (click)="setTab('signatures')">Signatures <span class="n" *ngIf="openSignatures">{{ openSignatures }}</span></button>
+    <button role="tab" [attr.aria-selected]="tab === 'activity'" [class.on]="tab === 'activity'" (click)="setTab('activity')">Activity</button>
+  </div>
+
+  <div class="layout">
+    <main class="main">
+
+      <!-- ── Overview ── -->
+      <ng-container *ngIf="tab === 'overview'">
+        <section class="panel">
+          <div class="panel-h"><h2>Next steps</h2><span class="count">{{ steps.length }}</span></div>
+          <button class="item" *ngFor="let s of steps" (click)="setTab(s.tab)">
+            <span class="dot" [ngClass]="'t-' + s.tone"></span>
+            <span class="item-t">{{ s.text }}</span>
+            <span class="who">{{ s.who }}</span>
+            <span class="pill" [ngClass]="'p-' + s.tone" *ngIf="s.when">{{ s.when }}</span>
+          </button>
+          <div class="empty" *ngIf="!steps.length"><i class="ti ti-circle-check"></i><b>Nothing waiting</b><span>No deadlines, signatures or missing evidence need attention.</span></div>
+        </section>
+
+        <section class="stats">
+          <div class="stat"><span>Evidence</span><b>{{ evidenceDone }} of {{ c.checklist?.length || 0 }}</b><div class="mini"><i [style.width.%]="c.progress"></i></div></div>
+          <div class="stat stat-link" (click)="setTab('tasks')"><span>Open tasks</span><b>{{ openTasks.length }}</b></div>
+          <div class="stat"><span>Forms ready</span><b>{{ formsReady }} of {{ forms.length }}</b></div>
+          <div class="stat"><span>Open signatures</span><b>{{ openSignatures }}</b></div>
+          <div class="stat"><span>Intake</span><b>{{ c.intakes?.[0]?.status ? label(c.intakes[0].status) : 'Not sent' }}</b></div>
+        </section>
+
+        <section class="panel">
+          <div class="panel-h">
+            <h2>Case details</h2>
+            <button class="link-btn" *ngIf="!editing" (click)="startEdit()"><i class="ti ti-pencil"></i>Edit</button>
+            <div class="row-actions" *ngIf="editing">
+              <button class="btn btn-sec btn-sm" (click)="editing = false">Cancel</button>
+              <button class="btn btn-pri btn-sm" (click)="saveDetails()">Save</button>
+            </div>
+          </div>
+          <dl class="details" *ngIf="!editing">
+            <div><dt>Petitioner</dt><dd>{{ c.petitioner || '—' }}</dd></div>
+            <div><dt>Visa class</dt><dd>{{ c.visa_class || '—' }}</dd></div>
+            <div><dt>Receipt number</dt><dd class="mono">{{ c.receipt_number || '—' }}</dd></div>
+            <div><dt>Filed</dt><dd>{{ c.filed_date ? (c.filed_date | date:'MMM d, y') : '—' }}</dd></div>
+            <div><dt>Priority date</dt><dd>{{ c.priority_date ? (c.priority_date | date:'MMM d, y') : '—' }}</dd></div>
+            <div><dt>Status expires</dt><dd>{{ c.expiry_date ? (c.expiry_date | date:'MMM d, y') : '—' }}</dd></div>
+            <div *ngIf="c.rfe_due_date"><dt>RFE due</dt><dd>{{ c.rfe_due_date | date:'MMM d, y' }}</dd></div>
+            <div *ngIf="c.decision_date"><dt>Decision</dt><dd>{{ c.decision_date | date:'MMM d, y' }}</dd></div>
+          </dl>
+          <div class="details edit" *ngIf="editing">
+            <label>Petitioner<input [(ngModel)]="draftDetails.petitioner"></label>
+            <label>Visa class<input [(ngModel)]="draftDetails.visa_class"></label>
+            <label>Receipt number<input [(ngModel)]="draftDetails.receipt_number" class="mono"></label>
+            <label>Filed<input type="date" [(ngModel)]="draftDetails.filed_date"></label>
+            <label>Priority date<input type="date" [(ngModel)]="draftDetails.priority_date"></label>
+            <label>Status expires<input type="date" [(ngModel)]="draftDetails.expiry_date"></label>
+            <label>RFE due<input type="date" [(ngModel)]="draftDetails.rfe_due_date"></label>
+            <label>Decision date<input type="date" [(ngModel)]="draftDetails.decision_date"></label>
+          </div>
+        </section>
+
+        <section class="panel">
+          <div class="panel-h"><h2>Recent activity</h2><button class="link-btn" (click)="setTab('activity')">View all</button></div>
+          <div class="ev" *ngFor="let e of c.events?.slice(0, 5)">
+            <span class="ev-t">{{ e.text }}</span><span class="muted">{{ e.at | date:'MMM d, h:mm a' }}<span *ngIf="e.actor"> · {{ e.actor }}</span></span>
+          </div>
+          <div class="empty small" *ngIf="!c.events?.length"><span>No activity yet</span></div>
+        </section>
+      </ng-container>
+
+      <!-- ── Tasks ── -->
+      <section class="panel" *ngIf="tab === 'tasks'">
+        <div class="panel-h">
+          <h2>Task list</h2>
+          <button class="btn btn-sec btn-sm" (click)="applyTemplate()" [disabled]="busy === 'template'"><i class="ti ti-list-check"></i>{{ busy === 'template' ? 'Applying…' : (c.tasks?.length ? 'Add missing template tasks' : 'Apply ' + c.case_label + ' task list') }}</button>
+        </div>
+
+        <div class="chips" *ngIf="c.tasks?.length">
+          <button [class.on]="!roleFilter" (click)="roleFilter = ''">All open <span>{{ openTasks.length }}</span></button>
+          <ng-container *ngFor="let r of roles">
+            <button *ngIf="roleCount(r)" [class.on]="roleFilter === r" (click)="roleFilter = r">{{ label(r) }} <span>{{ roleCount(r) }}</span></button>
+          </ng-container>
+        </div>
+
+        <div class="task" *ngFor="let t of shownTasks">
+          <input type="checkbox" [checked]="t.done" (change)="updateTask(t, { done: true })" [attr.aria-label]="'Complete ' + t.title">
+          <span class="task-body">
+            <b>{{ t.title }}</b>
+            <span class="task-meta">
+              <select [ngModel]="t.role" (ngModelChange)="updateTask(t, { role: $event })" aria-label="Who does it">
+                <option *ngFor="let r of roles" [value]="r">{{ label(r) }}</option>
+              </select>
+              <input class="assignee" [ngModel]="t.assignee" (change)="updateTask(t, { assignee: $any($event.target).value })" placeholder="Assignee" aria-label="Assignee">
+            </span>
+          </span>
+          <input type="date" class="due" [ngModel]="t.due_date" (change)="updateTask(t, { due_date: $any($event.target).value || null })" aria-label="Due date">
+          <span class="pill" [ngClass]="dueTone(t)">{{ dueText(t) }}</span>
+          <button class="x" (click)="deleteTask(t)" aria-label="Remove task"><i class="ti ti-trash"></i></button>
+        </div>
+
+        <div class="empty" *ngIf="!c.tasks?.length">
+          <i class="ti ti-list-check"></i><b>No tasks yet</b>
+          <span>Apply the {{ c.case_label }} task list to start with the usual steps, or add your own below.</span>
+        </div>
+        <div class="empty small" *ngIf="c.tasks?.length && !shownTasks.length"><span>No open tasks{{ roleFilter ? ' for ' + label(roleFilter) : '' }}.</span></div>
+
+        <form class="task-add" (ngSubmit)="addTask()">
+          <input name="title" [(ngModel)]="newTask.title" placeholder="Add a task" aria-label="New task title">
+          <select name="role" [(ngModel)]="newTask.role" aria-label="Who does it"><option *ngFor="let r of roles" [value]="r">{{ label(r) }}</option></select>
+          <input name="assignee" [(ngModel)]="newTask.assignee" placeholder="Assignee" aria-label="Assignee">
+          <input name="due" type="date" [(ngModel)]="newTask.due_date" aria-label="Due date">
+          <button class="btn btn-pri btn-sm" type="submit">Add</button>
+        </form>
+
+        <div class="done-h" *ngIf="doneTasks.length">
+          <button class="link-btn" (click)="showDone = !showDone"><i class="ti" [class.ti-chevron-right]="!showDone" [class.ti-chevron-down]="showDone"></i>Done ({{ doneTasks.length }})</button>
+        </div>
+        <ng-container *ngIf="showDone">
+          <div class="task done" *ngFor="let t of doneTasks">
+            <input type="checkbox" checked (change)="updateTask(t, { done: false })" [attr.aria-label]="'Reopen ' + t.title">
+            <span class="task-body"><b>{{ t.title }}</b><span class="muted">{{ label(t.role) }} · done {{ t.done_at | date:'MMM d' }}<span *ngIf="t.done_by"> by {{ t.done_by }}</span></span></span>
+          </div>
+        </ng-container>
+      </section>
+
+      <!-- ── Forms ── -->
+      <section class="panel" *ngIf="tab === 'forms'">
+        <div class="panel-h"><h2>Official USCIS forms</h2></div>
+        <ng-container *ngFor="let f of forms">
+        <div class="row">
+          <span class="ficon"><i class="ti ti-file-text"></i></span>
+          <span class="row-body">
+            <b>Form {{ f.form }}</b>
+            <span class="muted" *ngIf="f.total">{{ f.filled }} of {{ f.total }} fields filled</span>
+            <span class="warn-text" *ngIf="f.edition_ok === false">This form's edition has changed — re-check before filing.</span>
+          </span>
+          <span class="pill p-warn" *ngIf="f.missing?.length">{{ f.missing!.length }} required blank</span>
+          <span class="pill p-ok" *ngIf="f.missing && !f.missing.length">Ready</span>
+          <button class="btn btn-sec btn-sm" (click)="toggleForm(f.form)" [attr.aria-expanded]="openForm === f.form">{{ openForm === f.form ? 'Close' : 'Review fields' }}</button>
+          <button class="btn btn-pri btn-sm" (click)="downloadForm(f.form)"><i class="ti ti-download"></i>PDF</button>
+        </div>
+        <div class="form-edit" *ngIf="openForm === f.form">
+          <div class="muted" *ngIf="!formFields.length">Loading fields…</div>
+          <fieldset *ngFor="let g of fieldGroups()">
+            <legend>{{ g.group }}</legend>
+            <label *ngFor="let fld of g.fields" [class.req-missing]="fld.required && !(formEdits[fld.key] ?? fld.value)">
+              <span>{{ fld.label }}<b *ngIf="fld.required" class="req">*</b>
+                <em class="src" *ngIf="fld.source" [class.src-derived]="fld.source === 'derived'">{{ fld.source === 'derived' ? 'Check — derived' : label(fld.source) }}</em></span>
+              <input [ngModel]="formEdits[fld.key] ?? fld.value" (ngModelChange)="formEdits[fld.key] = $event"
+                     [placeholder]="fld.options ? fld.options.join(' / ') : ''">
+            </label>
+          </fieldset>
+          <div class="form-edit-actions" *ngIf="formFields.length">
+            <button class="btn btn-sec btn-sm" (click)="openForm = ''">Cancel</button>
+            <button class="btn btn-pri btn-sm" (click)="saveForm(f.form)">Save values</button>
+          </div>
+        </div>
+        </ng-container>
+        <div class="empty" *ngIf="!forms.length"><i class="ti ti-file-off"></i><b>No auto-fill form for this case type</b><span>Auto-fill covers I-129, I-539, I-765, I-140, I-485, I-130 and I-90.</span></div>
+        <p class="hint">Values come from the client's intake, the case and staff entries. Signatures are never filled.</p>
+      </section>
+
+      <!-- ── Documents / evidence ── -->
+      <section class="panel" *ngIf="tab === 'documents'">
+        <div class="panel-h">
+          <h2>Evidence checklist</h2>
+          <button class="btn btn-sec btn-sm" (click)="matchDocs()" [disabled]="busy === 'match'"><i class="ti ti-wand"></i>{{ busy === 'match' ? 'Matching…' : 'Match uploaded documents' }}</button>
+        </div>
+        <label class="row check" *ngFor="let i of c.checklist">
+          <input type="checkbox" [checked]="i.done" (change)="toggleItem(i)">
+          <span class="row-body"><b>{{ i.item }}</b><span class="muted" *ngIf="!i.required">Optional</span></span>
+          <span class="pill p-ok" *ngIf="i.document_id">Matched to a document</span>
+          <span class="pill p-warn" *ngIf="!i.done && !i.document_id">Outstanding</span>
+        </label>
+        <div class="empty" *ngIf="!c.checklist?.length"><span>No evidence checklist for this case type.</span></div>
+      </section>
+
+      <!-- ── Signatures ── -->
+      <section class="panel" *ngIf="tab === 'signatures'">
+        <div class="panel-h">
+          <h2>E-signatures</h2>
+          <button class="btn btn-pri btn-sm" (click)="showSigForm = !showSigForm"><i class="ti ti-signature"></i>Request signature</button>
+        </div>
+        <div class="sig-form" *ngIf="showSigForm">
+          <label>Document title<input [(ngModel)]="sigForm.title" placeholder="G-28 Notice of appearance"></label>
+          <label>Signer name<input [(ngModel)]="sigForm.signer_name" placeholder="Priya Raman"></label>
+          <label>Signer email<input [(ngModel)]="sigForm.signer_email" type="email" placeholder="name@example.com"></label>
+          <button class="btn btn-pri btn-sm" (click)="requestSignature()" [disabled]="busy === 'sign'">{{ busy === 'sign' ? 'Creating…' : 'Create signing link' }}</button>
+        </div>
+        <div class="row" *ngFor="let s of c.signatures">
+          <span class="ficon"><i class="ti ti-signature"></i></span>
+          <span class="row-body"><b>{{ s.title }}</b><span class="muted">{{ s.signer_name }}<span *ngIf="s.signed_at"> · signed {{ s.signed_at | date:'MMM d, y' }}</span></span></span>
+          <span class="pill" [ngClass]="s.status === 'signed' ? 'p-ok' : s.status === 'voided' || s.status === 'declined' ? 'p-neutral' : 'p-warn'">{{ label(s.status) }}</span>
+          <button class="btn btn-sec btn-sm" *ngIf="s.status === 'signed'" (click)="certificate(s)">Certificate</button>
+          <button class="btn btn-sec btn-sm" *ngIf="!['signed','voided','declined'].includes(s.status)" (click)="voidSignature(s)">Void</button>
+        </div>
+        <div class="empty" *ngIf="!c.signatures?.length && !showSigForm"><span>No signature requests yet.</span></div>
+      </section>
+
+      <!-- ── Activity ── -->
+      <section class="panel" *ngIf="tab === 'activity'">
+        <div class="panel-h"><h2>Case history</h2></div>
+        <div class="note">
+          <textarea [(ngModel)]="note" rows="2" placeholder="Add a note to this case" aria-label="New note"></textarea>
+          <button class="btn btn-pri btn-sm" (click)="addNote()" [disabled]="!note.trim()">Add note</button>
+        </div>
+        <div class="ev" *ngFor="let e of c.events">
+          <span class="ev-kind">{{ label(e.kind) }}</span>
+          <span class="ev-t">{{ e.text }}</span>
+          <span class="muted">{{ e.at | date:'MMM d, y, h:mm a' }}<span *ngIf="e.actor"> · {{ e.actor }}</span></span>
+        </div>
+      </section>
+    </main>
+
+    <!-- ── Right rail ── -->
+    <aside class="rail">
+      <section class="panel">
+        <div class="panel-h"><h2>Deadlines</h2></div>
+        <div class="dl" *ngFor="let d of c.deadlines">
+          <span>{{ d.what }}</span>
+          <span class="pill" [ngClass]="d.days < 0 ? 'p-bad' : d.days <= 30 ? 'p-warn' : 'p-neutral'">{{ d.date | date:'MMM d, y' }}</span>
+        </div>
+        <div class="empty small" *ngIf="!c.deadlines?.length"><span>Add an expiry date to track deadlines.</span></div>
+      </section>
+      <section class="panel">
+        <div class="panel-h"><h2>Client intake</h2></div>
+        <div class="dl" *ngFor="let i of c.intakes?.slice(0, 3)">
+          <span>{{ i.created_at | date:'MMM d' }} · {{ i.answered }} answers</span>
+          <span class="pill" [ngClass]="i.status === 'submitted' ? 'p-ok' : 'p-warn'">{{ label(i.status) }}</span>
+        </div>
+        <button class="btn btn-sec btn-sm full" (click)="sendIntake()" [disabled]="busy === 'intake'">{{ c.intakes?.length ? 'Send a new link' : 'Send intake' }}</button>
+      </section>
+      <section class="panel">
+        <div class="panel-h"><h2>AI drafts</h2></div>
+        <button class="rail-link" (click)="draftLetter('client_update')"><i class="ti ti-mail"></i>Client update email</button>
+        <button class="rail-link" (click)="draftLetter('case_summary')"><i class="ti ti-notes"></i>Internal case summary</button>
+        <button class="rail-link" (click)="draftLetter('support_letter')"><i class="ti ti-building"></i>Employer support letter outline</button>
+        <button class="rail-link" (click)="draftLetter('rfe_outline')"><i class="ti ti-alert-triangle"></i>RFE response outline</button>
+      </section>
+    </aside>
+  </div>
+</div>
+
+<ng-template #loadingTpl>
+  <div class="cp state">
+    <ng-container *ngIf="error; else spin">
+      <i class="ti ti-folder-off"></i><b>{{ error }}</b>
+      <a class="btn btn-sec" routerLink="/immigration" [queryParams]="{ section: 'cases' }">Back to cases</a>
+    </ng-container>
+    <ng-template #spin><span class="muted">Loading case…</span></ng-template>
+  </div>
+</ng-template>

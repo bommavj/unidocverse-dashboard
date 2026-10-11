@@ -26,9 +26,9 @@ import { FeatureFlagService } from '../../services/feature-flag.service';
 </div>
   `,
   styles: [`
-.hub-page    { display:flex; flex-direction:column; height:100%; min-height:0; }
+.hub-page    { display:flex; flex-direction:column; height:var(--content-h); min-height:0; }
 .hub-content { flex:1; overflow:hidden; display:flex; flex-direction:column; min-height:0; }
-.hub-content > * { flex:1; overflow:hidden; min-height:0; }
+.hub-content > * { flex:1; overflow-y:auto; min-height:0; }   /* embedded pages scroll inside the hub */
   `],
 })
 export class DocumentsHubComponent implements OnInit {
@@ -60,11 +60,12 @@ export class DocumentsHubComponent implements OnInit {
       this.tabs.push({ key: 'workflow',   label: 'Approval Workflows',  icon: '🔀' });
     }
 
-    if (this.flags.legalMode()) {
+    if (this.flags.legalMode() || this.flags.operationsMode()) {
       this.tabs.push({ key: 'clm', label: 'Contracts (CLM)', icon: '📝' });
     }
 
-    if (this.flags.medicalMode()) {
+    // Document risk and health scores belong to the Compliance and Risk module
+    if (this.flags.complianceMode()) {
       this.tabs.push({ key: 'risk', label: 'Risk & Health', icon: '🏥' });
     }
   }

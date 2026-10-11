@@ -44,7 +44,7 @@ const BASE = 'http://localhost:8000';
       display: block;
       font-family: 'Inter', system-ui, sans-serif;
       background: #f9fafb;
-      min-height: 100vh;
+      min-height: var(--content-h);
       padding: 24px;
       box-sizing: border-box;
     }

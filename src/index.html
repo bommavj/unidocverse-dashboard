@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="utf-8">
-  <title>UniDocVerseAiDashboard</title>
+  <title>UniDocVerse</title>
   <base href="/">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <link rel="icon" type="image/x-icon" href="favicon.ico">
@@ -10,18 +10,97 @@
   <link rel="apple-touch-icon" href="assets/favicon.png">
   <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500&display=swap" rel="stylesheet">
   <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@2.44.0/tabler-icons.min.css">
 </head>
 <body class="mat-typography">
   <app-root></app-root>
-  <!-- Bomma — AI document assistant widget -->
-  <script
-    src="http://localhost:8000/chatbot-widget.js"
-    data-api="http://localhost:8000"
-    data-title="Bomma"
-    data-subtitle="Your AI document assistant"
-    data-icon="🤖"
-    data-color="#1a56db"
-    data-position="bottom-right">
+  <!-- Bomma — AI document assistant widget (only for authenticated users) -->
+  <script>
+    var _udvWidgetLoaded = false;
+    function _loadUdvWidget() {
+      var token = localStorage.getItem('udv_access_token');
+      if (_udvWidgetLoaded || !token) return;
+      _udvWidgetLoaded = true;
+      // Inline the widget so document.currentScript is always valid
+      var wrap = document.createElement('div');
+      wrap.id = 'udv-widget-host';
+      document.body.appendChild(wrap);
+      var API = 'http://localhost:8000';
+      var COLOR = '#1a56db';
+      var TITLE = 'Bomma';
+      var SUBTITLE = 'Your AI document assistant';
+      var ICON = '🤖';
+      var POSITION = 'bottom-right';
+      var _q = new URLSearchParams({ title: TITLE, color: COLOR, icon: ICON, embedded: '1', api: API, subtitle: SUBTITLE });
+      _q.set('v', '6');
+      if (token) _q.set('jwt', token);
+      var chatUrl = API + '/chatbot?' + _q.toString();
+
+      var style = document.createElement('style');
+      var side = 'right';
+      style.textContent = '#udv-wrap{position:fixed;bottom:24px;right:24px;z-index:99998;display:flex;flex-direction:row-reverse;align-items:flex-end;gap:10px;touch-action:none}#udv-fab{width:52px;height:52px;border-radius:50%;background:' + COLOR + ';color:#fff;border:none;box-shadow:0 4px 16px rgba(0,0,0,.25);cursor:grab;font-size:22px;display:flex;align-items:center;justify-content:center;transition:transform .2s,box-shadow .2s;position:relative;flex-shrink:0;user-select:none}#udv-fab:hover{transform:scale(1.08)}#udv-fab.dragging{cursor:grabbing;transform:scale(1.12);box-shadow:0 8px 28px rgba(0,0,0,.35)}#udv-panel{position:fixed;bottom:80px;right:24px;z-index:99999;width:380px;height:600px;max-height:calc(100dvh - 116px);border-radius:16px;overflow:hidden;box-shadow:0 8px 40px rgba(0,0,0,.18);border:1px solid rgba(0,0,0,.08);display:none;flex-direction:column;transform:scale(.92) translateY(12px);opacity:0;transition:transform .22s cubic-bezier(.34,1.56,.64,1),opacity .18s ease}#udv-panel.open{display:flex;transform:scale(1) translateY(0);opacity:1}#udv-panel iframe{width:100%;flex:1;border:none}';
+      document.head.appendChild(style);
+
+      var panel = document.createElement('div');
+      panel.id = 'udv-panel';
+      var iframe = document.createElement('iframe');
+      iframe.src = chatUrl;
+      iframe.title = TITLE;
+      iframe.allow = 'clipboard-write';
+      panel.appendChild(iframe);
+      document.body.appendChild(panel);
+
+      var wrapEl = document.createElement('div');
+      wrapEl.id = 'udv-wrap';
+      var fab = document.createElement('button');
+      fab.id = 'udv-fab';
+      fab.title = TITLE;
+      fab.textContent = '💬';
+      wrapEl.appendChild(fab);
+      document.body.appendChild(wrapEl);
+
+      var open = false;
+      function openChat() { open = true; fab.textContent = '✕'; panel.style.display = 'flex'; requestAnimationFrame(function() { panel.classList.add('open'); }); }
+      function closeChat() { open = false; fab.textContent = '💬'; panel.classList.remove('open'); setTimeout(function() { panel.style.display = 'none'; }, 220); }
+      // ── Drag to reposition ───────────────────────────────────────────────
+      var dragging = false, dragMoved = false, startX, startY, startRight, startBottom;
+      fab.addEventListener('pointerdown', function(e) {
+        dragging = true; dragMoved = false;
+        startX = e.clientX; startY = e.clientY;
+        var rect = wrapEl.getBoundingClientRect();
+        startRight  = window.innerWidth  - rect.right;
+        startBottom = window.innerHeight - rect.bottom;
+        fab.classList.add('dragging');
+        fab.setPointerCapture(e.pointerId);
+        e.preventDefault();
+      });
+      fab.addEventListener('pointermove', function(e) {
+        if (!dragging) return;
+        var dx = e.clientX - startX, dy = e.clientY - startY;
+        if (Math.abs(dx) > 4 || Math.abs(dy) > 4) dragMoved = true;
+        var newRight  = Math.max(8, Math.min(window.innerWidth  - 68, startRight  - dx));
+        var newBottom = Math.max(8, Math.min(window.innerHeight - 68, startBottom + dy));
+        wrapEl.style.right  = newRight  + 'px';
+        wrapEl.style.bottom = newBottom + 'px';
+        panel.style.right   = newRight  + 'px';
+        panel.style.bottom  = (newBottom + 64) + 'px';
+      });
+      fab.addEventListener('pointerup', function(e) {
+        fab.classList.remove('dragging');
+        dragging = false;
+        if (!dragMoved) { open ? closeChat() : openChat(); }
+      });
+      // legacy click guard
+      fab.addEventListener('click', function(e) { if (dragMoved) { dragMoved = false; e.stopImmediatePropagation(); } });
+      document.addEventListener('keydown', function(e) { if (e.key === 'Escape' && open) closeChat(); });
+
+      window.addEventListener('udv-logout', function() {
+        panel.remove(); wrapEl.remove(); style.remove(); _udvWidgetLoaded = false;
+      });
+    }
+    // Widget is injected only when Angular fires udv-login (post-route, auth confirmed)
+    window.addEventListener('udv-login', _loadUdvWidget);
   </script>
 </body>
 </html>

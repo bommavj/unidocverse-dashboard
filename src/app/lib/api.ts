@@ -105,7 +105,7 @@ async uploadDocument(file: File): Promise<any> {
     const formData = new FormData();
     formData.append('file', file);
 
-    const response = await fetch(`${this.baseUrl}/api/upload`, {
+    const response = await authFetch(`${this.baseUrl}/api/upload`, {
       method: 'POST',
       body: formData,
     });
@@ -119,7 +119,7 @@ async uploadDocument(file: File): Promise<any> {
   }
 
   async getDocuments(skip = 0, limit = 100): Promise<{ documents: DocumentResponse[]; total: number }> {
-    const response = await fetch(`${this.baseUrl}/api/documents?skip=${skip}&limit=${limit}`);
+    const response = await authFetch(`${this.baseUrl}/api/documents?skip=${skip}&limit=${limit}`);
     
     if (!response.ok) {
       throw new Error('Failed to fetch documents');
@@ -132,126 +132,74 @@ async uploadDocument(file: File): Promise<any> {
   }
 
   async getDocument(id: string): Promise<DocumentResponse> {
-    const response = await fetch(`${this.baseUrl}/api/documents/${id}`);
-    
-    if (!response.ok) {
-      throw new Error('Failed to fetch document');
-    }
-    
+    const response = await authFetch(`${this.baseUrl}/api/documents/${id}`);
+    if (!response.ok) throw new Error('Failed to fetch document');
     return response.json();
   }
 
   async deleteDocument(id: string): Promise<void> {
-    const response = await fetch(`${this.baseUrl}/api/documents/${id}`, {
-      method: 'DELETE',
-    });
-    
-    if (!response.ok) {
-      throw new Error('Failed to delete document');
-    }
+    const response = await authFetch(`${this.baseUrl}/api/documents/${id}`, { method: 'DELETE' });
+    if (!response.ok) throw new Error('Failed to delete document');
   }
 
   async semanticSearch(query: string, limit = 10): Promise<SemanticSearchResponse> {
-    const response = await fetch(
+    const response = await authFetch(
       `${this.baseUrl}/api/search/semantic?query=${encodeURIComponent(query)}&limit=${limit}`,
       { method: 'POST' }
     );
-    
-    if (!response.ok) {
-      throw new Error('Semantic search failed');
-    }
-    
+    if (!response.ok) throw new Error('Semantic search failed');
     return response.json();
   }
 
   async getSimilarDocuments(docId: string, limit: number = 5): Promise<any> {
-    const response = await fetch(
-      `${this.baseUrl}/api/search/documents/${docId}/similar?limit=${limit}`  // ✅ Add /search
-    );
-    
-    if (!response.ok) {
-      throw new Error('Failed to fetch similar documents');
-    }
-    
+    const response = await authFetch(`${this.baseUrl}/api/search/documents/${docId}/similar?limit=${limit}`);
+    if (!response.ok) throw new Error('Failed to fetch similar documents');
     return response.json();
   }
 
   async getHealth(): Promise<any> {
-    const response = await fetch(`${this.baseUrl}/health`);
-    
-    if (!response.ok) {
-      throw new Error('Health check failed');
-    }
-    
+    const response = await fetch(`${this.baseUrl}/health`); // health is public
+    if (!response.ok) throw new Error('Health check failed');
     return response.json();
   }
 
   async getDashboardAnalytics(): Promise<any> {
-    const response = await fetch(`${this.baseUrl}/api/analytics/dashboard`);
-    
-    if (!response.ok) {
-      throw new Error('Failed to fetch analytics');
-    }
-    
+    const response = await authFetch(`${this.baseUrl}/api/analytics/dashboard`);
+    if (!response.ok) throw new Error('Failed to fetch analytics');
     return response.json();
   }
 
   async askDocumentQuestion(
-    docId: string, 
+    docId: string,
     question: string,
     conversationHistory: Array<{question: string, answer: string}> = []
   ): Promise<any> {
-    const response = await fetch(
-      `${this.baseUrl}/api/search/documents/${docId}/ask`,  // ✅ Add /search
+    const response = await authFetch(
+      `${this.baseUrl}/api/search/documents/${docId}/ask`,
       {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          question: question,
-          conversation_history: conversationHistory
-        })
+        body: JSON.stringify({ question, conversation_history: conversationHistory }),
       }
     );
-    
     if (!response.ok) {
       const error = await response.json();
       throw new Error(error.detail || 'Failed to get answer');
     }
-    
     return response.json();
   }
 
   async getDocumentStatus(docId: string): Promise<any> {
-    const response = await fetch(`${this.baseUrl}/api/documents/${docId}/status`);
-    
-    if (!response.ok) {
-      throw new Error('Failed to fetch document status');
-    }
-    
+    const response = await authFetch(`${this.baseUrl}/api/documents/${docId}/status`);
+    if (!response.ok) throw new Error('Failed to fetch document status');
     return response.json();
   }
 
-    /**
-   * ✅ Get intelligent suggested questions for a document
-   */
-    async getSuggestedQuestions(documentId: string): Promise<SuggestedQuestionsResponse> {
-      const response = await fetch(`${API_BASE_URL}/api/search/documents/${documentId}/suggested-questions`, {
-        method: 'GET',
-        headers: {
-          'Content-Type': 'application/json',
-          // Add auth headers if needed
-        },
-      });
+  async getSuggestedQuestions(documentId: string): Promise<SuggestedQuestionsResponse> {
+    const response = await authFetch(`${API_BASE_URL}/api/search/documents/${documentId}/suggested-questions`);
   
-      if (!response.ok) {
-        throw new Error(`Failed to get suggested questions: ${response.statusText}`);
-      }
-  
-      return response.json();
-    }
-  
+    if (!response.ok) throw new Error(`Failed to get suggested questions: ${response.statusText}`);
+    return response.json();
+  }
 }
 
 // Export singleton instance

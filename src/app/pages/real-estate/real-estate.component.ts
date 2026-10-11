@@ -1,15 +1,16 @@
+import { DomainDocumentsComponent } from '../../components/domain-documents/domain-documents.component';
 import { Component, OnInit, NgZone } from '@angular/core';
 import { authFetch } from '../../lib/api';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { ActivatedRoute, RouterModule } from '@angular/router';
-import { HttpClient, HttpClientModule } from '@angular/common/http';
+import { HttpClient } from '@angular/common/http';
 import { ToastService } from '../../services/toast.service';
 
 @Component({
   selector: 'app-real-estate',
   standalone: true,
-  imports: [CommonModule, FormsModule, RouterModule, HttpClientModule],
+  imports: [CommonModule, FormsModule, RouterModule, DomainDocumentsComponent],
   template: `
     <div class="p-6 page-container">
       <!-- Topbar Header -->
@@ -173,7 +174,7 @@ import { ToastService } from '../../services/toast.service';
             </div>
           </div>
         </div>
-        <div *ngIf="properties.length === 0" class="p-8 text-center bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl">
+        <div *ngIf="properties.length === 0 && domainDocCount === 0" class="p-8 text-center bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl">
           <span style="font-size: 36px">🏠</span>
           <h3 class="text-md font-bold mt-3 text-slate-900 dark:text-white">No Properties Found</h3>
           <p class="text-xs text-slate-550 mt-2 font-sans">Upload title deeds, lease agreements, or appraisal documents to dynamically view property details.</p>
@@ -184,7 +185,7 @@ import { ToastService } from '../../services/toast.service';
       </div>
 
       <!-- Management / Global Tabs -->
-      <div class="mb-6 flex flex-wrap gap-2 border-b border-slate-200 dark:border-slate-800 pb-3" *ngIf="properties.length > 0">
+      <div class="mb-6 flex flex-wrap gap-2 border-b border-slate-200 dark:border-slate-800 pb-3">
         <button 
           *ngFor="let item of managementMenu"
           (click)="activeTab = item.id"
@@ -198,7 +199,9 @@ import { ToastService } from '../../services/toast.service';
       </div>
 
       <!-- Content Pane -->
-      <div class="min-w-0" *ngIf="properties.length > 0">
+      <app-domain-documents domain="real-estate" [tab]="activeTab" (count)="domainDocCount = $event"></app-domain-documents>
+
+      <div class="min-w-0">
         <div [ngSwitch]="activeTab">
           <!-- 1. Leases: Escalations, Rent Roll & Tenant Portal Log -->
           <div *ngSwitchCase="'leases'" class="grid grid-cols-1 lg:grid-cols-3 gap-6 animate-fade-in">
@@ -963,6 +966,7 @@ import { ToastService } from '../../services/toast.service';
 })
 export class RealEstateComponent implements OnInit {
   activeTab = 'leases';
+  domainDocCount = 0;
   searchQuery = '';
   newTenantMsg = '';
 

@@ -142,7 +142,7 @@ interface PlannerTask {
       margin: 0 auto;
       font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
       background: var(--bg-surface, #f8fafc);
-      min-height: calc(100vh - 56px);
+      min-height: var(--content-h);
     }
     .page-header {
       margin-bottom: 24px;

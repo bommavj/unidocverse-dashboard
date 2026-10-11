@@ -66,6 +66,7 @@ export class AuthService {
         localStorage.setItem(this.USER_KEY,    JSON.stringify(res.user));
         this.currentUser.set(res.user);
         this.isLoggedIn.set(true);
+        window.dispatchEvent(new CustomEvent('udv-login', { detail: { token: res.access_token } }));
         // Load fresh feature flags from backend after login
         this.features.load();
       })
@@ -75,6 +76,7 @@ export class AuthService {
   logout() {
     this.features.clear();
     this.clearSession();
+    window.dispatchEvent(new CustomEvent('udv-logout'));
     this.router.navigate(['/login']);
   }
 

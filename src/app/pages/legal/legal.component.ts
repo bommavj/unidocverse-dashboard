@@ -1,15 +1,16 @@
+import { DomainDocumentsComponent } from '../../components/domain-documents/domain-documents.component';
 import { Component, OnInit, NgZone } from '@angular/core';
 import { authFetch } from '../../lib/api';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { ActivatedRoute, RouterModule } from '@angular/router';
-import { HttpClient, HttpClientModule } from '@angular/common/http';
+import { HttpClient } from '@angular/common/http';
 import { ToastService } from '../../services/toast.service';
 
 @Component({
   selector: 'app-legal',
   standalone: true,
-  imports: [CommonModule, FormsModule, RouterModule, HttpClientModule],
+  imports: [CommonModule, FormsModule, RouterModule, DomainDocumentsComponent],
   template: `
     <div class="p-6 page-container">
       <!-- Topbar Header -->
@@ -161,7 +162,7 @@ import { ToastService } from '../../services/toast.service';
             </div>
           </div>
         </div>
-        <div *ngIf="lifecycleContracts.length === 0" class="p-8 text-center bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl">
+        <div *ngIf="lifecycleContracts.length === 0 && domainDocCount === 0" class="p-8 text-center bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl">
           <span style="font-size: 36px">⚖️</span>
           <h3 class="text-md font-bold mt-3 text-slate-900 dark:text-white">No Legal Contracts Found</h3>
           <p class="text-xs text-slate-550 mt-2 font-sans">Upload contract or legal documents to dynamically view compliance details and clauses.</p>
@@ -172,7 +173,7 @@ import { ToastService } from '../../services/toast.service';
       </div>
 
       <!-- Management / Global Tabs -->
-      <div class="mb-6 flex flex-wrap gap-2 border-b border-slate-200 dark:border-slate-800 pb-3" *ngIf="lifecycleContracts.length > 0">
+      <div class="mb-6 flex flex-wrap gap-2 border-b border-slate-200 dark:border-slate-800 pb-3">
         <button 
           *ngFor="let item of managementMenu"
           (click)="activeTab = item.id"
@@ -186,8 +187,27 @@ import { ToastService } from '../../services/toast.service';
       </div>
 
       <!-- Content Pane -->
-      <div class="min-w-0" *ngIf="lifecycleContracts.length > 0">
+      <app-domain-documents domain="legal" [tab]="activeTab" (count)="domainDocCount = $event"></app-domain-documents>
+
+      <div class="min-w-0">
         <div [ngSwitch]="activeTab">
+          <div *ngSwitchCase="'template'" class="bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-800 p-6 shadow-sm space-y-4">
+            <h3 class="text-sm font-bold">Compare a contract to your standard template</h3>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+              <label class="text-xs">Contract<select class="w-full border rounded p-2 mt-1" [(ngModel)]="cmpContract"><option value="">Select…</option><option *ngFor="let d of cmpDocs" [value]="d.id">{{ d.filename }}</option></select></label>
+              <label class="text-xs">Template<select class="w-full border rounded p-2 mt-1" [(ngModel)]="cmpTemplate"><option value="">Select…</option><option *ngFor="let d of cmpDocs" [value]="d.id">{{ d.filename }}</option></select></label>
+            </div>
+            <button class="px-4 py-2 rounded bg-blue-700 text-white text-sm" (click)="runTemplateCompare()" [disabled]="cmpBusy">{{ cmpBusy ? 'Comparing…' : 'Compare' }}</button>
+            <p *ngIf="cmpError" class="text-xs text-red-700">{{ cmpError }}</p>
+            <div *ngIf="cmpResult">
+              <p class="text-xs mb-2">{{ cmpResult.counts.match }} match · {{ cmpResult.counts.deviates }} deviate · {{ cmpResult.counts.missing }} missing · {{ cmpResult.counts.additional }} non-standard</p>
+              <table class="w-full text-xs"><thead><tr class="text-left"><th class="p-2">Clause</th><th class="p-2">Result</th><th class="p-2">Differences</th></tr></thead>
+                <tbody><tr *ngFor="let f of cmpResult.findings" class="border-t">
+                  <td class="p-2">{{ f.label }}</td><td class="p-2">{{ f.status }}</td>
+                  <td class="p-2"><div *ngFor="let d of f.differences">{{ d.term }}: template {{ d.template }} → contract {{ d.contract }}</div></td>
+                </tr></tbody></table>
+            </div>
+          </div>
           <!-- 1. Clauses -->
           <div *ngSwitchCase="'clauses'" class="grid grid-cols-1 lg:grid-cols-3 gap-6 animate-fade-in">
             <div class="lg:col-span-2 bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-800 p-5 shadow-sm">
@@ -812,6 +832,7 @@ import { ToastService } from '../../services/toast.service';
 })
 export class LegalComponent implements OnInit {
   activeTab = 'clauses';
+  domainDocCount = 0;
   searchQuery = '';
   selectedMatter = '';
 
@@ -925,7 +946,8 @@ export class LegalComponent implements OnInit {
     { id: 'obligations', label: 'Obligations', icon: '📋' },
     { id: 'renewals', label: 'Renewals', icon: '🕒' },
     { id: 'counterparties', label: 'Counterparties', icon: '🤝' },
-    { id: 'holds', label: 'Litigation Holds', icon: '🚨' }
+    { id: 'holds', label: 'Litigation Holds', icon: '🚨' },
+    { id: 'template', label: 'Compare to Template', icon: '⚖️' }
   ];
 
   managementMenu = [
@@ -936,6 +958,24 @@ export class LegalComponent implements OnInit {
     { id: 'audit', label: 'Audit Trail', icon: '📜' },
     { id: 'reports', label: 'Reports', icon: '📈' }
   ];
+
+  cmpDocs: any[] = [];
+  cmpContract = '';
+  cmpTemplate = '';
+  cmpBusy = false;
+  cmpError = '';
+  cmpResult: any = null;
+
+  runTemplateCompare() {
+    this.cmpError = '';
+    if (!this.cmpContract || !this.cmpTemplate) { this.cmpError = 'Choose a contract and a template'; return; }
+    this.cmpBusy = true;
+    this.http.post<any>('http://localhost:8000/api/workflow/contract-vs-template',
+      { document_id: this.cmpContract, template_document_id: this.cmpTemplate }).subscribe({
+      next: r => { this.cmpResult = r; this.cmpBusy = false; },
+      error: e => { this.cmpError = e?.error?.detail || 'Comparison failed'; this.cmpBusy = false; }
+    });
+  }
 
   customClauseText = '';
   auditResult: any = null;
@@ -970,6 +1010,9 @@ export class LegalComponent implements OnInit {
   }
 
   loadBackendData() {
+    this.http.get<any>('http://localhost:8000/api/documents?limit=500').subscribe({
+      next: r => this.cmpDocs = Array.isArray(r) ? r : (r?.documents || r?.items || [])
+    });
     this.http.get<any[]>('http://localhost:8000/api/domains/legal/clauses').subscribe({
       next: data => this.clauses = data
     });

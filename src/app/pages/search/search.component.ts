@@ -1,4 +1,5 @@
-import { Component } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
+import { ActivatedRoute } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { ApiService } from '../../services/api.service';
@@ -11,13 +12,21 @@ import { DocSheetComponent } from '../../components/doc-sheet/doc-sheet.componen
   templateUrl: './search.component.html',
   styleUrls: ['./search.component.scss']
 })
-export class SearchComponent {
+export class SearchComponent implements OnInit {
   query = '';
   results: any[] = [];
   selectedDoc: any = null;
   chips = ['bank statement balance','tax refund 2024','invoice payment terms','payoff amount'];
 
-  constructor(private api: ApiService) {}
+  constructor(private api: ApiService, private route: ActivatedRoute) {}
+
+  ngOnInit(): void {
+    // The top-bar search box navigates here with ?q=
+    this.route.queryParamMap.subscribe(p => {
+      const q = p.get('q');
+      if (q && q !== this.query) { this.query = q; this.search(); }
+    });
+  }
 
   loading = false;
 

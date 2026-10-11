@@ -1,4 +1,4 @@
-.clm-page { padding: 24px 28px; max-width: 100%; overflow: hidden; display: flex; flex-direction: column; height: calc(100vh - 56px); }
+.clm-page { padding: 24px 28px; max-width: 100%; overflow: hidden; display: flex; flex-direction: column; height: var(--content-h); }
 
 /* ── Header ──────────────────────────────────────────────────────────────── */
 .clm-header { display: flex; align-items: flex-start; justify-content: space-between; margin-bottom: 20px; flex-shrink: 0; }

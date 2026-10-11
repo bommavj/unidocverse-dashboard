@@ -1,8 +1,13 @@
 <div class="app-shell">
   <app-license-warning-banner></app-license-warning-banner>
   <div class="app-body">
-    <app-main-nav (openAskAi)="askAiOpen=true" (openVoice)="voiceOpen=true"></app-main-nav>
+    @if (auth.isLoggedIn()) {
+      <app-main-nav (openAskAi)="askAiOpen=true" (openVoice)="voiceOpen=true"></app-main-nav>
+    }
     <div class="page-content">
+      @if (auth.isLoggedIn()) {
+        <app-top-bar (openAskAi)="askAiOpen=true" (openVoice)="voiceOpen=true"></app-top-bar>
+      }
       <router-outlet></router-outlet>
     </div>
   </div>

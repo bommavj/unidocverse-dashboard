@@ -1,4 +1,4 @@
-import { Component, OnInit, OnDestroy, ElementRef, ViewChild, ChangeDetectorRef, HostListener } from '@angular/core';
+import { Component, OnInit, OnDestroy, ElementRef, ViewChild, ChangeDetectorRef, HostListener, NgZone } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { HttpClient } from '@angular/common/http';
@@ -7,6 +7,31 @@ import { DomSanitizer, SafeHtml } from '@angular/platform-browser';
 import { Observable, Subject } from 'rxjs';
 
 const API = 'http://localhost:8000';
+
+function _jwtExpired(token: string): boolean {
+  try {
+    const payload = JSON.parse(atob(token.split('.')[1]));
+    return payload.exp * 1000 < Date.now() + 30_000; // refresh 30s early
+  } catch { return true; }
+}
+
+async function _getValidJwt(http: HttpClient): Promise<string> {
+  const token = localStorage.getItem('udv_access_token') || '';
+  if (token && !_jwtExpired(token)) return token;
+  const refresh = localStorage.getItem('udv_refresh_token') || '';
+  if (!refresh) return token;
+  try {
+    const res: any = await http.post(
+      `${API}/api/auth/refresh`, {},
+      { headers: { Authorization: `Bearer ${refresh}` } }
+    ).toPromise();
+    if (res?.access_token) {
+      localStorage.setItem('udv_access_token', res.access_token);
+      return res.access_token;
+    }
+  } catch {}
+  return token;
+}
 
 interface ResearchDoc {
   id: string;
@@ -169,6 +194,7 @@ export class ResearchComponent implements OnInit, OnDestroy {
     private cdr: ChangeDetectorRef,
     private route: ActivatedRoute,
     private router: Router,
+    private zone: NgZone,
   ) {}
 
   ngOnInit() {
@@ -286,6 +312,15 @@ export class ResearchComponent implements OnInit, OnDestroy {
       this.selectAll = true;
     }
     this.cdr.markForCheck();
+  }
+
+  /** One click: runs every tax check (forms, W-2, income vs 1040, 1099-B/8949, K-1) for last tax year. */
+  reviewYear = new Date().getFullYear() - 1;
+  reviewReturn() {
+    if (this.running) return;
+    this.activeSession = null;          // a fresh run, not a follow-up on the open answer
+    this.question = `Review my ${this.reviewYear} tax return`;
+    this.submit();
   }
 
   useExample(q: string) {
@@ -512,7 +547,7 @@ ${sources ? `<div class="sources"><strong>Sources:</strong> ${sources}</div>` : 
     }
   }
 
-  submit() {
+  async submit() {
     if (!this.question.trim() || this.running) return;
     // If there's an active session with matched docs, auto-treat as follow-up
     if (this.activeSession?.matchedDocIds?.length) {
@@ -536,6 +571,8 @@ ${sources ? `<div class="sources"><strong>Sources:</strong> ${sources}</div>` : 
 
     const params = new URLSearchParams({ question: q });
     if (docIds) params.set('doc_ids', docIds);
+    const jwt = await _getValidJwt(this.http);
+    if (jwt) params.set('jwt', jwt);
 
     // Create a placeholder session immediately so the UI shows up
     const session: ResearchSession = {
@@ -561,10 +598,33 @@ ${sources ? `<div class="sources"><strong>Sources:</strong> ${sources}</div>` : 
 
   /** Shared SSE event handler — wires up an EventSource to a ResearchSession. */
   private _attachSSEHandler(es: EventSource, session: ResearchSession, onDone?: () => void) {
-    es.onmessage = (ev) => {
-      const msg = JSON.parse(ev.data);
+    // Idle timeout: the server sends progress events every few seconds while it
+    // works, so only a stream that goes silent for 90s is treated as dead.
+    const onIdle = () => {
+      if (es.readyState !== EventSource.CLOSED) {
+        es.close();
+        if (this._es === es) this._es = null;
+        this.running = false;
+        this.liveThinking = '';
+        if (!session.answer) session.answer = 'Request timed out. Please try again.';
+        this.cdr.markForCheck();
+      }
+    };
+    let timeout = setTimeout(onIdle, 90_000);
 
-      if (msg.type === 'step') {
+    // EventSource callbacks run outside Angular's zone: without zone.run the view
+    // only re-rendered on the next unrelated event (answers "arrived" a minute late).
+    es.onmessage = (ev) => this.zone.run(() => onMessage(ev));
+    const onMessage = (ev: MessageEvent) => {
+      const msg = JSON.parse(ev.data);
+      clearTimeout(timeout);
+      if (msg.type !== 'done' && msg.type !== 'error') timeout = setTimeout(onIdle, 90_000);
+
+      if (msg.type === 'progress') {
+        this.liveThinking = msg.text || 'Working...';
+        this.cdr.markForCheck();
+
+      } else if (msg.type === 'step') {
         const s = msg.step;
         const obs = s.observation || {};
         const hitl = obs.hitl === true;
@@ -606,6 +666,10 @@ ${sources ? `<div class="sources"><strong>Sources:</strong> ${sources}</div>` : 
         this.running = false;
         this.liveThinking = '';
         this.streamingAnswer = '';
+        // Use done.answer as fallback if no tokens arrived
+        if (msg.answer && !session.answer) session.answer = msg.answer;
+        // Last resort: show a generic message instead of blank
+        if (!session.answer) session.answer = 'No relevant information was found in your documents for this question.';
         session.iterations = session.steps.length;
         if (msg.session_id) session.id = msg.session_id;
         if (msg.matched_doc_ids?.length) session.matchedDocIds = msg.matched_doc_ids;
@@ -637,13 +701,14 @@ ${sources ? `<div class="sources"><strong>Sources:</strong> ${sources}</div>` : 
       }
     };
 
-    es.onerror = () => {
+    es.onerror = () => this.zone.run(() => {
       es.close();
       if (this._es === es) this._es = null;
       this.running = false;
       this.liveThinking = '';
+      if (!session.answer) session.answer = 'Connection lost. Please try your question again.';
       this.cdr.markForCheck();
-    };
+    });
   }
 
   loadMore() {
@@ -769,7 +834,7 @@ ${sources ? `<div class="sources"><strong>Sources:</strong> ${sources}</div>` : 
     this.submitFollowUp();
   }
 
-  submitFollowUp() {
+  async submitFollowUp() {
     const q = this.followUpQuestion.trim();
     if (!q || this.running || !this.activeSession) return;
     const prev = this.activeSession;
@@ -782,10 +847,15 @@ ${sources ? `<div class="sources"><strong>Sources:</strong> ${sources}</div>` : 
     ];
 
     // Build prior_qa chain
+    // Answers can be long tables; only the gist is needed to resolve the follow-up,
+    // and the whole chain travels in the URL (EventSource can't POST).
+    // Sessions reopened from history have their turns in `thread` but no priorQA yet.
+    const earlier = prev.priorQA
+      ?? (prev.thread || []).slice(0, -1).map(t => ({ q: t.question, a: (t.answer || '').slice(0, 600) }));
     const priorQA: { q: string; a: string }[] = [
-      ...(prev.priorQA || []),
-      { q: prev.question, a: prev.answer },
-    ];
+      ...earlier,
+      { q: prev.question, a: (prev.answer || '').slice(0, 600) },
+    ].slice(-4);
 
     const contextDocIds = prev.matchedDocIds?.join(',') || '';
     // rootId = the DB id of the root session (never a child's id)
@@ -794,6 +864,14 @@ ${sources ? `<div class="sources"><strong>Sources:</strong> ${sources}</div>` : 
     if (contextDocIds) params.set('context_doc_ids', contextDocIds);
     if (rootId) params.set('parent_session_id', rootId);
     params.set('prior_qa', JSON.stringify(priorQA));
+    // Files this conversation has answered from — follow-ups stay on them
+    // (filenames can contain commas, so send JSON, not a CSV).
+    const convoSources = Array.from(new Set(
+      (prev.thread || []).flatMap(t => t.sources || []).concat(prev.sources || []),
+    )).slice(0, 20);
+    if (convoSources.length) params.set('context_sources', JSON.stringify(convoSources));
+    const jwt = await _getValidJwt(this.http);
+    if (jwt) params.set('jwt', jwt);
 
     // Update the SAME session in place — rootQuestion stays fixed for sidebar display
     prev.rootQuestion = prev.rootQuestion || prev.question;

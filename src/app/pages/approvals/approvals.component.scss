@@ -1,4 +1,4 @@
-.apr-page { padding: 24px 28px; height: calc(100vh - 56px); display: flex; flex-direction: column; overflow: hidden; }
+.apr-page { padding: 24px 28px; height: var(--content-h); display: flex; flex-direction: column; overflow: hidden; }
 
 .apr-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 20px; flex-shrink: 0; }
 .apr-title  { font-size: 22px; font-weight: 700; color: var(--text-primary,#1e293b); margin: 0 0 4px; }

@@ -4,6 +4,7 @@ import { HttpClient } from '@angular/common/http';
 
 export interface FeatureFlags {
   agency_mode: boolean;
+  immigration_mode: boolean;
   legal_mode: boolean;
   medical_mode: boolean;
   finance_mode: boolean;
@@ -16,6 +17,7 @@ export interface FeatureFlags {
 
 const DEFAULT_FLAGS: FeatureFlags = {
   agency_mode: false,
+  immigration_mode: false,
   legal_mode: false,
   medical_mode: false,
   finance_mode: false,
@@ -40,6 +42,7 @@ export class FeatureFlagService {
   // ── Public signals ────────────────────────────────────────────────────────
 
   agencyMode = () => this._flags().agency_mode;
+  immigrationMode = () => this._flags().immigration_mode;
   legalMode = () => this._flags().legal_mode;
   medicalMode = () => this._flags().medical_mode;
   financeMode = () => this._flags().finance_mode;
@@ -78,7 +81,9 @@ export class FeatureFlagService {
     const stored = localStorage.getItem(FLAGS_KEY);
     if (stored) {
       try {
-        this._flags.set({ ...DEFAULT_FLAGS, ...JSON.parse(stored) });
+        const f = JSON.parse(stored);
+        // Older cached flags had no immigration switch — it followed HR
+        this._flags.set({ ...DEFAULT_FLAGS, ...f, immigration_mode: f.immigration_mode ?? !!f.hr_mode });
       } catch {
         this._flags.set(DEFAULT_FLAGS);
       }

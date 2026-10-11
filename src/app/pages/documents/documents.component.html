@@ -181,6 +181,7 @@
               <button *ngIf="d.doc_type!=='archive'" class="da" (click)="$event.stopPropagation();openSimilar(d)" title="Find Similar">🔍</button>
               <button *ngIf="d.doc_type!=='archive'" class="da" (click)="$event.stopPropagation();openDocTab(d,'askai')" title="Ask AI">💬</button>
               <button *ngIf="d.doc_type!=='archive'" class="da" (click)="$event.stopPropagation();openCompare(d, filtered[0])" title="Compare">⇄</button>
+              <button *ngIf="d.doc_type!=='archive'" class="da" (click)="$event.stopPropagation();reprocessDoc(d)" [disabled]="d._reprocessing" [title]="d._reprocessing ? 'Reprocessing...' : 'Reprocess (fix doc type)'">{{ d._reprocessing ? '⏳' : '🔄' }}</button>
               <button class="da" (click)="$event.stopPropagation();downloadDoc(d)" title="Download">⬇</button>
             </div>
             <ng-template #processingPlaceholder>

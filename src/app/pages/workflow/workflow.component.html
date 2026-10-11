@@ -10,17 +10,54 @@
 
   <!-- Workflow selector tabs -->
   <div class="wf-nav">
-    <button class="wf-nav-btn" [class.active]="activeWorkflow==='compare'"   (click)="activeWorkflow='compare'">
+    <div class="wf-nav-group-label">Document Operations</div>
+    <button class="wf-nav-btn" [class.active]="activeWorkflow==='compare'"   (click)="switchTab('compare')">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
       Compare &amp; Merge
     </button>
-    <button class="wf-nav-btn" [class.active]="activeWorkflow==='threeway'"  (click)="activeWorkflow='threeway'">
+    <button class="wf-nav-btn" [class.active]="activeWorkflow==='threeway'"  (click)="switchTab('threeway')">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 11 12 14 22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>
       Three-Way Match
     </button>
-    <button class="wf-nav-btn" [class.active]="activeWorkflow==='reconcile'" (click)="activeWorkflow='reconcile'">
+    <button class="wf-nav-btn" [class.active]="activeWorkflow==='reconcile'" (click)="switchTab('reconcile')">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>
       Bank Reconciliation
+    </button>
+
+    <div class="wf-nav-divider"></div>
+    <div class="wf-nav-group-label">Domain Pipelines</div>
+
+    <button class="wf-nav-btn" [class.active]="activeWorkflow==='procurement'" (click)="switchTab('procurement')">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"/></svg>
+      Procurement
+    </button>
+    <button class="wf-nav-btn" [class.active]="activeWorkflow==='clm'" (click)="switchTab('clm')">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/></svg>
+      Contracts (CLM)
+    </button>
+    <button class="wf-nav-btn" [class.active]="activeWorkflow==='claims'" (click)="switchTab('claims')">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+      Claims
+    </button>
+    <button class="wf-nav-btn" [class.active]="activeWorkflow==='renewals'" (click)="switchTab('renewals')">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><polyline points="1 4 1 10 7 10"/><path d="M3.51 15a9 9 0 1 0 .49-5"/></svg>
+      Renewals
+    </button>
+    <button class="wf-nav-btn" [class.active]="activeWorkflow==='payroll'" (click)="switchTab('payroll')">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
+      Payroll
+    </button>
+    <button class="wf-nav-btn" [class.active]="activeWorkflow==='medical'" (click)="switchTab('medical')">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>
+      Medical
+    </button>
+    <button class="wf-nav-btn" [class.active]="activeWorkflow==='legal'" (click)="switchTab('legal')">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="7" width="20" height="14" rx="2" ry="2"/><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/></svg>
+      Legal
+    </button>
+    <button class="wf-nav-btn" [class.active]="activeWorkflow==='real_estate'" (click)="switchTab('real_estate')">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+      Real Estate
     </button>
   </div>
 
@@ -390,6 +427,160 @@
         </div>
       </div>
     </div>
+  </div>
+
+  <!-- ══════════════════════════════════════════════════════════════ -->
+  <!-- DOMAIN PIPELINE (Kanban)                                       -->
+  <!-- ══════════════════════════════════════════════════════════════ -->
+  <div *ngIf="isDomainTab" class="wf-body wf-domain-body">
+
+    <div *ngIf="domainLoading[activeWorkflow]" class="wf-loading">
+      <span class="wf-spin"></span> Loading pipeline…
+    </div>
+
+    <ng-container *ngIf="!domainLoading[activeWorkflow]">
+
+      <!-- Domain header -->
+      <div class="wf-domain-header">
+        <div>
+          <div class="wf-card-title">{{ currentDomainConfig()?.label }} Pipeline</div>
+          <div class="wf-card-sub">
+            {{ (domainItems[activeWorkflow] || []).length }} items across
+            {{ currentDomainStages().length }} stages
+          </div>
+        </div>
+        <button class="wf-run-btn" (click)="openNewItemForm()">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+          Add Item
+        </button>
+      </div>
+
+      <!-- Stage summary bar -->
+      <div class="wf-stage-bar">
+        <div class="wf-stage-pill" *ngFor="let stage of currentDomainStages()"
+             [style.border-color]="stage.color">
+          <span class="wf-stage-dot" [style.background]="stage.color"></span>
+          <span class="wf-stage-name">{{ stage.label }}</span>
+          <span class="wf-stage-count">{{ stage.count }}</span>
+          <span class="wf-hitl-dot" *ngIf="isHitlStage(stage.id)" title="Human review required">👤</span>
+        </div>
+      </div>
+
+      <!-- Kanban board -->
+      <div class="wf-kanban">
+        <div class="wf-kanban-col" *ngFor="let stage of currentDomainStages()">
+          <div class="wf-kanban-col-header" [style.border-top-color]="stage.color">
+            <span class="wf-kanban-col-label">{{ stage.label }}</span>
+            <span class="wf-kanban-col-count">{{ itemsForStage(stage.id).length }}</span>
+            <span class="wf-hitl-badge" *ngIf="isHitlStage(stage.id)">HITL</span>
+          </div>
+
+          <div class="wf-kanban-empty" *ngIf="!itemsForStage(stage.id).length">
+            <span>No items</span>
+          </div>
+
+          <div class="wf-kanban-card" *ngFor="let item of itemsForStage(stage.id)"
+               (click)="openHistory(item)">
+            <div class="wf-kc-title">{{ item.title }}</div>
+            <div class="wf-kc-fields" *ngIf="fieldKeys(item.fields).length">
+              <div class="wf-kc-field" *ngFor="let k of fieldKeys(item.fields) | slice:0:3">
+                <span class="wf-kc-fk">{{ k }}</span>
+                <span class="wf-kc-fv">{{ item.fields[k] }}</span>
+              </div>
+            </div>
+            <div class="wf-kc-footer">
+              <span class="wf-kc-date">{{ item.updated_at | date:'MMM d' }}</span>
+              <div class="wf-kc-actions" (click)="$event.stopPropagation()">
+                <select class="wf-stage-select" (change)="moveItemStage(item, $any($event.target).value)"
+                        [value]="item.stage">
+                  <option *ngFor="let s of currentDomainStages()" [value]="s.id">{{ s.label }}</option>
+                </select>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- New item form -->
+      <div class="hitl-overlay" *ngIf="showNewItemForm" (click)="$event.stopPropagation()">
+        <div class="hitl-modal hitl-modal--wide">
+          <div class="hitl-header">
+            <div class="hitl-title">Add {{ currentDomainConfig()?.label }} Item</div>
+          </div>
+          <div class="hitl-body">
+            <div class="wf-form-row">
+              <label>Title *</label>
+              <input class="wf-form-input" [(ngModel)]="newItemTitle" placeholder="e.g. Invoice #1042 — Acme Corp">
+            </div>
+            <div class="wf-form-row">
+              <label>Initial Stage</label>
+              <select class="wf-stage-select wf-stage-select--full" [(ngModel)]="newItemStage">
+                <option value="">— default (first stage) —</option>
+                <option *ngFor="let s of currentDomainStages()" [value]="s.id">{{ s.label }}</option>
+              </select>
+            </div>
+            <ng-container *ngFor="let f of currentDomainConfig()?.fields">
+              <div class="wf-form-row">
+                <label>{{ f | titlecase }}</label>
+                <input class="wf-form-input" [(ngModel)]="newItemFields[f]" [placeholder]="f">
+              </div>
+            </ng-container>
+            <div class="wf-form-row">
+              <label>Notes</label>
+              <textarea class="hitl-feedback" [(ngModel)]="newItemNotes" rows="2" placeholder="Optional notes…"></textarea>
+            </div>
+          </div>
+          <div class="hitl-footer">
+            <button class="hitl-reject-btn" (click)="showNewItemForm=false">Cancel</button>
+            <button class="hitl-approve-btn" (click)="submitNewItem()"
+                    [disabled]="!newItemTitle.trim() || newItemSubmitting">
+              <span *ngIf="newItemSubmitting" class="wf-spin-sm"></span>
+              {{ newItemSubmitting ? 'Saving…' : 'Add Item' }}
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- History side panel -->
+      <div class="wf-history-panel" *ngIf="historyItem" (click)="closeHistory()">
+        <div class="wf-history-inner" (click)="$event.stopPropagation()">
+          <div class="wf-history-header">
+            <div>
+              <div class="wf-card-title">{{ historyItem.title }}</div>
+              <div class="wf-card-sub">Stage history</div>
+            </div>
+            <button class="wf-ghost-btn" (click)="closeHistory()">✕ Close</button>
+          </div>
+
+          <div class="wf-history-fields" *ngIf="fieldKeys(historyItem.fields).length">
+            <div class="wf-kc-field" *ngFor="let k of fieldKeys(historyItem.fields)">
+              <span class="wf-kc-fk">{{ k }}</span>
+              <span class="wf-kc-fv">{{ historyItem.fields[k] }}</span>
+            </div>
+          </div>
+
+          <div class="wf-history-log" *ngIf="!historyLoading">
+            <div class="wf-history-entry" *ngFor="let h of historyLog">
+              <div class="wf-history-dot"></div>
+              <div class="wf-history-body">
+                <div class="wf-history-move">
+                  <span *ngIf="h.from_stage" class="wf-history-stage from">{{ h.from_stage }}</span>
+                  <span *ngIf="h.from_stage"> → </span>
+                  <span class="wf-history-stage to">{{ h.to_stage }}</span>
+                </div>
+                <div class="wf-history-meta">{{ h.moved_by }} · {{ h.moved_at | date:'MMM d, h:mm a' }}</div>
+                <div class="wf-history-note" *ngIf="h.note">{{ h.note }}</div>
+              </div>
+            </div>
+            <div class="wf-kanban-empty" *ngIf="!historyLog.length">No history yet</div>
+          </div>
+          <div class="wf-loading" *ngIf="historyLoading">
+            <span class="wf-spin"></span> Loading…
+          </div>
+        </div>
+      </div>
+
+    </ng-container>
   </div>
 
 </div>

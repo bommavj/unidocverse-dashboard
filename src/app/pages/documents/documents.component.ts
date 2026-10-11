@@ -301,12 +301,63 @@ export class DocumentsComponent implements OnInit, OnDestroy {
   selectedDocTab = 'summary';
   openDocTab(doc: any, tab: string): void { this.selectedDocTab = tab; this.selectedDoc = doc; }
   openAnalytics(doc: any): void { this.router.navigate(['/analytics', doc.id, 'advanced']); }
-  previewDoc(doc: any): void { window.open(`http://localhost:8000/api/documents/${doc.id}/preview`, '_blank'); }
+  previewDoc(doc: any): void {
+    const token = localStorage.getItem('udv_access_token') || '';
+    fetch(`http://localhost:8000/api/documents/${doc.id}/preview`, {
+      headers: { Authorization: `Bearer ${token}` },
+    })
+      .then(r => r.blob())
+      .then(blob => {
+        const url = URL.createObjectURL(blob);
+        const w = window.open(url, '_blank');
+        if (w) setTimeout(() => URL.revokeObjectURL(url), 60000);
+      })
+      .catch(() => window.open(`http://localhost:8000/api/documents/${doc.id}/preview`, '_blank'));
+  }
   downloadDoc(doc: any): void {
-    const a = document.createElement('a');
-    a.href     = `http://localhost:8000/api/documents/${doc.id}/download`;
-    a.download = doc.filename || 'document';
-    a.click();
+    const token = localStorage.getItem('udv_access_token') || '';
+    fetch(`http://localhost:8000/api/documents/${doc.id}/download`, {
+      headers: { Authorization: `Bearer ${token}` },
+    })
+      .then(r => r.blob())
+      .then(blob => {
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url; a.download = doc.filename || 'document'; a.click();
+        setTimeout(() => URL.revokeObjectURL(url), 10000);
+      });
+  }
+
+  reprocessDoc(doc: any): void {
+    const token = localStorage.getItem('udv_access_token') || '';
+    doc._reprocessing = true;
+    fetch(`http://localhost:8000/api/documents/${doc.id}/reprocess`, {
+      method: 'POST',
+      headers: { Authorization: `Bearer ${token}` },
+    })
+      .then(r => r.json())
+      .then(() => {
+        doc.status = 'pending';
+        doc.doc_type = null;
+        // Poll until completed (up to 60s)
+        let attempts = 0;
+        const poll = setInterval(() => {
+          if (++attempts > 30) { clearInterval(poll); doc._reprocessing = false; return; }
+          fetch(`http://localhost:8000/api/documents/${doc.id}`, {
+            headers: { Authorization: `Bearer ${token}` },
+          })
+            .then(r => r.json())
+            .then(updated => {
+              if (updated.status === 'completed') {
+                clearInterval(poll);
+                doc.doc_type = updated.doc_type;
+                doc.status = updated.status;
+                doc._reprocessing = false;
+              }
+            });
+        }, 2000);
+      })
+      .catch(() => { doc._reprocessing = false; });
   }
 
   openCompare(docA: any, docB: any): void {

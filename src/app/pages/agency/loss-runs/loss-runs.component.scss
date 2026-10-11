@@ -4,7 +4,7 @@
     padding: 24px;
     max-width: 1600px;
     margin: 0 auto;
-    min-height: 100vh;
+    min-height: var(--content-h);
     background: var(--surf2, #f5f7ff);
   }
   
