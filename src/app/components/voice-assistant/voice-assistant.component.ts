@@ -521,8 +521,8 @@ export class VoiceAssistantComponent implements OnInit, OnDestroy, OnChanges {
     this.cdr.detectChanges();
 
     const url = this.activeDocument 
-      ? `http://localhost:8000/api/documents/${this.activeDocument.id}/ask`
-      : 'http://localhost:8000/api/documents/ask';
+      ? `http://localhost:7979/api/documents/${this.activeDocument.id}/ask`
+      : 'http://localhost:7979/api/documents/ask';
 
     authFetch(url, {
       method: 'POST',
@@ -607,7 +607,7 @@ export class VoiceAssistantComponent implements OnInit, OnDestroy, OnChanges {
       this.isSpeaking = true;
       this.cdr.detectChanges();
 
-      this.http.post('http://localhost:8000/api/tts/speak', { text: plainText }, { responseType: 'arraybuffer' })
+      this.http.post('http://localhost:7979/api/tts/speak', { text: plainText }, { responseType: 'arraybuffer' })
         .subscribe({
           next: async (buffer: ArrayBuffer) => {
             try {
@@ -734,7 +734,7 @@ export class VoiceAssistantComponent implements OnInit, OnDestroy, OnChanges {
       else this.resetOrbVisuals();
     };
 
-    this.http.post('http://localhost:8000/api/tts/speak', { text }, { responseType: 'arraybuffer' })
+    this.http.post('http://localhost:7979/api/tts/speak', { text }, { responseType: 'arraybuffer' })
       .subscribe({
         next: async (buffer: ArrayBuffer) => {
           try {
@@ -888,7 +888,7 @@ export class VoiceAssistantComponent implements OnInit, OnDestroy, OnChanges {
       due_date: due
     };
 
-    this.http.post<any>('http://localhost:8000/api/personal/planner', payload).subscribe({
+    this.http.post<any>('http://localhost:7979/api/personal/planner', payload).subscribe({
       next: () => {
         this.status = 'Ready';
         this.aiAnswer = `📅 Scheduled Task:\n\n**${payload.title}** for **${due}**`;
@@ -954,7 +954,7 @@ export class VoiceAssistantComponent implements OnInit, OnDestroy, OnChanges {
       doc_id: this.activeDocument ? this.activeDocument.id : null
     };
 
-    this.http.post<any>('http://localhost:8000/api/personal/notes', payload).subscribe({
+    this.http.post<any>('http://localhost:7979/api/personal/notes', payload).subscribe({
       next: () => {
         this.status = 'Ready';
         this.aiAnswer = `📝 Note Saved:\n\n**${title}**\n\n"${content}"`;

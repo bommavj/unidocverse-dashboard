@@ -76,7 +76,7 @@ export class TopBarComponent implements OnInit, OnDestroy {
     this.http.get<{ unread: number }>('/api/notifications/unread').subscribe({
       next: r => { this.unreadAlerts = r.unread || 0; this.cdr.markForCheck(); }, error: () => {}
     });
-    this.http.get<any>('http://localhost:8000/api/approvals/stats').subscribe({
+    this.http.get<any>('http://localhost:7979/api/approvals/stats').subscribe({
       next: r => { this.pendingApprovals = r?.pending ?? r?.by_status?.pending ?? 0; this.cdr.markForCheck(); }, error: () => {}
     });
   }

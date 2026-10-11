@@ -58,7 +58,7 @@ export class ClmComponent implements OnInit {
   allDocs: any[] = [];
   addDraft = { doc_id: '', stage: 'draft', counterparty: '', contract_value: '', governing_law: '', notes: '' };
 
-  private readonly api = 'http://localhost:8000';
+  private readonly api = 'http://localhost:7979';
 
   get docOptions(): SelectOption[] {
     return this.allDocs.map(d => ({ value: d.id, label: d.filename }));

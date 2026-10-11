@@ -143,7 +143,7 @@ export class GlobalAskAiComponent implements OnChanges {
     this.cdr.detectChanges();
     this.scrollToBottom();
 
-    authFetch('http://localhost:8000/api/documents/ask', {
+    authFetch('http://localhost:7979/api/documents/ask', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({

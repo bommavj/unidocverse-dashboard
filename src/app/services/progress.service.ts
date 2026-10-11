@@ -49,7 +49,7 @@ export class ProgressService {
   /**
    * Get current progress status (one-time, non-streaming)
    */
-  private baseUrl = 'http://localhost:8000';
+  private baseUrl = 'http://localhost:7979';
 
   getProgressStatus(documentId: string): Observable<any> {
     return this.http.get(`${this.baseUrl}/api/documents/${documentId}/progress/status`);

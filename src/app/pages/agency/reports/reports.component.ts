@@ -47,7 +47,7 @@ export class AgencyReportsComponent implements OnInit {
   pageTitle = 'AI Reports';
   readonly pageSize = 25;
   sectionPages: Record<string, number> = {};
-  private readonly api = 'http://localhost:8000';
+  private readonly api = 'http://localhost:7979';
 
   constructor(private http: HttpClient, private route: ActivatedRoute) {}
 

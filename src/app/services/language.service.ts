@@ -336,7 +336,7 @@ export class LanguageService {
         localStorage.setItem('udv_user', JSON.stringify(user));
         
         // Sync to backend DB
-        this.http.put('http://localhost:8000/api/auth/me/preferences', { language: lang }).subscribe({
+        this.http.put('http://localhost:7979/api/auth/me/preferences', { language: lang }).subscribe({
           next: () => console.log('✅ Language preference synced to DB'),
           error: (err) => console.error('❌ Failed to sync language to DB', err)
         });

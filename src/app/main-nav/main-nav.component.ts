@@ -290,14 +290,14 @@ export class MainNavComponent implements OnInit, OnDestroy {
   // Model switcher
   // ---------------------------------------------------------------------------
   loadModels(): void {
-    this.http.get<{ installed_models: string[] }>('http://localhost:8000/api/models/list-models').subscribe({
+    this.http.get<{ installed_models: string[] }>('http://localhost:7979/api/models/list-models').subscribe({
       next: (res) => {
         this.models = res.installed_models;
         this.cdr.markForCheck();
       },
       error: () => {}
     });
-    this.http.get<{ selected_model: string }>('http://localhost:8000/api/models/get-model').subscribe({
+    this.http.get<{ selected_model: string }>('http://localhost:7979/api/models/get-model').subscribe({
       next: (res) => {
         this.currentModel = res.selected_model;
         this.cdr.markForCheck();
@@ -310,7 +310,7 @@ export class MainNavComponent implements OnInit, OnDestroy {
     if (modelName === this.currentModel || this.switchingModel) return;
     this.switchingModel = true;
     this.cdr.markForCheck();
-    this.http.post<{ selected_model: string }>('http://localhost:8000/api/models/set-model', {
+    this.http.post<{ selected_model: string }>('http://localhost:7979/api/models/set-model', {
       model_name: modelName
     }).subscribe({
       next: (res) => {

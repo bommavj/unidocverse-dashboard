@@ -1015,7 +1015,7 @@ export class SettingsComponent implements OnInit {
   langSuccess = false;
   langError = '';
 
-  private readonly api = 'http://localhost:8000';
+  private readonly api = 'http://localhost:7979';
 
   constructor(
     private http:  HttpClient,

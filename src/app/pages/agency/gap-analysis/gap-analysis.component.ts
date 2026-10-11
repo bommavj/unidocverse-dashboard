@@ -13,7 +13,7 @@ import { RouterModule, ActivatedRoute } from '@angular/router';
   styleUrls: ['./gap-analysis.component.scss']
 })
 export class GapAnalysisComponent implements OnInit {
-  private api = 'http://localhost:8000';
+  private api = 'http://localhost:7979';
   clients: any[] = [];
   selectedClientId = '';
   analysis: any = null;

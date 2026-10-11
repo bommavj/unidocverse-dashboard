@@ -13,7 +13,7 @@ import { RouterModule, ActivatedRoute } from '@angular/router';
   styleUrls: ['./coi.component.scss']
 })
 export class CoiComponent implements OnInit {
-  private api = 'http://localhost:8000';
+  private api = 'http://localhost:7979';
   clients: any[] = [];
   certificates: any[] = [];
   expiring: any[] = [];

@@ -158,7 +158,7 @@ export class DocumentsComponent implements OnInit, OnDestroy {
     if (!this.archiveChildren[docId]) {
       this.archiveChildren[docId] = { loading: true, children: [], done: 0, total: 0 };
     }
-    this.http.get<any>(`http://localhost:8000/api/documents/${docId}/children`).subscribe({
+    this.http.get<any>(`http://localhost:7979/api/documents/${docId}/children`).subscribe({
       next: res => {
         this.archiveChildren[docId] = {
           loading: false,
@@ -178,7 +178,7 @@ export class DocumentsComponent implements OnInit, OnDestroy {
   }
 
   private _pollChildren(docId: string): void {
-    this.http.get<any>(`http://localhost:8000/api/documents/${docId}/children`).subscribe({
+    this.http.get<any>(`http://localhost:7979/api/documents/${docId}/children`).subscribe({
       next: res => {
         this.archiveChildren[docId] = {
           loading: false,
@@ -205,7 +205,7 @@ export class DocumentsComponent implements OnInit, OnDestroy {
   }
 
   loadGlobalAlerts(): void {
-    this.http.get<any>('http://localhost:8000/api/insights/alerts').subscribe({
+    this.http.get<any>('http://localhost:7979/api/insights/alerts').subscribe({
       next: (res) => {
         this.globalAlertCount   = res.total || 0;
         const alerts            = res.alerts || [];
@@ -303,7 +303,7 @@ export class DocumentsComponent implements OnInit, OnDestroy {
   openAnalytics(doc: any): void { this.router.navigate(['/analytics', doc.id, 'advanced']); }
   previewDoc(doc: any): void {
     const token = localStorage.getItem('udv_access_token') || '';
-    fetch(`http://localhost:8000/api/documents/${doc.id}/preview`, {
+    fetch(`http://localhost:7979/api/documents/${doc.id}/preview`, {
       headers: { Authorization: `Bearer ${token}` },
     })
       .then(r => r.blob())
@@ -312,11 +312,11 @@ export class DocumentsComponent implements OnInit, OnDestroy {
         const w = window.open(url, '_blank');
         if (w) setTimeout(() => URL.revokeObjectURL(url), 60000);
       })
-      .catch(() => window.open(`http://localhost:8000/api/documents/${doc.id}/preview`, '_blank'));
+      .catch(() => window.open(`http://localhost:7979/api/documents/${doc.id}/preview`, '_blank'));
   }
   downloadDoc(doc: any): void {
     const token = localStorage.getItem('udv_access_token') || '';
-    fetch(`http://localhost:8000/api/documents/${doc.id}/download`, {
+    fetch(`http://localhost:7979/api/documents/${doc.id}/download`, {
       headers: { Authorization: `Bearer ${token}` },
     })
       .then(r => r.blob())
@@ -331,7 +331,7 @@ export class DocumentsComponent implements OnInit, OnDestroy {
   reprocessDoc(doc: any): void {
     const token = localStorage.getItem('udv_access_token') || '';
     doc._reprocessing = true;
-    fetch(`http://localhost:8000/api/documents/${doc.id}/reprocess`, {
+    fetch(`http://localhost:7979/api/documents/${doc.id}/reprocess`, {
       method: 'POST',
       headers: { Authorization: `Bearer ${token}` },
     })
@@ -343,7 +343,7 @@ export class DocumentsComponent implements OnInit, OnDestroy {
         let attempts = 0;
         const poll = setInterval(() => {
           if (++attempts > 30) { clearInterval(poll); doc._reprocessing = false; return; }
-          fetch(`http://localhost:8000/api/documents/${doc.id}`, {
+          fetch(`http://localhost:7979/api/documents/${doc.id}`, {
             headers: { Authorization: `Bearer ${token}` },
           })
             .then(r => r.json())

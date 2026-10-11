@@ -16,7 +16,7 @@ type Section = 'cases' | 'crm' | 'forms' | 'esign' | 'reports' | 'ai' | 'transla
 })
 export class ImmigrationSuiteComponent implements OnInit, OnChanges {
   @Input() section: Section = 'cases';
-  readonly api = 'http://localhost:8000/api/immigration-suite';
+  readonly api = 'http://localhost:7979/api/immigration-suite';
 
   meta: any = { statuses: [], lead_stages: [], languages: {}, case_types: {} };
   error = '';
@@ -135,7 +135,7 @@ export class ImmigrationSuiteComponent implements OnInit, OnChanges {
   }
   loadDocs() {
     if (this.docs.length) return;
-    this.http.get<any>('http://localhost:8000/api/documents').subscribe({
+    this.http.get<any>('http://localhost:7979/api/documents').subscribe({
       next: r => (this.docs = (Array.isArray(r) ? r : r.documents || []).filter((d: any) => d.status === 'completed')),
     });
   }

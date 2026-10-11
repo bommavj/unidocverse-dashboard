@@ -207,7 +207,7 @@
         <!-- Server status bar -->
         <div class="ig-mcp-bar">
           <div class="ig-mcp-dot" [class.ig-mcp-dot--on]="mcpServerOnline"></div>
-          <span class="ig-mcp-url">MCP Server&nbsp;·&nbsp;<code>http://localhost:8000/mcp/sse</code></span>
+          <span class="ig-mcp-url">MCP Server&nbsp;·&nbsp;<code>http://localhost:7979/mcp/sse</code></span>
           <button class="ig-mcp-copy" (click)="copyMcpUrl()">{{ mcpCopied ? '✓ Copied' : '📋 Copy' }}</button>
           <div class="ig-mcp-hitl">
             <label class="ig-toggle-label">
@@ -284,7 +284,7 @@
             </div>
             <div class="ig-card-body">
               <div class="ig-card-name">Any MCP Client</div>
-              <div class="ig-card-desc">Any client supporting MCP SSE transport can connect to <code>http://localhost:8000/mcp/sse</code>.</div>
+              <div class="ig-card-desc">Any client supporting MCP SSE transport can connect to <code>http://localhost:7979/mcp/sse</code>.</div>
             </div>
             <div class="ig-card-footer">
               <button class="ig-mcp-copy ig-mcp-copy--sm" (click)="copyMcpUrl()">{{ mcpCopied ? '✓ Copied' : '📋 Copy SSE URL' }}</button>

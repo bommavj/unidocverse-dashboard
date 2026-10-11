@@ -52,7 +52,7 @@ interface PortfolioStats {
 })
 export class InsightsDashboardComponent implements OnInit {
 
-  private readonly base = 'http://localhost:8000';
+  private readonly base = 'http://localhost:7979';
 
   stats: PortfolioStats = {
     severity_counts: { critical: 0, warning: 0, info: 0, positive: 0 },

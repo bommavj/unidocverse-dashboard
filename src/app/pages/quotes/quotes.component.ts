@@ -7,7 +7,7 @@ import { HttpClient } from '@angular/common/http';
 import { ReplacePipe } from '../../pipes/replace.pipe';
 import { UdvSelectComponent, SelectOption } from '../../components/udv-select/udv-select.component';
 
-const API = 'http://localhost:8000/api';
+const API = 'http://localhost:7979/api';
 
 const US_STATES = [
   {v:'AL',l:'Alabama'},{v:'AK',l:'Alaska'},{v:'AZ',l:'Arizona'},{v:'AR',l:'Arkansas'},

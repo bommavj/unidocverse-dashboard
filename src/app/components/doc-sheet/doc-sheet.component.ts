@@ -379,7 +379,7 @@ export class DocSheetComponent implements OnChanges {
     const aiIdx = this.msgs.length;
     this.msgs.push({ role: 'ai', text: '' });
 
-    authFetch(`http://localhost:8000/api/documents/${this.d.id}/ask`, {
+    authFetch(`http://localhost:7979/api/documents/${this.d.id}/ask`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ question: q })

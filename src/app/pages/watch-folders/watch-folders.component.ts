@@ -359,7 +359,7 @@ export class WatchFoldersComponent implements OnInit, OnDestroy {
     return this.folderSvc.getFolders();
   }
 
-  private apiBase = 'http://localhost:8000';
+  private apiBase = 'http://localhost:7979';
   private pollInterval: any;
 
   constructor(

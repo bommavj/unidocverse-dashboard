@@ -86,7 +86,7 @@ export class DomainDocumentsComponent implements OnChanges {
     if (!this.domain) return;
     this.loaded = false;
     this.error = '';
-    this.http.get<any>(`http://localhost:8000/api/domains/${this.domain}/uploaded`, { params: { tab: this.tab || '' } })
+    this.http.get<any>(`http://localhost:7979/api/domains/${this.domain}/uploaded`, { params: { tab: this.tab || '' } })
       .subscribe({
         next: r => {
           this.docs = r.documents || [];

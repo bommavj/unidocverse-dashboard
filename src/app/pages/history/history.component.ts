@@ -536,7 +536,7 @@ export class HistoryComponent implements OnInit, OnDestroy {
 
   loadDocs(silent = false) {
     if (!silent) this.docsLoading = true;
-    this.http.get<any>('http://localhost:8000/api/qa-history/docs').subscribe({
+    this.http.get<any>('http://localhost:7979/api/qa-history/docs').subscribe({
       next: res => {
         const fresh = res.docs || [];
         // If a new doc appeared or turn_count changed, refresh the selected doc thread too
@@ -569,7 +569,7 @@ export class HistoryComponent implements OnInit, OnDestroy {
     this.histLoading = true;
     this.cdr.detectChanges();
     const offset = append ? this.turnsOffset : 0;
-    this.http.get<any>(`http://localhost:8000/api/documents/${this.selectedDoc.document_id}/qa-history?limit=30&offset=${offset}`).subscribe({
+    this.http.get<any>(`http://localhost:7979/api/documents/${this.selectedDoc.document_id}/qa-history?limit=30&offset=${offset}`).subscribe({
       next: res => this.zone.run(() => {
         const incoming: QATurn[] = res.history || [];
         this.turns = append ? [...incoming, ...this.turns] : incoming;
@@ -601,7 +601,7 @@ export class HistoryComponent implements OnInit, OnDestroy {
   doSearch(q: string) {
     if (!q.trim()) { this.searchResults = []; this.groupedResults = []; this.expandedGroups.clear(); this.cdr.detectChanges(); return; }
     this.searchLoading = true;
-    this.http.get<any>(`http://localhost:8000/api/qa-history/search?q=${encodeURIComponent(q)}&limit=50`).subscribe({
+    this.http.get<any>(`http://localhost:7979/api/qa-history/search?q=${encodeURIComponent(q)}&limit=50`).subscribe({
       next: res => {
         this.searchResults = res.results || [];
         this.groupedResults = this.buildGroups(this.searchResults);
@@ -674,7 +674,7 @@ export class HistoryComponent implements OnInit, OnDestroy {
     const turn = this.pendingDeleteTurn;
     this.zone.run(() => { this.pendingDeleteTurn = null; this.cdr.detectChanges(); });
     if (!yes || !turn || !this.selectedDoc) return;
-    this.http.delete(`http://localhost:8000/api/documents/${this.selectedDoc.document_id}/qa-history/${turn.id}`).subscribe({
+    this.http.delete(`http://localhost:7979/api/documents/${this.selectedDoc.document_id}/qa-history/${turn.id}`).subscribe({
       next: () => this.zone.run(() => {
         this.turns = this.turns.filter(t => t.id !== turn.id);
         this.turnsTotal = Math.max(0, this.turnsTotal - 1);
@@ -697,7 +697,7 @@ export class HistoryComponent implements OnInit, OnDestroy {
     const doc = this.pendingClearAll;
     this.zone.run(() => { this.pendingClearAll = null; this.cdr.detectChanges(); });
     if (!yes || !doc) return;
-    this.http.delete(`http://localhost:8000/api/documents/${doc.document_id}/qa-history`).subscribe({
+    this.http.delete(`http://localhost:7979/api/documents/${doc.document_id}/qa-history`).subscribe({
       next: () => this.zone.run(() => {
         this.turns = [];
         this.turnsTotal = 0;

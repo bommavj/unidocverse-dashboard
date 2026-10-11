@@ -2,7 +2,7 @@ import { Component, OnInit, OnDestroy, ChangeDetectorRef } from '@angular/core';
 import { CommonModule, TitleCasePipe, DatePipe } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { HttpClient } from '@angular/common/http';
-const API = 'http://localhost:8000';
+const API = 'http://localhost:7979';
 
 const SECTOR_TASKS: Record<string, string[]> = {
   insurance:    ['Policy Renewal Watch', 'Coverage Gap Analysis', 'COI Status Check', 'Loss Run Review', 'Custom…'],

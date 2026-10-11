@@ -763,7 +763,7 @@ export class InsuranceAutomationComponent implements OnInit {
   private cdr     = inject(ChangeDetectorRef);
   private confirm = inject(ConfirmService);
 
-  private base = 'http://localhost:8000/api/insurance/automations';
+  private base = 'http://localhost:7979/api/insurance/automations';
 
   rules: AutomationRule[] = [];
   log: LogEntry[] = [];

@@ -91,7 +91,7 @@ export class IntegrationsComponent implements OnInit, OnDestroy {
   mcpCopied       = false;
   snippetCopied   = '';
   mcpClients: Record<string, boolean> = {};
-  readonly MCP_SSE_URL = 'http://localhost:8000/mcp/sse';
+  readonly MCP_SSE_URL = 'http://localhost:7979/mcp/sse';
 
   // MCP activation modal
   mcpActivation: {
@@ -107,15 +107,15 @@ export class IntegrationsComponent implements OnInit, OnDestroy {
   activationCopied = false;
   copiedCmd = '';
 
-  readonly curlSseCmd = 'curl -N -H "Accept: text/event-stream" http://localhost:8000/mcp/sse';
-  readonly mcpInspectorCmd = 'npx @modelcontextprotocol/inspector sse http://localhost:8000/mcp/sse';
+  readonly curlSseCmd = 'curl -N -H "Accept: text/event-stream" http://localhost:7979/mcp/sse';
+  readonly mcpInspectorCmd = 'npx @modelcontextprotocol/inspector sse http://localhost:7979/mcp/sse';
 
   readonly toolsListCmd = `# Step 1 — open SSE stream (keep this terminal open):
-curl -N -H "Accept: text/event-stream" http://localhost:8000/mcp/sse
+curl -N -H "Accept: text/event-stream" http://localhost:7979/mcp/sse
 # You'll see: data: {"type":"endpoint","uri":"/mcp/messages/?session_id=<ID>"}
 
 # Step 2 — in a NEW terminal, paste the session URL from above:
-curl -X POST "http://localhost:8000/mcp/messages/?session_id=<ID>" \\
+curl -X POST "http://localhost:7979/mcp/messages/?session_id=<ID>" \\
   -H "Content-Type: application/json" \\
   -d '{"jsonrpc":"2.0","id":1,"method":"tools/list","params":{}}'`;
 
@@ -139,14 +139,14 @@ curl -X POST "http://localhost:8000/mcp/messages/?session_id=<ID>" \\
   }
 
   private loadClaudeDesktopSnippet(): void {
-    this.http.get<any>('http://localhost:8000/api/mcp/claude-desktop-snippet').subscribe({
+    this.http.get<any>('http://localhost:7979/api/mcp/claude-desktop-snippet').subscribe({
       next: (res) => { this.claudeDesktopSnippetRaw = res.snippet; this.cdr.markForCheck(); },
       error: () => {}
     });
   }
 
   loadMcpSettings(): void {
-    this.http.get<any>('http://localhost:8000/api/mcp/settings').subscribe({
+    this.http.get<any>('http://localhost:7979/api/mcp/settings').subscribe({
       next: (s) => {
         this.mcpHitl = s.hitl_enabled ?? true;
         const enabled: string[] = s.enabled_clients ?? [];
@@ -161,7 +161,7 @@ curl -X POST "http://localhost:8000/mcp/messages/?session_id=<ID>" \\
 
   saveMcpSettings(): void {
     const enabled = Object.keys(this.mcpClients).filter(k => this.mcpClients[k]);
-    this.http.post('http://localhost:8000/api/mcp/settings', {
+    this.http.post('http://localhost:7979/api/mcp/settings', {
       hitl_enabled: this.mcpHitl,
       enabled_clients: enabled
     }).subscribe({ error: () => {} });
@@ -179,7 +179,7 @@ curl -X POST "http://localhost:8000/mcp/messages/?session_id=<ID>" \\
       steps: [
         {
           title: 'Config written — stdio bridge mode',
-          desc: 'The config was merged into <code>~/Library/Application Support/Claude/claude_desktop_config.json</code>. Claude Desktop uses <strong>stdio</strong> transport: it launches the bridge script directly, which calls <code>localhost:8000</code> in the background. <em>Keep the UniDocVerse backend running while using Claude Desktop.</em>',
+          desc: 'The config was merged into <code>~/Library/Application Support/Claude/claude_desktop_config.json</code>. Claude Desktop uses <strong>stdio</strong> transport: it launches the bridge script directly, which calls <code>localhost:7979</code> in the background. <em>Keep the UniDocVerse backend running while using Claude Desktop.</em>',
         },
         {
           title: 'Fully quit Claude Desktop',
@@ -296,7 +296,7 @@ curl -X POST "http://localhost:8000/mcp/messages/?session_id=<ID>" \\
     this.mcpConnectResult = { ...this.mcpConnectResult, [client]: undefined as any };
     this.cdr.markForCheck();
 
-    this.http.post<any>('http://localhost:8000/api/mcp/connect-client', { client })
+    this.http.post<any>('http://localhost:7979/api/mcp/connect-client', { client })
       .subscribe({
         next: (res) => {
           this.mcpConnecting = { ...this.mcpConnecting, [client]: false };
@@ -387,18 +387,18 @@ curl -X POST "http://localhost:8000/mcp/messages/?session_id=<ID>" \\
   }
 
   private loadModels(): void {
-    this.http.get<{ installed_models: string[] }>('http://localhost:8000/api/models/list-models').subscribe({
+    this.http.get<{ installed_models: string[] }>('http://localhost:7979/api/models/list-models').subscribe({
       next: (res) => { this.models = res.installed_models; this.loadingModels = false; this.cdr.markForCheck(); },
       error: () => { this.loadingModels = false; this.cdr.markForCheck(); }
     });
-    this.http.get<{ selected_model: string }>('http://localhost:8000/api/models/get-model').subscribe({
+    this.http.get<{ selected_model: string }>('http://localhost:7979/api/models/get-model').subscribe({
       next: (res) => { this.currentModel = res.selected_model; this.cdr.markForCheck(); },
       error: () => {}
     });
   }
 
   private loadIntegrations(): void {
-    this.http.get<{ integrations: Integration[] }>('http://localhost:8000/api/integrations').subscribe({
+    this.http.get<{ integrations: Integration[] }>('http://localhost:7979/api/integrations').subscribe({
       next: (res) => { this.integrations = res.integrations; this.cdr.markForCheck(); },
       error: () => {}
     });
@@ -480,7 +480,7 @@ curl -X POST "http://localhost:8000/mcp/messages/?session_id=<ID>" \\
       ...this.form
     };
 
-    this.http.post<{ success: boolean }>('http://localhost:8000/api/integrations/save', payload).subscribe({
+    this.http.post<{ success: boolean }>('http://localhost:7979/api/integrations/save', payload).subscribe({
       next: () => {
         this.saving = false;
         this.closeModal();
@@ -503,7 +503,7 @@ curl -X POST "http://localhost:8000/mcp/messages/?session_id=<ID>" \\
 
 
   disconnect(provider: string): void {
-    this.http.post<{ success: boolean }>('http://localhost:8000/api/integrations/disconnect', { provider }).subscribe({
+    this.http.post<{ success: boolean }>('http://localhost:7979/api/integrations/disconnect', { provider }).subscribe({
       next: () => {
         this.loadIntegrations();
         this.showToast(`${this.getLabel(provider)} disconnected.`, true);
@@ -514,7 +514,7 @@ curl -X POST "http://localhost:8000/mcp/messages/?session_id=<ID>" \\
 
   testIntegration(provider: string): void {
     this.testing = provider;
-    this.http.post<{ success: boolean; message: string }>('http://localhost:8000/api/integrations/test', { provider }).subscribe({
+    this.http.post<{ success: boolean; message: string }>('http://localhost:7979/api/integrations/test', { provider }).subscribe({
       next: (res) => {
         this.testing = null;
         this.showToast(res.message || 'Test message sent!');
@@ -531,7 +531,7 @@ curl -X POST "http://localhost:8000/mcp/messages/?session_id=<ID>" \\
   switchModel(modelName: string): void {
     if (modelName === this.currentModel || this.switchingModel) return;
     this.switchingModel = true;
-    this.http.post<{ selected_model: string }>('http://localhost:8000/api/models/set-model', {
+    this.http.post<{ selected_model: string }>('http://localhost:7979/api/models/set-model', {
       model_name: modelName
     }).subscribe({
       next: (res) => { this.currentModel = res.selected_model; this.switchingModel = false; this.cdr.markForCheck(); },
@@ -752,7 +752,7 @@ curl -X POST "http://localhost:8000/mcp/messages/?session_id=<ID>" \\
     this.stopWaPoll();
     this.cdr.markForCheck();
 
-    this.http.post<{ ok: boolean; state: string }>('http://localhost:8000/api/whatsapp/start', {}).subscribe({
+    this.http.post<{ ok: boolean; state: string }>('http://localhost:7979/api/whatsapp/start', {}).subscribe({
       next: () => {
         this.waState = 'starting';
         this.cdr.markForCheck();
@@ -769,7 +769,7 @@ curl -X POST "http://localhost:8000/mcp/messages/?session_id=<ID>" \\
 
   private pollWaStatus(): void {
     this.waPollTimer = setInterval(() => {
-      this.http.get<{ state: string; qr: string | null }>('http://localhost:8000/api/whatsapp/status').subscribe({
+      this.http.get<{ state: string; qr: string | null }>('http://localhost:7979/api/whatsapp/status').subscribe({
         next: (res) => {
           this.ngZone.run(() => {
             const prev = this.waState;
@@ -820,7 +820,7 @@ curl -X POST "http://localhost:8000/mcp/messages/?session_id=<ID>" \\
   }
 
   logoutWa(): void {
-    this.http.post('http://localhost:8000/api/whatsapp/logout', {}).subscribe({
+    this.http.post('http://localhost:7979/api/whatsapp/logout', {}).subscribe({
       next: () => {
         this.waState = 'idle';
         this.waQR    = null;

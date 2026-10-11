@@ -45,7 +45,7 @@ export class DashboardComponent implements OnInit {
     this.unlockLoading = true;
     this.unlockError = '';
     this.http.post(
-      `http://localhost:8000/api/documents/${this.unlockDoc.id}/unlock`,
+      `http://localhost:7979/api/documents/${this.unlockDoc.id}/unlock`,
       { password: this.unlockPassword }
     ).subscribe({
       next: () => {
@@ -106,14 +106,14 @@ export class DashboardComponent implements OnInit {
   }
 
   loadApprovals(): void {
-    this.http.get<any[]>('http://localhost:8000/api/approvals?status=pending').subscribe({
+    this.http.get<any[]>('http://localhost:7979/api/approvals?status=pending').subscribe({
       next: rows => { this.approvals = rows || []; this.pendingApprovals = this.approvals.length; this.buildAttention(); },
       error: () => {}
     });
   }
 
   loadDeadlines(): void {
-    this.http.get<any>('http://localhost:8000/api/alerts/all').subscribe({
+    this.http.get<any>('http://localhost:7979/api/alerts/all').subscribe({
       next: r => {
         this.deadlines = (r?.alerts || [])
           .filter((a: any) => a.days_until_expiry !== null && a.days_until_expiry !== undefined)
@@ -177,7 +177,7 @@ export class DashboardComponent implements OnInit {
   }
 
   loadImmigrationExpiry(): void {
-    this.http.get<any>('http://localhost:8000/api/immigration/expiry-dashboard').subscribe({
+    this.http.get<any>('http://localhost:7979/api/immigration/expiry-dashboard').subscribe({
       next: res => {
         const buckets = res.buckets || {};
         this.immExpired  = (buckets.expired  || []).length;

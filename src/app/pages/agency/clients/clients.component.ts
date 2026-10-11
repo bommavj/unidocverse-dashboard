@@ -52,7 +52,7 @@ export class ClientsComponent implements OnInit, OnDestroy {
   activeAiClient: any = null;
 
   private sub?: Subscription;
-  private readonly api = 'http://localhost:8000';
+  private readonly api = 'http://localhost:7979';
 
   readonly AVATAR_COLORS = [
     '#6366f1','#0891b2','#16a34a','#d97706',

@@ -50,7 +50,7 @@ export class PoliciesComponent implements OnInit, OnDestroy {
   clients: any[] = [];
 
   private sub?: Subscription;
-  private readonly api = 'http://localhost:8000';
+  private readonly api = 'http://localhost:7979';
 
   readonly LINES = [
     { id: 'homeowners',          label: '🏠 Homeowners' },

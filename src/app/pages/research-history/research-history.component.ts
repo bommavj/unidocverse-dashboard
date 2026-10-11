@@ -5,7 +5,7 @@ import { HttpClient } from '@angular/common/http';
 import { Router } from '@angular/router';
 import { DomSanitizer, SafeHtml } from '@angular/platform-browser';
 
-const API = 'http://localhost:8000';
+const API = 'http://localhost:7979';
 
 interface Turn {
   question: string;
