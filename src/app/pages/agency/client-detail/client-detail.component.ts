@@ -13,7 +13,7 @@ import { ToastService } from '../../../services/toast.service';
   styleUrls: ['./client-detail.component.scss']
 })
 export class ClientDetailComponent implements OnInit {
-  private readonly api = 'http://localhost:8000';
+  private readonly api = 'http://localhost:7979';
 
   clientId = '';
   client:      any    = null;
@@ -335,7 +335,7 @@ import { ToastService } from '../../../services/toast.service';
   styleUrls: ['./client-detail.component.scss']
 })
 export class ClientDetailComponent implements OnInit {
-  private readonly api = 'http://localhost:8000';
+  private readonly api = 'http://localhost:7979';
 
   clientId = '';
   client: any = null;

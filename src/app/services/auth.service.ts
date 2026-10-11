@@ -57,7 +57,7 @@ export class AuthService {
 
   login(username: string, password: string): Observable<LoginResponse> {
     return this.http.post<LoginResponse>(
-      'http://localhost:8000/api/auth/login',
+      'http://localhost:7979/api/auth/login',
       { username, password }
     ).pipe(
       tap(res => {
@@ -101,7 +101,7 @@ export class AuthService {
 
   changePassword(currentPassword: string, newPassword: string): Observable<any> {
     return this.http.post(
-      'http://localhost:8000/api/auth/change-password',
+      'http://localhost:7979/api/auth/change-password',
       { current_password: currentPassword, new_password: newPassword },
       { headers: this.getAuthHeaders() }
     );

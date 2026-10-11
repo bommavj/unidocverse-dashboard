@@ -52,7 +52,7 @@ export interface DashboardResponse {
   providedIn: 'root'
 })
 export class DocumentService {
-  private apiUrl = 'http://localhost:8000/api';
+  private apiUrl = 'http://localhost:7979/api';
 
   constructor(private http: HttpClient) {}
 

@@ -1,4 +1,4 @@
-const API_BASE_URL = 'http://localhost:8000';
+const API_BASE_URL = 'http://localhost:7979';
 
 export function authFetch(input: RequestInfo | URL, init: RequestInit = {}): Promise<Response> {
   const token = localStorage.getItem('udv_access_token') || '';

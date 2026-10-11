@@ -572,8 +572,8 @@ import { ToastService } from '../../services/toast.service';
             <h3 class="font-bold text-lg text-slate-900 dark:text-white font-semibold">Generate Property Closing & Valuation Reports</h3>
             <p class="text-xs text-slate-505">Export comparable properties (comps), outstanding lien logs, closing milestones, and deed rosters.</p>
             <div class="flex gap-3">
-              <a href="http://localhost:8000/api/analytics/export?query=List+all+properties&format=xlsx" download class="px-4 py-2 bg-indigo-650 text-white rounded text-xs font-bold hover:bg-indigo-700">Export XLSX</a>
-              <a href="http://localhost:8000/api/analytics/export?query=List+all+properties&format=csv" download class="px-4 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 dark:bg-slate-800 dark:text-white rounded text-xs font-bold">Export CSV</a>
+              <a href="http://localhost:7979/api/analytics/export?query=List+all+properties&format=xlsx" download class="px-4 py-2 bg-indigo-650 text-white rounded text-xs font-bold hover:bg-indigo-700">Export XLSX</a>
+              <a href="http://localhost:7979/api/analytics/export?query=List+all+properties&format=csv" download class="px-4 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 dark:bg-slate-800 dark:text-white rounded text-xs font-bold">Export CSV</a>
             </div>
           </div>
         </div>
@@ -1028,7 +1028,7 @@ export class RealEstateComponent implements OnInit {
   }
 
   loadBackendData() {
-    this.http.get<any[]>('http://localhost:8000/api/domains/real-estate/properties').subscribe({
+    this.http.get<any[]>('http://localhost:7979/api/domains/real-estate/properties').subscribe({
       next: data => {
         this.properties = data;
         if (data && data.length > 0) {
@@ -1240,7 +1240,7 @@ export class RealEstateComponent implements OnInit {
       title_status: property.title ? 'Clear' : 'HOA Assessment Lien'
     } : {};
 
-    authFetch('http://localhost:8000/api/documents/ask/with-context', {
+    authFetch('http://localhost:7979/api/documents/ask/with-context', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ question: q, context_data: context })

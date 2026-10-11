@@ -56,7 +56,7 @@ export class UploadComponent implements OnInit {
   ) {}
 
   ngOnInit(): void {
-    this.http.get<any>('http://localhost:8000/api/ams/clients?limit=200').subscribe({
+    this.http.get<any>('http://localhost:7979/api/ams/clients?limit=200').subscribe({
       next: r => this.clients = (r.clients || r.data || r || []).map((c: any) => ({ id: c.id, name: c.name || c.full_name || c.id })),
       error: () => {}
     });

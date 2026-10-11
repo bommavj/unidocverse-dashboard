@@ -194,7 +194,7 @@ export class AdvancedAnalyticsComponent implements OnInit {
     this.msgs.push({ role: 'ai', text: '', timestamp: new Date() });
     this.cdr.detectChanges();
 
-    authFetch(`http://localhost:8000/api/documents/${this.documentId}/ask`, {
+    authFetch(`http://localhost:7979/api/documents/${this.documentId}/ask`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ question: q })

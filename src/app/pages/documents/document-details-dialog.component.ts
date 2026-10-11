@@ -901,7 +901,7 @@ async loadMoreInsightsFromAPI(): Promise<void> {
 
   try {
     const response: any = await this.http.get(
-      `http://localhost:8000/api/documents/${this.document.id}/insights`,
+      `http://localhost:7979/api/documents/${this.document.id}/insights`,
       {
         params: {
           limit: this.insightsLimit.toString(),
@@ -982,7 +982,7 @@ async loadMoreKeyPointsFromAPI(): Promise<void> {
 
   try {
     const response: any = await this.http.get(
-      `http://localhost:8000/api/documents/${this.document.id}/key-points`,
+      `http://localhost:7979/api/documents/${this.document.id}/key-points`,
       {
         params: {
           limit: this.keyPointsLimit.toString(),
@@ -1216,7 +1216,7 @@ async loadDeepSummary(): Promise<void> {
   this.deepSummaryLoading = true;
   try {
     const result: any = await authFetch(
-      `http://localhost:8000/api/documents/${this.document.id}/analyze-deep/summary`,
+      `http://localhost:7979/api/documents/${this.document.id}/analyze-deep/summary`,
       { method: 'POST' }
     ).then(r => r.json());
     if (result.summary) this.displayedSummary = result.summary;

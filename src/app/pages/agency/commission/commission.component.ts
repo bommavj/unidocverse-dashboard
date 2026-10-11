@@ -12,7 +12,7 @@ import { ToastService } from '../../../services/toast.service';
   styleUrls: ['./commission.component.scss']
 })
 export class CommissionComponent implements OnInit {
-  private api = 'http://localhost:8000';
+  private api = 'http://localhost:7979';
 
   statements: any[] = [];
   selectedStatement: any = null;

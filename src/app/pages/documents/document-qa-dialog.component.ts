@@ -544,7 +544,7 @@ export class DocumentQaDialogComponent implements OnInit, AfterViewChecked {
 
     try {
       const response = await authFetch(
-        `http://localhost:8000/api/documents/${this.document.id}/ask`,
+        `http://localhost:7979/api/documents/${this.document.id}/ask`,
         {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },

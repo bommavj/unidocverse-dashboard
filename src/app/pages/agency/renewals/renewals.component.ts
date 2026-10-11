@@ -22,7 +22,7 @@ export class RenewalsComponent implements OnInit, OnDestroy {
   loading  = false;
 
   private sub?: Subscription;
-  private readonly api = 'http://localhost:8000';
+  private readonly api = 'http://localhost:7979';
 
   constructor(
     public  toast:  ToastService,

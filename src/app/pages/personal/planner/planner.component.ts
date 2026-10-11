@@ -448,7 +448,7 @@ export class PlannerComponent implements OnInit {
   newTaskPriority = 'medium';
   newTaskDueDate = '';
 
-  private readonly api = 'http://localhost:8000';
+  private readonly api = 'http://localhost:7979';
 
   constructor(
     private http: HttpClient,

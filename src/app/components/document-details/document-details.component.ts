@@ -76,7 +76,7 @@ export class DocumentDetailsComponent implements OnInit {
   async loadSummary(): Promise<void> {
     try {
       const response: any = await this.http.get(
-        `http://localhost:8000/api/documents/${this.documentId}/summary`
+        `http://localhost:7979/api/documents/${this.documentId}/summary`
       ).toPromise();
       
       this.summary = response.summary;
@@ -97,7 +97,7 @@ export class DocumentDetailsComponent implements OnInit {
 
     try {
       const response: any = await this.http.get(
-        `http://localhost:8000/api/documents/${this.documentId}/insights`,
+        `http://localhost:7979/api/documents/${this.documentId}/insights`,
         {
           params: {
             limit: this.insightsLimit.toString(),
@@ -131,7 +131,7 @@ export class DocumentDetailsComponent implements OnInit {
 
     try {
       const response: any = await this.http.get(
-        `http://localhost:8000/api/documents/${this.documentId}/key-points`,
+        `http://localhost:7979/api/documents/${this.documentId}/key-points`,
         {
           params: {
             limit: this.keyPointsLimit.toString(),
@@ -158,7 +158,7 @@ export class DocumentDetailsComponent implements OnInit {
   async loadClassifications(): Promise<void> {
     try {
       this.classifications = await this.http.get(
-        `http://localhost:8000/api/documents/${this.documentId}/classifications`
+        `http://localhost:7979/api/documents/${this.documentId}/classifications`
       ).toPromise();
     } catch (error) {
       console.error('Error loading classifications:', error);
@@ -169,7 +169,7 @@ export class DocumentDetailsComponent implements OnInit {
   async loadDetails(): Promise<void> {
     try {
       this.details = await this.http.get(
-        `http://localhost:8000/api/documents/${this.documentId}/details`
+        `http://localhost:7979/api/documents/${this.documentId}/details`
       ).toPromise();
     } catch (error) {
       console.error('Error loading details:', error);

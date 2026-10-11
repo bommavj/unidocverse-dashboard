@@ -499,7 +499,7 @@ import {
       this.error = '';
       this.cdr.markForCheck();
   
-      this.http.get<AlertsResponse>('http://localhost:8000/api/alerts/all').subscribe({
+      this.http.get<AlertsResponse>('http://localhost:7979/api/alerts/all').subscribe({
         next: (res) => {
           this.alerts = res.alerts;
           this.counts = res.counts;

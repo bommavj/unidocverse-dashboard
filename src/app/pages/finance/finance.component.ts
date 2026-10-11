@@ -580,8 +580,8 @@ import { ToastService } from '../../services/toast.service';
             <h3 class="font-bold text-lg text-slate-900 dark:text-white font-semibold">Audit Evidence Export</h3>
             <p class="text-xs text-slate-550 font-semibold">Compile corporate billing statements, matched PO receipts, and general ledger reconciliation sheets as compliant evidence formats.</p>
             <div class="flex gap-3">
-              <a href="http://localhost:8000/api/analytics/export?query=List+all+financial+records&format=xlsx" download class="px-4 py-2 bg-indigo-600 text-white rounded text-xs font-bold hover:bg-indigo-700">Compile & Export XLSX</a>
-              <a href="http://localhost:8000/api/analytics/export?query=List+all+financial+records&format=csv" download class="px-4 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 dark:bg-slate-800 dark:text-white rounded text-xs font-bold">Compile & Export CSV</a>
+              <a href="http://localhost:7979/api/analytics/export?query=List+all+financial+records&format=xlsx" download class="px-4 py-2 bg-indigo-600 text-white rounded text-xs font-bold hover:bg-indigo-700">Compile & Export XLSX</a>
+              <a href="http://localhost:7979/api/analytics/export?query=List+all+financial+records&format=csv" download class="px-4 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 dark:bg-slate-800 dark:text-white rounded text-xs font-bold">Compile & Export CSV</a>
             </div>
           </div>
         </div>
@@ -1123,7 +1123,7 @@ export class FinanceComponent implements OnInit {
   }
 
   loadBackendData() {
-    this.http.get<any[]>('http://localhost:8000/api/domains/finance/vendors').subscribe({
+    this.http.get<any[]>('http://localhost:7979/api/domains/finance/vendors').subscribe({
       next: data => {
         this.vendors = data;
         if (data && data.length > 0) {
@@ -1131,10 +1131,10 @@ export class FinanceComponent implements OnInit {
         }
       }
     });
-    this.http.get<any[]>('http://localhost:8000/api/domains/finance/matches').subscribe({
+    this.http.get<any[]>('http://localhost:7979/api/domains/finance/matches').subscribe({
       next: data => this.threeWayMatches = data
     });
-    this.http.get<any>('http://localhost:8000/api/domains/finance/documents').subscribe({
+    this.http.get<any>('http://localhost:7979/api/domains/finance/documents').subscribe({
       next: d => {
         this.bankStatements = d.bank_statements || [];
         this.taxDocuments = d.tax_documents || [];
@@ -1259,7 +1259,7 @@ export class FinanceComponent implements OnInit {
       lien_check: 'No Liens Flagged'
     } : {};
 
-    authFetch('http://localhost:8000/api/documents/ask/with-context', {
+    authFetch('http://localhost:7979/api/documents/ask/with-context', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ question: q, context_data: context })

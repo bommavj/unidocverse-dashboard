@@ -1035,7 +1035,7 @@ export class HealthcareComponent implements OnInit {
   }
 
   loadBackendData() {
-    this.http.get<any[]>('http://localhost:8000/api/domains/healthcare/patients').subscribe({
+    this.http.get<any[]>('http://localhost:7979/api/domains/healthcare/patients').subscribe({
       next: data => {
         this.patientCharts = data;
         if (data && data.length > 0) {
@@ -1043,10 +1043,10 @@ export class HealthcareComponent implements OnInit {
         }
       }
     });
-    this.http.get<any>('http://localhost:8000/api/domains/healthcare/biomarkers').subscribe({
+    this.http.get<any>('http://localhost:7979/api/domains/healthcare/biomarkers').subscribe({
       next: data => this.biomarkerHistory = data
     });
-    this.http.get<any[]>('http://localhost:8000/api/domains/healthcare/alerts').subscribe({
+    this.http.get<any[]>('http://localhost:7979/api/domains/healthcare/alerts').subscribe({
       next: data => this.abnormalAlerts = data
     });
   }
@@ -1190,7 +1190,7 @@ export class HealthcareComponent implements OnInit {
       insurance: patient.payer
     } : {};
 
-    authFetch('http://localhost:8000/api/documents/ask/with-context', {
+    authFetch('http://localhost:7979/api/documents/ask/with-context', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ question: q, context_data: context })

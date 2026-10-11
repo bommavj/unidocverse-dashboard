@@ -6,7 +6,7 @@ import { ActivatedRoute, Router } from '@angular/router';
 import { DomSanitizer, SafeHtml } from '@angular/platform-browser';
 import { Observable, Subject } from 'rxjs';
 
-const API = 'http://localhost:8000';
+const API = 'http://localhost:7979';
 
 function _jwtExpired(token: string): boolean {
   try {

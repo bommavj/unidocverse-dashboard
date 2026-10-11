@@ -479,8 +479,8 @@ import { ToastService } from '../../services/toast.service';
             <h3 class="font-bold text-lg text-slate-900 dark:text-white font-semibold">Generate Talent & Policy Compliance Reports</h3>
             <p class="text-xs text-slate-505 font-normal">Export active pipeline rosters, regulatory handbook sign-offs, training compliance checklists, and promotion sponsor logs.</p>
             <div class="flex gap-3">
-              <a href="http://localhost:8000/api/analytics/export?query=List+all+candidates&format=xlsx" download class="px-4 py-2 bg-indigo-650 text-white rounded text-xs font-bold hover:bg-indigo-700">Export XLSX</a>
-              <a href="http://localhost:8000/api/analytics/export?query=List+all+candidates&format=csv" download class="px-4 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 dark:bg-slate-800 dark:text-white rounded text-xs font-bold font-sans">Export CSV</a>
+              <a href="http://localhost:7979/api/analytics/export?query=List+all+candidates&format=xlsx" download class="px-4 py-2 bg-indigo-650 text-white rounded text-xs font-bold hover:bg-indigo-700">Export XLSX</a>
+              <a href="http://localhost:7979/api/analytics/export?query=List+all+candidates&format=csv" download class="px-4 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 dark:bg-slate-800 dark:text-white rounded text-xs font-bold font-sans">Export CSV</a>
             </div>
           </div>
         </div>
@@ -926,7 +926,7 @@ export class HRComponent implements OnInit {
   }
 
   loadBackendData() {
-    this.http.get<any[]>('http://localhost:8000/api/domains/hr/candidates').subscribe({
+    this.http.get<any[]>('http://localhost:7979/api/domains/hr/candidates').subscribe({
       next: data => {
         this.candidates = data.map((cand: any) => {
           return {
@@ -1148,7 +1148,7 @@ export class HRComponent implements OnInit {
       feedbacks: candidate.feedbacks?.map((f: any) => `${f.interviewer} (${f.rating}/5): ${f.note}`).join('; ')
     } : {};
 
-    authFetch('http://localhost:8000/api/documents/ask/with-context', {
+    authFetch('http://localhost:7979/api/documents/ask/with-context', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ question: q, context_data: context })

@@ -54,7 +54,7 @@ export class AuditComponent implements OnInit {
 
   readonly ACTION_ICONS  = ACTION_ICONS;
   readonly ACTION_COLOR  = ACTION_COLOR;
-  private readonly api   = 'http://localhost:8000';
+  private readonly api   = 'http://localhost:7979';
 
   constructor(public cdr: ChangeDetectorRef) {}
 

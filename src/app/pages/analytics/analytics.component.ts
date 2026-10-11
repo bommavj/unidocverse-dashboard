@@ -7,7 +7,7 @@ import { Chart, registerables } from 'chart.js';
 import { take } from 'rxjs/operators';
 Chart.register(...registerables);
 
-const API = 'http://localhost:8000';
+const API = 'http://localhost:7979';
 const PALETTE = ['#6366f1','#06b6d4','#10b981','#f59e0b','#ef4444','#8b5cf6','#ec4899','#14b8a6','#f97316','#84cc16'];
 
 @Component({

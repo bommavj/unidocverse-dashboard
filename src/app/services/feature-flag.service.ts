@@ -59,7 +59,7 @@ export class FeatureFlagService {
 
   load(): Promise<void> {
     return new Promise(resolve => {
-      this.http.get<{ flags: FeatureFlags }>('http://localhost:8000/api/features')
+      this.http.get<{ flags: FeatureFlags }>('http://localhost:7979/api/features')
         .subscribe({
           next: res => {
             this._flags.set({ ...DEFAULT_FLAGS, ...res.flags });

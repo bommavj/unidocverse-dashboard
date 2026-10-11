@@ -27,7 +27,7 @@ const DISMISS_KEY       = 'udv_license_banner_dismissed';
 const CHECK_INTERVAL_MS = 24 * 60 * 60 * 1000; // 24 hours
 
 // Fallback if Electron API not available (dev mode)
-const DEV_BACKEND_URL = 'http://localhost:8000';
+const DEV_BACKEND_URL = 'http://localhost:7979';
 
 @Injectable({ providedIn: 'root' })
 export class LicenseService implements OnDestroy {

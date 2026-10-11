@@ -416,7 +416,7 @@ export class NotesComponent implements OnInit {
   aiWorking = false;
   aiStatus = '';
 
-  private readonly api = 'http://localhost:8000';
+  private readonly api = 'http://localhost:7979';
 
   constructor(
     private http: HttpClient,

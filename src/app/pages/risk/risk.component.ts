@@ -32,7 +32,7 @@ interface RiskDoc {
   health_fields: HealthField[];
 }
 
-const BASE = 'http://localhost:8000';
+const BASE = 'http://localhost:7979';
 
 @Component({
   selector: 'app-risk',

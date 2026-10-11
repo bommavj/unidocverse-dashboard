@@ -13,7 +13,7 @@ import { RouterModule, ActivatedRoute } from '@angular/router';
   styleUrls: ['./loss-runs.component.scss']
 })
 export class LossRunsComponent implements OnInit {
-  private api = 'http://localhost:8000';
+  private api = 'http://localhost:7979';
   clients: any[] = [];
   highRisk: any[] = [];
   selectedClient: any = null;

@@ -13,7 +13,7 @@ import { HttpClient } from '@angular/common/http';
   styleUrls: ['./immigration.component.scss']
 })
 export class ImmigrationComponent implements OnInit {
-  private readonly api = 'http://localhost:8000';
+  private readonly api = 'http://localhost:7979';
 
   loading   = true;
   buckets: any = {};

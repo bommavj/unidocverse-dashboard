@@ -62,7 +62,7 @@ export class LicenseUploadComponent implements OnInit {
   }
 
   checkLicenseStatus() {
-    this.http.get<LicenseStatus>('http://localhost:8000/api/license/status')
+    this.http.get<LicenseStatus>('http://localhost:7979/api/license/status')
       .subscribe({
         next: (status) => {
           this.licenseStatus = status;
@@ -174,7 +174,7 @@ export class LicenseUploadComponent implements OnInit {
   private submitLicense(json: any) {
     this.isUploading = true;
 
-    this.http.post('http://localhost:8000/api/license/upload', json)
+    this.http.post('http://localhost:7979/api/license/upload', json)
       .subscribe({
         next: (response: any) => {
           this.isUploading = false;

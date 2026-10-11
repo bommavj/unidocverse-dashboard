@@ -445,8 +445,8 @@ import { ToastService } from '../../services/toast.service';
             <h3 class="font-bold text-lg text-slate-900 dark:text-white">Generate Matter & Expiration Reports</h3>
             <p class="text-xs text-slate-505">Export active contracts lists, risk mappings, and notice schedules.</p>
             <div class="flex gap-3">
-              <a href="http://localhost:8000/api/analytics/export?query=List+all+contracts&format=xlsx" download class="px-4 py-2 bg-indigo-600 text-white rounded text-xs font-bold hover:bg-indigo-700">Export XLSX</a>
-              <a href="http://localhost:8000/api/analytics/export?query=List+all+contracts&format=csv" download class="px-4 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 dark:bg-slate-800 dark:text-white rounded text-xs font-bold">Export CSV</a>
+              <a href="http://localhost:7979/api/analytics/export?query=List+all+contracts&format=xlsx" download class="px-4 py-2 bg-indigo-600 text-white rounded text-xs font-bold hover:bg-indigo-700">Export XLSX</a>
+              <a href="http://localhost:7979/api/analytics/export?query=List+all+contracts&format=csv" download class="px-4 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 dark:bg-slate-800 dark:text-white rounded text-xs font-bold">Export CSV</a>
             </div>
           </div>
         </div>
@@ -970,7 +970,7 @@ export class LegalComponent implements OnInit {
     this.cmpError = '';
     if (!this.cmpContract || !this.cmpTemplate) { this.cmpError = 'Choose a contract and a template'; return; }
     this.cmpBusy = true;
-    this.http.post<any>('http://localhost:8000/api/workflow/contract-vs-template',
+    this.http.post<any>('http://localhost:7979/api/workflow/contract-vs-template',
       { document_id: this.cmpContract, template_document_id: this.cmpTemplate }).subscribe({
       next: r => { this.cmpResult = r; this.cmpBusy = false; },
       error: e => { this.cmpError = e?.error?.detail || 'Comparison failed'; this.cmpBusy = false; }
@@ -1010,13 +1010,13 @@ export class LegalComponent implements OnInit {
   }
 
   loadBackendData() {
-    this.http.get<any>('http://localhost:8000/api/documents?limit=500').subscribe({
+    this.http.get<any>('http://localhost:7979/api/documents?limit=500').subscribe({
       next: r => this.cmpDocs = Array.isArray(r) ? r : (r?.documents || r?.items || [])
     });
-    this.http.get<any[]>('http://localhost:8000/api/domains/legal/clauses').subscribe({
+    this.http.get<any[]>('http://localhost:7979/api/domains/legal/clauses').subscribe({
       next: data => this.clauses = data
     });
-    this.http.get<any[]>('http://localhost:8000/api/domains/legal/lifecycle').subscribe({
+    this.http.get<any[]>('http://localhost:7979/api/domains/legal/lifecycle').subscribe({
       next: data => {
         this.lifecycleContracts = data;
         if (data && data.length > 0) {
@@ -1148,7 +1148,7 @@ export class LegalComponent implements OnInit {
       notice_period: contract.notice
     } : {};
 
-    authFetch('http://localhost:8000/api/documents/ask/with-context', {
+    authFetch('http://localhost:7979/api/documents/ask/with-context', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ question: q, context_data: context })

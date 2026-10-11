@@ -64,7 +64,7 @@ export class ApprovalsComponent implements OnInit {
 
   readonly PRIORITY_COLOR = PRIORITY_COLOR;
   readonly STATUS_COLOR = STATUS_COLOR;
-  private readonly api = 'http://localhost:8000';
+  private readonly api = 'http://localhost:7979';
 
   constructor(private cdr: ChangeDetectorRef, private confirm: ConfirmService) {}
 

@@ -41,7 +41,7 @@ export class CalendarComponent implements OnInit {
     { value: 'document',          label: '⬜ Document' },
   ];
 
-  private readonly api = 'http://localhost:8000';
+  private readonly api = 'http://localhost:7979';
 
   constructor(private http: HttpClient, private router: Router) {}
 
