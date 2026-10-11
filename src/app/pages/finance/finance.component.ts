@@ -1,15 +1,16 @@
+import { DomainDocumentsComponent } from '../../components/domain-documents/domain-documents.component';
 import { Component, OnInit, NgZone } from '@angular/core';
 import { authFetch } from '../../lib/api';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { ActivatedRoute, RouterModule } from '@angular/router';
-import { HttpClient, HttpClientModule } from '@angular/common/http';
+import { HttpClient } from '@angular/common/http';
 import { ToastService } from '../../services/toast.service';
 
 @Component({
   selector: 'app-finance',
   standalone: true,
-  imports: [CommonModule, FormsModule, RouterModule, HttpClientModule],
+  imports: [CommonModule, FormsModule, RouterModule, DomainDocumentsComponent],
   template: `
     <div class="p-6 page-container">
       <!-- Topbar Header -->
@@ -151,7 +152,7 @@ import { ToastService } from '../../services/toast.service';
             </div>
           </div>
         </div>
-        <div *ngIf="vendors.length === 0" class="p-8 text-center bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl">
+        <div *ngIf="vendors.length === 0 && vendorTabs.includes(activeTab) && domainDocCount === 0" class="p-8 text-center bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl">
           <span style="font-size: 36px">🧾</span>
           <h3 class="text-md font-bold mt-3 text-slate-900 dark:text-white">No Finance Vendors Found</h3>
           <p class="text-xs text-slate-550 mt-2 font-sans">Upload invoices, bank statements, or tax documents to dynamically view vendor reconciliation records.</p>
@@ -162,7 +163,7 @@ import { ToastService } from '../../services/toast.service';
       </div>
 
       <!-- Management / Global Tabs -->
-      <div class="mb-6 flex flex-wrap gap-2 border-b border-slate-200 dark:border-slate-800 pb-3" *ngIf="vendors.length > 0">
+      <div class="mb-6 flex flex-wrap gap-2 border-b border-slate-200 dark:border-slate-800 pb-3">
         <button 
           *ngFor="let item of managementMenu"
           (click)="activeTab = item.id"
@@ -176,7 +177,9 @@ import { ToastService } from '../../services/toast.service';
       </div>
 
       <!-- Content Pane -->
-      <div class="min-w-0" *ngIf="vendors.length > 0">
+      <app-domain-documents domain="finance" [tab]="activeTab" (count)="domainDocCount = $event"></app-domain-documents>
+
+      <div class="min-w-0">
         <div [ngSwitch]="activeTab">
           <!-- 1. Expenses & Spend Category Analytics -->
           <div *ngSwitchCase="'expenses'" class="bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-800 p-6 shadow-sm animate-fade-in space-y-6">
@@ -225,6 +228,43 @@ import { ToastService } from '../../services/toast.service';
 
           <!-- 2. Reconciliations: Vendor Statements, GL & Exception Queue -->
           <div *ngSwitchCase="'reconciliation'" class="bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-800 p-6 shadow-sm animate-fade-in space-y-6">
+            <!-- Uploaded bank statements -->
+            <div>
+              <div class="flex justify-between items-center mb-4">
+                <h3 class="font-bold text-lg text-slate-900 dark:text-white">Bank statements <span class="text-slate-400 text-sm font-semibold">({{ bankStatements.length }})</span></h3>
+                <a routerLink="/upload" class="px-3.5 py-1.5 bg-indigo-600 hover:bg-indigo-700 text-white rounded text-xs font-semibold">↑ Upload statement</a>
+              </div>
+              <div class="overflow-x-auto">
+                <table class="w-full text-left border-collapse text-xs">
+                  <thead>
+                    <tr class="border-b border-slate-200 dark:border-slate-800 text-slate-455">
+                      <th class="py-2.5 px-2 font-bold uppercase">Statement</th>
+                      <th class="py-2.5 px-2 font-bold uppercase">Bank</th>
+                      <th class="py-2.5 px-2 font-bold uppercase">Period</th>
+                      <th class="py-2.5 px-2 font-bold uppercase text-right">Transactions</th>
+                      <th class="py-2.5 px-2 font-bold uppercase text-right">Money out</th>
+                      <th class="py-2.5 px-2 font-bold uppercase text-right">Money in</th>
+                      <th class="py-2.5 px-2 font-bold uppercase text-right">Closing balance</th>
+                    </tr>
+                  </thead>
+                  <tbody class="divide-y divide-slate-150 dark:divide-slate-800 text-slate-700 dark:text-slate-300">
+                    <tr *ngIf="bankStatements.length === 0">
+                      <td colspan="7" class="py-6 text-center text-xs text-slate-400">{{ financeDocsLoaded ? 'No bank statements uploaded yet.' : 'Loading…' }}</td>
+                    </tr>
+                    <tr *ngFor="let b of bankStatements" class="hover:bg-slate-50 dark:hover:bg-slate-950">
+                      <td class="py-3 px-2 font-semibold text-slate-900 dark:text-white">{{ b.filename }}</td>
+                      <td class="py-3 px-2">{{ b.bank || '—' }}</td>
+                      <td class="py-3 px-2 font-mono">{{ b.period || '—' }}</td>
+                      <td class="py-3 px-2 text-right font-mono">{{ b.transactions }}</td>
+                      <td class="py-3 px-2 text-right font-mono">{{ formatCurrency(b.debits) }}</td>
+                      <td class="py-3 px-2 text-right font-mono">{{ formatCurrency(b.credits) }}</td>
+                      <td class="py-3 px-2 text-right font-mono">{{ b.closing_balance != null ? formatCurrency(b.closing_balance) : '—' }}<span *ngIf="b.closing_calculated" class="text-slate-400" title="Opening balance + money in − money out; the ending balance wasn't readable"> (calc.)</span></td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+            </div>
+
             <!-- 3-Way Match Audit Table -->
             <div>
               <div class="flex justify-between items-center mb-4">
@@ -384,27 +424,52 @@ import { ToastService } from '../../services/toast.service';
           </div>
 
           <!-- 5. Taxes -->
-          <div *ngSwitchCase="'tax'" class="bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-800 p-6 shadow-sm animate-fade-in space-y-4">
-            <h3 class="font-bold text-lg text-slate-900 dark:text-white mb-4">Tax Filing Timeline & Deadlines</h3>
-            <div class="space-y-4">
-              <div *ngFor="let t of taxTimeline" class="flex items-start gap-4 p-4 rounded bg-slate-50 dark:bg-slate-955 border dark:border-slate-800">
-                <span class="p-2.5 rounded bg-indigo-50 text-indigo-700 font-bold font-mono text-sm leading-none dark:bg-indigo-950/40 dark:text-indigo-400">
-                  {{ t.quarter }}
-                </span>
-                <div class="flex-1">
-                  <div class="flex justify-between items-start">
-                    <h4 class="font-bold text-slate-900 dark:text-white text-sm">{{ t.form }}</h4>
-                    <span [class]="t.daysLeft <= 10 ? 'text-red-600 font-bold text-2xs animate-pulse' : 'text-slate-400 text-2xs font-semibold'">
-                      {{ t.daysLeft }} Days Left
-                    </span>
+          <div *ngSwitchCase="'tax'" class="bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-800 p-6 shadow-sm animate-fade-in space-y-6">
+            <div class="flex justify-between items-center">
+              <h3 class="font-bold text-lg text-slate-900 dark:text-white">Tax documents <span class="text-slate-400 text-sm font-semibold">({{ taxDocuments.length }})</span></h3>
+              <a routerLink="/research" [queryParams]="{ q: 'Review my ' + reviewYear + ' tax return' }"
+                 class="px-3.5 py-1.5 bg-indigo-600 hover:bg-indigo-700 text-white rounded text-xs font-semibold">📋 Review {{ reviewYear }} return</a>
+            </div>
+            <div class="overflow-x-auto">
+              <table class="w-full text-left border-collapse text-xs">
+                <thead>
+                  <tr class="border-b border-slate-200 dark:border-slate-800 text-slate-455">
+                    <th class="py-2.5 px-2 font-bold uppercase">Form</th>
+                    <th class="py-2.5 px-2 font-bold uppercase">Year</th>
+                    <th class="py-2.5 px-2 font-bold uppercase">From</th>
+                    <th class="py-2.5 px-2 font-bold uppercase">Key amounts</th>
+                    <th class="py-2.5 px-2 font-bold uppercase">File</th>
+                  </tr>
+                </thead>
+                <tbody class="divide-y divide-slate-150 dark:divide-slate-800 text-slate-700 dark:text-slate-300">
+                  <tr *ngIf="taxDocuments.length === 0">
+                    <td colspan="5" class="py-6 text-center text-xs text-slate-400">{{ financeDocsLoaded ? 'No tax documents uploaded yet.' : 'Loading…' }}</td>
+                  </tr>
+                  <tr *ngFor="let t of taxDocuments" class="hover:bg-slate-50 dark:hover:bg-slate-950">
+                    <td class="py-3 px-2 font-semibold text-slate-900 dark:text-white">{{ t.form }}</td>
+                    <td class="py-3 px-2 font-mono">{{ t.year || '—' }}</td>
+                    <td class="py-3 px-2">{{ t.payer || '—' }}</td>
+                    <td class="py-3 px-2">
+                      <span *ngFor="let k of t.key_amounts; let last = last" class="whitespace-nowrap">{{ k.label }} <b class="font-mono">{{ formatCurrency(k.amount) }}</b><span *ngIf="!last"> · </span></span>
+                      <span *ngIf="!t.key_amounts.length" class="text-slate-400">—</span>
+                    </td>
+                    <td class="py-3 px-2 text-slate-500">{{ t.filename }}</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+            <div>
+              <h3 class="font-bold text-md text-slate-900 dark:text-white mb-3">Upcoming deadlines</h3>
+              <div class="space-y-2">
+                <div *ngFor="let d of taxDeadlines" class="flex items-center justify-between gap-4 p-3 rounded bg-slate-50 dark:bg-slate-950 border dark:border-slate-800">
+                  <div>
+                    <div class="font-semibold text-slate-900 dark:text-white text-sm">{{ d.name }}</div>
+                    <div class="text-2xs text-slate-500">{{ d.authority }} · due <span class="font-mono">{{ d.due }}</span></div>
                   </div>
-                  <p class="text-xs text-slate-550 dark:text-slate-400 mt-1">Filing Due Date: <span class="font-mono text-slate-700 dark:text-slate-300 font-bold">{{ t.due }}</span></p>
-                  <div class="flex items-center justify-between text-2xs mt-3">
-                    <span class="text-indigo-600 dark:text-indigo-400 font-semibold">Requirement: W-2 and 1099 Form Matches</span>
-                    <button (click)="toast.show('Draft generated for ' + t.form, 'success')" class="text-xs text-indigo-600 dark:text-indigo-400 font-bold hover:underline">Draft Return</button>
-                  </div>
+                  <span [class]="d.days_left <= 14 ? 'text-red-600 font-bold text-xs' : 'text-slate-500 font-semibold text-xs'">{{ d.days_left }} days</span>
                 </div>
               </div>
+              <p class="text-2xs text-slate-400 mt-2">Weekend due dates move to the next business day; holidays and disaster extensions aren't included.</p>
             </div>
           </div>
 
@@ -902,6 +967,7 @@ import { ToastService } from '../../services/toast.service';
 })
 export class FinanceComponent implements OnInit {
   activeTab = 'expenses';
+  domainDocCount = 0;
   searchQuery = '';
   selectedVendorName = '';
 
@@ -1016,6 +1082,12 @@ export class FinanceComponent implements OnInit {
   vendors: any[] = [];
 
   taxTimeline: any[] = [];
+  vendorTabs = ['expenses', 'vendors', 'payments'];
+  bankStatements: any[] = [];
+  taxDocuments: any[] = [];
+  taxDeadlines: any[] = [];
+  financeDocsLoaded = false;
+  reviewYear = new Date().getFullYear() - 1;
 
   glAccounts: any[] = [];
 
@@ -1061,6 +1133,15 @@ export class FinanceComponent implements OnInit {
     });
     this.http.get<any[]>('http://localhost:8000/api/domains/finance/matches').subscribe({
       next: data => this.threeWayMatches = data
+    });
+    this.http.get<any>('http://localhost:8000/api/domains/finance/documents').subscribe({
+      next: d => {
+        this.bankStatements = d.bank_statements || [];
+        this.taxDocuments = d.tax_documents || [];
+        this.taxDeadlines = d.deadlines || [];
+        this.financeDocsLoaded = true;
+      },
+      error: () => { this.financeDocsLoaded = true; }
     });
   }
 

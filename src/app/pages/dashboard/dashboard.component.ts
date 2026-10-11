@@ -7,6 +7,7 @@ import { ApiService } from '../../services/api.service';
 import { AuthService } from '../../services/auth.service';
 import { DocSheetComponent } from '../../components/doc-sheet/doc-sheet.component';
 import { VoiceService } from '../../services/voice.service';
+import { FeatureFlagService } from '../../services/feature-flag.service';
 
 @Component({
   selector: 'app-dashboard',
@@ -66,6 +67,14 @@ export class DashboardComponent implements OnInit {
   disclaimerVisible = true;
   private readonly DISC_KEY = 'udv_disclaimer_dismissed';
 
+  // ── Needs-your-attention queue ───────────────────────────────────────────
+  approvals: any[] = [];
+  pendingApprovals = 0;
+  deadlines: any[] = [];
+  anomalies: any[] = [];
+  attention: AttentionItem[] = [];
+  firstName = '';
+
   // ── Immigration expiry ───────────────────────────────────────────────────
   immExpiring: any[] = [];   // critical + high urgency records
   immCritical = 0;
@@ -78,6 +87,7 @@ export class DashboardComponent implements OnInit {
     private auth: AuthService,
     private voiceSvc: VoiceService,
     private http: HttpClient,
+    public features: FeatureFlagService,
   ) {}
 
   openVoice(): void {
@@ -89,7 +99,57 @@ export class DashboardComponent implements OnInit {
     this.setGreetingAndDate();
     this.loadDocs();
     this.loadAlerts();
-    this.loadImmigrationExpiry();
+    if (this.features.immigrationMode()) this.loadImmigrationExpiry();
+    this.loadApprovals();
+    this.loadDeadlines();
+    this.firstName = (this.auth.currentUser()?.full_name || '').split(' ')[0];
+  }
+
+  loadApprovals(): void {
+    this.http.get<any[]>('http://localhost:8000/api/approvals?status=pending').subscribe({
+      next: rows => { this.approvals = rows || []; this.pendingApprovals = this.approvals.length; this.buildAttention(); },
+      error: () => {}
+    });
+  }
+
+  loadDeadlines(): void {
+    this.http.get<any>('http://localhost:8000/api/alerts/all').subscribe({
+      next: r => {
+        this.deadlines = (r?.alerts || [])
+          .filter((a: any) => a.days_until_expiry !== null && a.days_until_expiry !== undefined)
+          .sort((a: any, b: any) => a.days_until_expiry - b.days_until_expiry);
+        this.buildAttention();
+      },
+      error: () => {}
+    });
+  }
+
+  get dueThisWeek(): number {
+    return this.deadlines.filter(d => d.days_until_expiry >= 0 && d.days_until_expiry <= 7).length;
+  }
+
+  /** One list, most urgent first: overdue items, anomalies, approvals, then upcoming deadlines. */
+  buildAttention(): void {
+    const items: AttentionItem[] = [];
+    for (const a of this.anomalies.slice(0, 5)) {
+      items.push({ kind: 'Exception', icon: 'alert-triangle', tone: 'bad', rank: 1,
+        title: a.title || a.message || 'Anomaly detected', sub: a.filename || a.doc_type || '', when: '', link: '/insights' });
+    }
+    for (const a of this.approvals.slice(0, 5)) {
+      items.push({ kind: 'Approval', icon: 'user-check', tone: 'warn', rank: 2,
+        title: a.title, sub: a.priority ? `${a.priority} priority` : '', when: this._timeAgo(a.created_at), link: '/approvals' });
+    }
+    for (const r of this.immExpiring.slice(0, 4)) {
+      items.push({ kind: 'Immigration', icon: 'world', tone: r.days_to_expiry < 0 ? 'bad' : 'warn', rank: r.days_to_expiry < 0 ? 0 : 3,
+        title: r.doc_label, sub: [r.beneficiary_name, r.visa_class].filter(Boolean).join(' · '),
+        when: r.days_to_expiry < 0 ? `${-r.days_to_expiry}d overdue` : `in ${r.days_to_expiry}d`, link: '/immigration' });
+    }
+    for (const d of this.deadlines.slice(0, 6)) {
+      items.push({ kind: 'Deadline', icon: 'calendar-due', tone: d.days_until_expiry < 0 ? 'bad' : d.days_until_expiry <= 7 ? 'warn' : 'neutral',
+        rank: d.days_until_expiry < 0 ? 0 : 4, title: d.label || d.filename, sub: d.label ? d.filename : '',
+        when: d.status_text || (d.days_until_expiry < 0 ? `${-d.days_until_expiry}d overdue` : `in ${d.days_until_expiry}d`), link: '/deadlines' });
+    }
+    this.attention = items.sort((a, b) => a.rank - b.rank).slice(0, 10);
   }
 
   dismissDisclaimer(): void {
@@ -129,6 +189,7 @@ export class DashboardComponent implements OnInit {
           ...(buckets.critical || []),
           ...(buckets.high     || []),
         ].slice(0, 8);
+        this.buildAttention();
       },
       error: () => {}
     });
@@ -142,6 +203,8 @@ export class DashboardComponent implements OnInit {
     this.api.get('/insights/alerts').subscribe({
       next: (res: any) => {
         this.anomalyCount = res.total || 0;
+        this.anomalies = res.alerts || [];
+        this.buildAttention();
       },
       error: () => {}
     });
@@ -171,10 +234,27 @@ export class DashboardComponent implements OnInit {
         ico: t.ico,
         bg: t.bg,
         dot: t.dot,
-        title: `<em style="color:#4f46e5">${name}</em> ${t.verb}`,
-        time: `${time} · phi3:mini`,
+        name,
+        verb: t.verb,
+        time,
+        icon: this.docIcon(d),
+        doc: d,
       };
     });
+  }
+
+  docIcon(doc: any): string {
+    if (doc.status === 'password_required') return 'lock';
+    const m: Record<string, string> = { bank_statement: 'building-bank', tax_document: 'receipt-tax', tax_form: 'receipt-tax',
+      invoice: 'file-invoice', credit_card_statement: 'credit-card', payoff_statement: 'file-dollar', medical_record: 'heartbeat' };
+    if (m[doc.doc_type]) return m[doc.doc_type];
+    const c = this.icoClass(doc.doc_type, doc);
+    return ({ img: 'photo', sheet: 'table', slide: 'presentation', email: 'mail', archive: 'file-zip' } as any)[c] || 'file-text';
+  }
+
+  typeLabel(doc: any): string {
+    const t = (doc.doc_type || '').replace(/_/g, ' ');
+    return t ? t.charAt(0).toUpperCase() + t.slice(1) : (doc.filename?.split('.').pop() || '').toUpperCase();
   }
 
   private _timeAgo(dateStr: string): string {
@@ -242,4 +322,9 @@ export class DashboardComponent implements OnInit {
     const k = 1024, s = ['B','KB','MB','GB'], i = Math.floor(Math.log(b) / Math.log(k));
     return Math.round(b / Math.pow(k, i) * 10) / 10 + ' ' + s[i];
   }
+}
+
+interface AttentionItem {
+  kind: string; icon: string; tone: 'bad' | 'warn' | 'neutral'; rank: number;
+  title: string; sub: string; when: string; link: string;
 }

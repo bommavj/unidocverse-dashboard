@@ -184,6 +184,16 @@
 
 .examples { width: 100%; max-width: 600px; }
 .examples-label { font-size: 11px; font-weight: 700; color: var(--t3); text-transform: uppercase; letter-spacing: .5px; margin-bottom: 10px; }
+.review-btn {
+  margin-left: auto; margin-right: 10px;
+  background: #4f46e5; color: #fff; border: none; border-radius: 8px;
+  padding: 7px 14px; font-size: 13px; font-weight: 600; cursor: pointer; white-space: nowrap;
+  transition: background .15s;
+  &:hover:not(:disabled) { background: #4338ca; }
+  &:focus-visible { outline: 2px solid #a5b4fc; outline-offset: 2px; }
+  &:disabled { opacity: .5; cursor: default; }
+}
+
 .example-chips { display: flex; flex-wrap: wrap; gap: 8px; justify-content: center; }
 .example-chip {
   background: #f8fafc; border: 1px solid var(--bdr); border-radius: 20px;
@@ -206,6 +216,7 @@
 .thread-history {
   display: flex;
   flex-direction: column;
+  flex-shrink: 0;   // inside the flex result area it was squeezed to one line
   gap: 0;
   border: 1px solid #e2e8f0;
   border-radius: 12px;
@@ -251,6 +262,10 @@
   color: #475569;
   line-height: 1.6;
   padding-left: 28px;
+  max-height: 320px;   // long earlier answers (tables) scroll in place
+  overflow-y: auto;
+  ::ng-deep table { font-size: 12px; border-collapse: collapse; }
+  ::ng-deep td, ::ng-deep th { padding: 2px 8px; border-bottom: 1px solid #eef2f7; }
   ::ng-deep p { margin: 0 0 4px; }
   ::ng-deep ul { margin: 4px 0; padding-left: 18px; }
   ::ng-deep strong { color: #1e293b; }
@@ -448,6 +463,10 @@
   cursor: pointer; font-family: var(--font);
   transition: all .13s;
   &:hover { background: #e0e7ff; border-color: #a5b4fc; }
+  &.viz-disabled, &:disabled {
+    opacity: 0.4; cursor: not-allowed;
+    &:hover { background: #eef2ff; border-color: #c7d2fe; }
+  }
 }
 
 .download-wrap { position: relative; }
@@ -710,6 +729,15 @@
 // ── Thinking state ────────────────────────────────────────────────────────────
 .thinking-area {
   flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 16px;
+
+  // A follow-up is running: show the conversation above, scroll like the answer view
+  &.with-thread {
+    justify-content: flex-start;
+    align-items: stretch;
+    overflow-y: auto;
+    padding: 24px 32px;
+    .thinking-question, .thinking-card { align-self: center; }
+  }
 }
 
 .thinking-question {

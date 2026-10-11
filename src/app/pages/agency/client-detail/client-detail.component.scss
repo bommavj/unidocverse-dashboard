@@ -1,4 +1,4 @@
-.page { display: flex; flex-direction: column; height: 100vh; overflow: hidden; background: var(--surf2, #f5f7ff); }
+.page { display: flex; flex-direction: column; height: var(--content-h); overflow: hidden; background: var(--surf2, #f5f7ff); }
 
 // ── Topbar ────────────────────────────────────────────────────────────────────
 .topbar {

@@ -43,6 +43,7 @@ interface User {
       <div class="tabs">
         <button class="tab" [class.active]="tab === 'users'"    (click)="tab='users';    cdr.markForCheck()">👥 {{ 'Users' | translate }}</button>
         <button class="tab" [class.active]="tab === 'password'" (click)="tab='password'; cdr.markForCheck()">🔑 {{ 'Change Password' | translate }}</button>
+        <button class="tab" [class.active]="tab === 'tokens'"   (click)="tab='tokens'; loadTokens(); cdr.markForCheck()">🗝️ {{ 'API Tokens' | translate }}</button>
         <button class="tab" [class.active]="tab === 'language'" (click)="tab='language'; cdr.markForCheck()">🌐 {{ 'Language Preferences' | translate }}</button>
         <button class="tab" [class.active]="tab === 'features'" (click)="tab='features'; cdr.markForCheck()">🚩 {{ 'Features' | translate }}</button>
         <button class="tab" [class.active]="tab === 'agency'" *ngIf="agencyMode" (click)="tab='agency';   loadAgencySettings(); cdr.markForCheck()">🏢 {{ 'Agency' | translate }}</button>
@@ -126,6 +127,52 @@ interface User {
         </div>
       </div>
 
+      <!-- ── API tokens tab ── -->
+      <div *ngIf="tab === 'tokens'">
+        <div class="card" style="max-width:760px">
+          <h2 class="card-title">Create an API token</h2>
+          <p class="subtitle" style="margin:0 0 14px">Tokens let scripts and integrations call the UniDocVerse API as you, inside your organisation. Read tokens can only fetch data; read-write tokens can also create and update.</p>
+          <div class="form-grid">
+            <div class="field"><label>Name</label><input [(ngModel)]="tokenForm.name" placeholder="Nightly export script" /></div>
+            <div class="field"><label>Access</label>
+              <select [(ngModel)]="tokenForm.scope"><option value="read">Read only</option><option value="write">Read and write</option></select>
+            </div>
+            <div class="field"><label>Expires</label>
+              <select [(ngModel)]="tokenForm.expires_days"><option [ngValue]="30">In 30 days</option><option [ngValue]="90">In 90 days</option><option [ngValue]="365">In 1 year</option><option [ngValue]="null">Never</option></select>
+            </div>
+          </div>
+          <div class="form-footer">
+            <span class="error-msg" *ngIf="tokenError">{{ tokenError }}</span>
+            <button class="btn-primary" (click)="createToken()" [disabled]="tokenBusy">{{ tokenBusy ? 'Creating...' : 'Create token' }}</button>
+          </div>
+          <div *ngIf="newToken" style="margin-top:16px;padding:14px;border:1px solid #bfe3d3;background:#e7f5ef;border-radius:8px">
+            <div style="font-weight:600;color:#0f7a55;margin-bottom:6px">Copy this token now — it won't be shown again</div>
+            <div style="display:flex;gap:8px;align-items:center">
+              <code style="flex:1;padding:8px 10px;background:#fff;border:1px solid #cbd4e1;border-radius:6px;font-size:12.5px;word-break:break-all">{{ newToken }}</code>
+              <button class="btn-primary" (click)="copyToken()">{{ tokenCopied ? 'Copied' : 'Copy' }}</button>
+            </div>
+          </div>
+        </div>
+        <div class="card" style="max-width:760px;margin-top:16px">
+          <h2 class="card-title">Your tokens</h2>
+          <p *ngIf="!tokens.length" class="subtitle">No tokens yet.</p>
+          <table *ngIf="tokens.length" style="width:100%;border-collapse:collapse;font-size:13px">
+            <thead><tr style="text-align:left;color:#76839a;font-size:11.5px;text-transform:uppercase;letter-spacing:.05em">
+              <th style="padding:8px">Name</th><th style="padding:8px">Token</th><th style="padding:8px">Access</th><th style="padding:8px">Last used</th><th style="padding:8px">Status</th><th></th></tr></thead>
+            <tbody>
+              <tr *ngFor="let t of tokens" style="border-top:1px solid #edf1f6">
+                <td style="padding:8px">{{ t.name }}<div style="color:#76839a;font-size:11.5px">{{ t.owner }}</div></td>
+                <td style="padding:8px;font-family:monospace">{{ t.prefix }}…</td>
+                <td style="padding:8px">{{ t.scope === 'write' ? 'Read and write' : 'Read only' }}</td>
+                <td style="padding:8px">{{ t.last_used_at ? (t.last_used_at | date:'MMM d, y') : 'Never' }}</td>
+                <td style="padding:8px"><span [style.color]="t.status === 'active' ? '#0f7a55' : '#b42318'">{{ t.status }}</span></td>
+                <td style="padding:8px;text-align:right"><button *ngIf="t.status === 'active'" class="btn-secondary" (click)="revokeToken(t)">Revoke</button></td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
       <!-- ── Language tab ── -->
       <div *ngIf="tab === 'language'">
         <div class="card" style="max-width:480px">
@@ -162,6 +209,18 @@ interface User {
             <div class="toggle-wrap">
               <button class="toggle" [class.on]="agencyMode" (click)="toggleFlag('agencyMode')" [disabled]="savingFlags"><span class="toggle-knob"></span></button>
               <span class="toggle-lbl" [class.on]="agencyMode">{{ agencyMode ? 'Enabled' : 'Disabled' }}</span>
+            </div>
+          </div>
+
+          <!-- Immigration Flag -->
+          <div class="feature-row">
+            <div class="feature-info">
+              <div class="feature-name"><span class="feature-icon">🛂</span>Immigration</div>
+              <div class="feature-desc">Enables the visa tracker, immigration cases, client CRM, USCIS form auto-fill and filing packets.</div>
+            </div>
+            <div class="toggle-wrap">
+              <button class="toggle" [class.on]="immigrationMode" (click)="toggleFlag('immigrationMode')" [disabled]="savingFlags"><span class="toggle-knob"></span></button>
+              <span class="toggle-lbl" [class.on]="immigrationMode">{{ immigrationMode ? 'Enabled' : 'Disabled' }}</span>
             </div>
           </div>
 
@@ -897,6 +956,7 @@ export class SettingsComponent implements OnInit {
   realEstateMode  = false;
   hrMode          = false;
   supplyChainMode = false;
+  immigrationMode = false;
   complianceMode  = false;
   operationsMode  = false;
   savingFlags = false;
@@ -944,6 +1004,13 @@ export class SettingsComponent implements OnInit {
   testingEmail  = false;
   agencyMsg     = '';
 
+  tokens: any[] = [];
+  tokenForm: { name: string; scope: string; expires_days: number | null } = { name: '', scope: 'read', expires_days: 90 };
+  tokenBusy = false;
+  tokenError = '';
+  newToken = '';
+  tokenCopied = false;
+
   selectedLang = 'en';
   langSuccess = false;
   langError = '';
@@ -959,6 +1026,8 @@ export class SettingsComponent implements OnInit {
   ) {}
 
   ngOnInit() {
+    const tab = new URLSearchParams(window.location.search).get('tab');
+    if (tab === 'tokens') { this.tab = 'tokens' as any; this.loadTokens(); }
     if (this.auth.isAdmin()) {
       this.loadUsers();
       this.loadFlags();
@@ -974,6 +1043,38 @@ export class SettingsComponent implements OnInit {
       this.langSuccess = false;
       this.cdr.markForCheck();
     }, 3000);
+  }
+
+  // ── API tokens ────────────────────────────────────────────────────────────
+
+  loadTokens(): void {
+    this.http.get<{ tokens: any[] }>(`${this.api}/api/auth/tokens`).subscribe({
+      next: r => { this.tokens = r.tokens || []; this.cdr.markForCheck(); },
+      error: () => {}
+    });
+  }
+
+  createToken(): void {
+    this.tokenError = '';
+    if (!this.tokenForm.name.trim()) { this.tokenError = 'Give the token a name'; this.cdr.markForCheck(); return; }
+    this.tokenBusy = true;
+    this.http.post<any>(`${this.api}/api/auth/tokens`, this.tokenForm).subscribe({
+      next: r => {
+        this.newToken = r.token; this.tokenCopied = false; this.tokenBusy = false;
+        this.tokenForm = { name: '', scope: 'read', expires_days: 90 };
+        this.loadTokens();
+      },
+      error: e => { this.tokenError = e?.error?.detail || 'Could not create the token'; this.tokenBusy = false; this.cdr.markForCheck(); }
+    });
+  }
+
+  copyToken(): void {
+    navigator.clipboard.writeText(this.newToken).then(() => { this.tokenCopied = true; this.cdr.markForCheck(); });
+  }
+
+  revokeToken(t: any): void {
+    if (!confirm(`Revoke "${t.name}"? Anything using it will stop working.`)) return;
+    this.http.post(`${this.api}/api/auth/tokens/${t.id}/revoke`, {}).subscribe({ next: () => this.loadTokens() });
   }
 
   // ── Agency settings ───────────────────────────────────────────────────────
@@ -1056,6 +1157,7 @@ export class SettingsComponent implements OnInit {
         this.realEstateMode  = res.flags?.real_estate_mode ?? false;
         this.hrMode          = res.flags?.hr_mode ?? false;
         this.supplyChainMode = res.flags?.supply_chain_mode ?? false;
+        this.immigrationMode = res.flags?.immigration_mode ?? res.flags?.hr_mode ?? false;
         this.complianceMode  = res.flags?.compliance_mode ?? false;
         this.operationsMode  = res.flags?.operations_mode ?? false;
         this.cdr.markForCheck();
@@ -1064,7 +1166,7 @@ export class SettingsComponent implements OnInit {
     });
   }
 
-  toggleFlag(flag: 'agencyMode' | 'legalMode' | 'medicalMode' | 'financeMode' | 'realEstateMode' | 'hrMode' | 'supplyChainMode' | 'complianceMode' | 'operationsMode') {
+  toggleFlag(flag: 'agencyMode' | 'immigrationMode' | 'legalMode' | 'medicalMode' | 'financeMode' | 'realEstateMode' | 'hrMode' | 'supplyChainMode' | 'complianceMode' | 'operationsMode') {
     const prevValue = this[flag];
     this[flag] = !prevValue;
     this.savingFlags = true;
@@ -1073,6 +1175,7 @@ export class SettingsComponent implements OnInit {
 
     const payload = {
       agency_mode: this.agencyMode,
+      immigration_mode: this.immigrationMode,
       legal_mode: this.legalMode,
       medical_mode: this.medicalMode,
       finance_mode: this.financeMode,
@@ -1086,6 +1189,7 @@ export class SettingsComponent implements OnInit {
     this.http.patch<{ flags: any }>(`${this.api}/api/features`, payload).subscribe({
       next: res => {
         this.agencyMode      = res.flags.agency_mode;
+        this.immigrationMode = res.flags.immigration_mode ?? res.flags.hr_mode;
         this.legalMode       = res.flags.legal_mode;
         this.medicalMode     = res.flags.medical_mode;
         this.financeMode     = res.flags.finance_mode;

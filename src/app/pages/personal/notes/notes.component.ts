@@ -123,7 +123,7 @@ interface WorkspaceDoc {
   styles: [`
     .notes-container {
       display: flex;
-      height: calc(100vh - 56px);
+      height: var(--content-h);
       background: var(--bg-surface, #f8fafc);
       font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
     }

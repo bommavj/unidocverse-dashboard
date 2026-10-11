@@ -19,9 +19,9 @@ import { WorkflowComponent } from '../workflow/workflow.component';
 </div>
   `,
   styles: [`
-.hub-page    { display:flex; flex-direction:column; height:calc(100vh - 56px); }
+.hub-page    { display:flex; flex-direction:column; height:var(--content-h); min-height:0; }
 .hub-content { flex:1; overflow:hidden; display:flex; flex-direction:column; min-height:0; }
-.hub-content > * { flex:1; overflow:hidden; min-height:0; }
+.hub-content > * { flex:1; overflow-y:auto; min-height:0; }   /* embedded pages scroll inside the hub */
   `],
   changeDetection: ChangeDetectionStrategy.OnPush,
 })

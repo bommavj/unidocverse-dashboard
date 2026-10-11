@@ -71,7 +71,7 @@ const DOC_ROLES = [
       display: block;
       font-family: 'Inter', sans-serif;
       background: var(--surf);
-      min-height: 100vh;
+      min-height: var(--content-h);
       color: var(--t1);
     }
 
@@ -175,7 +175,7 @@ const DOC_ROLES = [
       display: flex;
       gap: 0;
       padding: 0 32px 32px;
-      height: calc(100vh - 260px);
+      height: calc(var(--content-h) - 260px);
       min-height: 400px;
     }
 

@@ -5,14 +5,23 @@
     <div class="imm-header-left">
       <div class="imm-header-icon">🛂</div>
       <div>
-        <h1 class="imm-title">Visa & Immigration Tracker</h1>
-        <div class="imm-subtitle">All client immigration documents · expiry tracking · renewal alerts</div>
+        <h1 class="imm-title">Immigration</h1>
+        <div class="imm-subtitle">Visa tracking · cases · clients · forms · e-signature · reports · legal AI · translations</div>
       </div>
     </div>
-    <button class="imm-refresh" (click)="load()" [disabled]="loading">
+    <button class="imm-refresh" *ngIf="section==='tracker'" (click)="load()" [disabled]="loading">
       {{ loading ? 'Loading…' : '↻ Refresh' }}
     </button>
   </div>
+
+  <nav class="imm-sections" aria-label="Immigration sections">
+    <button *ngFor="let s of sections" [class.on]="section===s.id" (click)="go(s.id)" [attr.aria-current]="section===s.id ? 'page' : null">
+      <span aria-hidden="true">{{ s.icon }}</span> {{ s.label }}</button>
+  </nav>
+
+  <app-immigration-suite *ngIf="section!=='tracker'" [section]="section"></app-immigration-suite>
+
+  <ng-container *ngIf="section==='tracker'">
 
   <!-- Loading -->
   <div class="imm-loading" *ngIf="loading">
@@ -50,6 +59,15 @@
       </div>
     </div>
 
+    <!-- Search -->
+    <div class="imm-search">
+      <span class="imm-search-ico" aria-hidden="true">🔍</span>
+      <input type="search" [(ngModel)]="query" placeholder="Search by name, visa class, employer, document or receipt #"
+             aria-label="Search immigration records">
+      <button *ngIf="query" class="imm-search-clear" (click)="query=''" aria-label="Clear search">✕</button>
+      <span *ngIf="query" class="imm-search-count">{{ visibleRecords.length }} match{{ visibleRecords.length === 1 ? '' : 'es' }}</span>
+    </div>
+
     <!-- Filter tabs -->
     <div class="imm-tabs">
       <button [class.active]="activeTab==='all'"      (click)="activeTab='all'">All <span class="tc">{{ total }}</span></button>
@@ -61,14 +79,19 @@
     </div>
 
     <!-- Empty -->
-    <div class="imm-empty" *ngIf="visibleRecords.length === 0">
+    <div class="imm-empty" *ngIf="visibleRecords.length === 0 && query">
+      <div class="imm-empty-ico">🔍</div>
+      <div class="imm-empty-title">No records match “{{ query }}”</div>
+      <div class="imm-empty-sub">Try part of a name (e.g. “Bomma”), a visa class (“H-1B”) or an employer.</div>
+    </div>
+    <div class="imm-empty" *ngIf="visibleRecords.length === 0 && !query">
       <div class="imm-empty-ico">🛂</div>
       <div class="imm-empty-title">No immigration records found</div>
       <div class="imm-empty-sub">
-        Upload H-1B, I-94, EAD, passport, or any USCIS notice and link it to a client.<br>
-        The system will extract expiry dates automatically and track them here.
+        Upload passports, I-797 approval notices (H-1B, H-4, L-1…), EADs or I-94s.<br>
+        Expiry dates are read from the documents and tracked here.
       </div>
-      <a class="imm-empty-btn" routerLink="/clients">Go to Clients →</a>
+      <a class="imm-empty-btn" routerLink="/upload">↑ Upload documents</a>
     </div>
 
     <!-- Table -->
@@ -113,14 +136,17 @@
               <span class="imm-days" [ngClass]="urgencyClass(r.urgency)">{{ daysLabel(r) }}</span>
             </td>
             <td>
-              <a class="imm-view-btn" [routerLink]="['/clients', r.client_id]" [queryParams]="{tab:'immigration'}">
+              <a *ngIf="r.client_id" class="imm-view-btn" [routerLink]="['/clients', r.client_id]" [queryParams]="{tab:'immigration'}">
                 View →
               </a>
+              <span *ngIf="!r.client_id" class="imm-source" [title]="r.source_file">📄 {{ r.source_file }}</span>
+              <div *ngIf="r.notes" class="imm-note">{{ r.notes }}</div>
             </td>
           </tr>
         </tbody>
       </table>
     </div>
 
+  </ng-container>
   </ng-container>
 </div>

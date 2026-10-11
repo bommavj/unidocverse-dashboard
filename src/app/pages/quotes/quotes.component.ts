@@ -100,7 +100,7 @@ interface Stats {
   imports: [CommonModule, FormsModule, ReplacePipe, UdvSelectComponent],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
-<div style="display:flex;flex-direction:column;height:100vh;background:var(--surf);color:var(--t1);font-family:'Inter',sans-serif;overflow:hidden;">
+<div style="display:flex;flex-direction:column;height:var(--content-h);background:var(--surf);color:var(--t1);font-family:'Inter',sans-serif;overflow:hidden;">
 
   <!-- Toast -->
   <div *ngIf="toast" [style]="'position:fixed;top:20px;right:20px;z-index:9999;padding:12px 20px;border-radius:8px;font-size:14px;font-weight:500;box-shadow:0 4px 20px rgba(0,0,0,0.4);background:' + (toastType==='success'?'#10b981':'#ef4444') + ';color:#fff;'">

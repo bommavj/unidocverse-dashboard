@@ -3,7 +3,7 @@
 .page {
     padding: 24px 28px;
     width: 100%;
-    min-height: 100vh;
+    min-height: var(--content-h);
     font-family: inherit;
     box-sizing: border-box;
   }

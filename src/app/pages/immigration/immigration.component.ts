@@ -1,12 +1,14 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { RouterModule } from '@angular/router';
+import { ActivatedRoute, Router, RouterModule } from '@angular/router';
+import { FormsModule } from '@angular/forms';
+import { ImmigrationSuiteComponent } from './immigration-suite.component';
 import { HttpClient } from '@angular/common/http';
 
 @Component({
   selector: 'app-immigration',
   standalone: true,
-  imports: [CommonModule, RouterModule],
+  imports: [CommonModule, RouterModule, FormsModule, ImmigrationSuiteComponent],
   templateUrl: './immigration.component.html',
   styleUrls: ['./immigration.component.scss']
 })
@@ -17,11 +19,31 @@ export class ImmigrationComponent implements OnInit {
   buckets: any = {};
   counts:  any = {};
   total        = 0;
+  query        = '';
   activeTab: 'all' | 'expired' | 'critical' | 'high' | 'medium' | 'low' = 'all';
 
-  constructor(private http: HttpClient) {}
+  readonly sections = [
+    { id: 'tracker', label: 'Visa Tracker', icon: '🛂' },
+    { id: 'cases', label: 'Cases', icon: '📁' },
+    { id: 'crm', label: 'Clients', icon: '👥' },
+    { id: 'forms', label: 'Forms', icon: '📝' },
+    { id: 'esign', label: 'E-Signature', icon: '✍️' },
+    { id: 'reports', label: 'Reports', icon: '📊' },
+    { id: 'ai', label: 'Legal AI', icon: '✨' },
+    { id: 'translate', label: 'Translations', icon: '🌐' },
+  ];
+  section: any = 'tracker';
 
-  ngOnInit(): void { this.load(); }
+  constructor(private http: HttpClient, private route: ActivatedRoute, private router: Router) {}
+
+  ngOnInit(): void {
+    this.route.queryParams.subscribe(p => {
+      this.section = this.sections.some(s => s.id === p['section']) ? p['section'] : 'tracker';
+      if (this.section === 'tracker') this.load();
+    });
+  }
+
+  go(id: string) { this.router.navigate([], { queryParams: { section: id === 'tracker' ? null : id }, queryParamsHandling: 'merge' }); }
 
   load(): void {
     this.loading = true;
@@ -37,6 +59,17 @@ export class ImmigrationComponent implements OnInit {
   }
 
   get visibleRecords(): any[] {
+    const words = this.query.toLowerCase().split(/\s+/).filter(Boolean);
+    if (!words.length) return this.tabRecords;
+    // Every word must appear somewhere in the record ("vijay h-1b" → Vijay's H-1B)
+    return this.tabRecords.filter(r => {
+      const hay = [r.beneficiary_name, r.visa_class, (r.visa_class || '').replace('-', ''), r.employer_sponsor,
+                   r.doc_label, r.document_number, r.source_file, r.urgency_label].join(' ').toLowerCase();
+      return words.every(w => hay.includes(w));
+    });
+  }
+
+  private get tabRecords(): any[] {
     if (this.activeTab === 'all') {
       return [
         ...(this.buckets.expired  || []),

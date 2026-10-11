@@ -26,6 +26,37 @@ export interface CompareRow {
   status: 'match' | 'mismatch' | 'only_a' | 'only_b';
 }
 
+export interface DomainStage {
+  id: string;
+  label: string;
+  color: string;
+  count: number;
+}
+
+export interface DomainItem {
+  id: string;
+  domain: string;
+  stage: string;
+  title: string;
+  fields: Record<string, string>;
+  notes?: string;
+  updated_at: string;
+}
+
+export interface DomainConfig {
+  label: string;
+  icon: string;
+  stages: DomainStage[];
+  fields: string[];
+  hitl_stages: string[];
+}
+
+type DocWorkflowTab = 'compare' | 'threeway' | 'reconcile';
+type DomainWorkflowTab = 'procurement' | 'clm' | 'claims' | 'renewals' | 'payroll' | 'medical' | 'legal' | 'real_estate';
+type ActiveTab = DocWorkflowTab | DomainWorkflowTab;
+
+const DOMAIN_TABS: DomainWorkflowTab[] = ['procurement','clm','claims','renewals','payroll','medical','legal','real_estate'];
+
 // ── component ────────────────────────────────────────────────────────────────
 
 @Component({
@@ -38,8 +69,12 @@ export interface CompareRow {
 })
 export class WorkflowComponent implements OnInit {
 
-  // Workflow tabs
-  activeWorkflow: 'compare' | 'threeway' | 'reconcile' = 'compare';
+  // Tab state
+  activeWorkflow: ActiveTab = 'compare';
+  readonly docTabs: DocWorkflowTab[] = ['compare', 'threeway', 'reconcile'];
+  readonly domainTabs = DOMAIN_TABS;
+
+  get isDomainTab(): boolean { return DOMAIN_TABS.includes(this.activeWorkflow as DomainWorkflowTab); }
 
   // All uploaded docs for selection
   allDocs: any[] = [];
@@ -108,9 +143,35 @@ export class WorkflowComponent implements OnInit {
   recRunning  = false;
   recHitlOpen = false;
 
+  // ── Domain Workflow (Kanban) ───────────────────────────────────────────────
+  domainConfigs: Record<string, DomainConfig> = {};
+  domainItems: Record<string, DomainItem[]> = {};
+  domainStages: Record<string, DomainStage[]> = {};
+  domainLoading: Record<string, boolean> = {};
+
+  // New item form
+  newItemTitle  = '';
+  newItemStage  = '';
+  newItemNotes  = '';
+  newItemFields: Record<string, string> = {};
+  showNewItemForm = false;
+  newItemSubmitting = false;
+
+  // Stage move
+  movingItemId = '';
+  movingDomain = '';
+
+  // History panel
+  historyItem: DomainItem | null = null;
+  historyLog: any[] = [];
+  historyLoading = false;
+
   constructor(private http: HttpClient, private cdr: ChangeDetectorRef) {}
 
-  ngOnInit(): void { this.loadDocs(); }
+  ngOnInit(): void {
+    this.loadDocs();
+    this.loadDomainConfigs();
+  }
 
   loadDocs(): void {
     this.loadingDocs = true;
@@ -122,6 +183,145 @@ export class WorkflowComponent implements OnInit {
       },
       error: () => { this.loadingDocs = false; this.cdr.markForCheck(); }
     });
+  }
+
+  loadDomainConfigs(): void {
+    this.http.get<any>(`${API}/domain-workflow/config`).subscribe({
+      next: r => {
+        this.domainConfigs = r.domains || {};
+        this.cdr.markForCheck();
+      },
+      error: () => {}
+    });
+  }
+
+  switchTab(tab: ActiveTab): void {
+    this.activeWorkflow = tab;
+    if (DOMAIN_TABS.includes(tab as DomainWorkflowTab)) {
+      this.loadDomainItems(tab as DomainWorkflowTab);
+    }
+    this.cdr.markForCheck();
+  }
+
+  loadDomainItems(domain: DomainWorkflowTab): void {
+    this.domainLoading[domain] = true;
+    this.cdr.markForCheck();
+    this.http.get<any>(`${API}/domain-workflow/${domain}/items`).subscribe({
+      next: r => {
+        this.domainItems[domain] = r.items || [];
+        this.domainStages[domain] = r.stages || [];
+        if (!this.domainConfigs[domain] && r.config) {
+          this.domainConfigs[domain] = r.config;
+        }
+        this.domainLoading[domain] = false;
+        this.cdr.markForCheck();
+      },
+      error: () => { this.domainLoading[domain] = false; this.cdr.markForCheck(); }
+    });
+  }
+
+  currentDomainConfig(): DomainConfig | null {
+    return this.domainConfigs[this.activeWorkflow] || null;
+  }
+
+  currentDomainStages(): DomainStage[] {
+    return this.domainStages[this.activeWorkflow] || [];
+  }
+
+  itemsForStage(stage: string): DomainItem[] {
+    const items = this.domainItems[this.activeWorkflow] || [];
+    return items.filter(i => i.stage === stage);
+  }
+
+  openNewItemForm(): void {
+    this.newItemTitle = '';
+    this.newItemStage = '';
+    this.newItemNotes = '';
+    this.newItemFields = {};
+    const cfg = this.currentDomainConfig();
+    if (cfg?.fields) cfg.fields.forEach(f => this.newItemFields[f] = '');
+    this.showNewItemForm = true;
+    this.cdr.markForCheck();
+  }
+
+  submitNewItem(): void {
+    if (!this.newItemTitle.trim()) return;
+    const domain = this.activeWorkflow as DomainWorkflowTab;
+    this.newItemSubmitting = true;
+    this.cdr.markForCheck();
+
+    const body = {
+      title: this.newItemTitle.trim(),
+      stage: this.newItemStage || undefined,
+      notes: this.newItemNotes || undefined,
+      fields: Object.fromEntries(Object.entries(this.newItemFields).filter(([,v]) => v)),
+    };
+
+    this.http.post<any>(`${API}/domain-workflow/${domain}/items`, body).subscribe({
+      next: () => {
+        this.showNewItemForm = false;
+        this.newItemSubmitting = false;
+        this.loadDomainItems(domain);
+      },
+      error: () => { this.newItemSubmitting = false; this.cdr.markForCheck(); }
+    });
+  }
+
+  moveItemStage(item: DomainItem, newStage: string): void {
+    const domain = item.domain as DomainWorkflowTab;
+    this.http.patch<any>(`${API}/domain-workflow/${domain}/items/${item.id}/stage`, {
+      stage: newStage,
+      note: `Moved to ${newStage}`,
+    }).subscribe({
+      next: () => this.loadDomainItems(this.activeWorkflow as DomainWorkflowTab),
+      error: () => {}
+    });
+  }
+
+  stageOptions(domain: string): SelectOption[] {
+    const stages = this.domainStages[domain] || this.domainConfigs[domain]?.stages || [];
+    return stages.map((s: any) => ({ value: s.id, label: s.label }));
+  }
+
+  openHistory(item: DomainItem): void {
+    this.historyItem = item;
+    this.historyLog = [];
+    this.historyLoading = true;
+    this.cdr.markForCheck();
+
+    this.http.get<any>(`${API}/domain-workflow/${item.domain}/items/${item.id}/history`).subscribe({
+      next: r => {
+        this.historyLog = r.history || [];
+        this.historyLoading = false;
+        this.cdr.markForCheck();
+      },
+      error: () => { this.historyLoading = false; this.cdr.markForCheck(); }
+    });
+  }
+
+  closeHistory(): void {
+    this.historyItem = null;
+    this.historyLog = [];
+    this.cdr.markForCheck();
+  }
+
+  isHitlStage(stage: string): boolean {
+    const cfg = this.currentDomainConfig();
+    return cfg?.hitl_stages?.includes(stage) ?? false;
+  }
+
+  domainTabLabel(tab: DomainWorkflowTab): string {
+    const labels: Record<DomainWorkflowTab, string> = {
+      procurement: 'Procurement',
+      clm:         'Contracts',
+      claims:      'Claims',
+      renewals:    'Renewals',
+      payroll:     'Payroll',
+      medical:     'Medical',
+      legal:       'Legal',
+      real_estate: 'Real Estate',
+    };
+    return labels[tab];
   }
 
   docName(id: string): string {
@@ -151,12 +351,10 @@ export class WorkflowComponent implements OnInit {
     this.cmpRunning = true;
     this.cdr.markForCheck();
 
-    // Step 1 — load docs
     this._setStep(this.cmpSteps, 0, 'running', 'Fetching document metadata…');
     await this._delay(600);
     this._setStep(this.cmpSteps, 0, 'done', `Loaded: ${this.docName(this.cmpDocA)} + ${this.docName(this.cmpDocB)}`);
 
-    // Step 2 — compare
     this._setStep(this.cmpSteps, 1, 'running', 'Extracting and comparing fields…');
     try {
       const res: any = await this.http.post(`${API}/workflow/compare`, {
@@ -176,13 +374,11 @@ export class WorkflowComponent implements OnInit {
       this.cmpRunning = false; this.cdr.markForCheck(); return;
     }
 
-    // Step 3 — HITL
     this._setStep(this.cmpSteps, 2, 'hitl', 'Waiting for human review…');
     this.hitlStep = this.cmpSteps[2];
     this.hitlOpen = true;
     this.cmpRunning = false;
     this.cdr.markForCheck();
-    // execution pauses here — resumed by hitlApprove() / hitlReject()
   }
 
   async hitlApprove(): Promise<void> {
@@ -192,13 +388,11 @@ export class WorkflowComponent implements OnInit {
     this.cmpRunning = true;
     this.cdr.markForCheck();
 
-    // Record decision
     await this.http.post(`${API}/workflow/hitl/decision`, {
       run_id: this.cmpRunId, step_index: 3,
       decision: 'approve', feedback: this.hitlFeedback || null,
     }).toPromise().catch(() => {});
 
-    // Step 4 — merge
     this._setStep(this.cmpSteps, 3, 'running', 'Merging fields…');
     try {
       const overrideMap: Record<string, string> = {};
@@ -316,8 +510,7 @@ export class WorkflowComponent implements OnInit {
     this._setStep(this.twSteps, 4, 'running', 'Generating match report…');
     await this._delay(600);
     const s = this.twResult?.summary;
-    this._setStep(this.twSteps, 4, 'done',
-      `Report complete · Status: ${s?.status || 'DONE'}`);
+    this._setStep(this.twSteps, 4, 'done', `Report complete · Status: ${s?.status || 'DONE'}`);
     this.twRunning = false;
     this.cdr.markForCheck();
   }
@@ -326,7 +519,6 @@ export class WorkflowComponent implements OnInit {
     if (!this.twResult) return;
     const lines = [
       `THREE-WAY MATCH REPORT — ${new Date().toLocaleDateString()}`,
-      `Invoice: ${this.twResult.invoice}`,
       `Status: ${this.twResult.summary?.status}`,
       '',
       'MATCHED FIELDS:',
@@ -366,8 +558,7 @@ export class WorkflowComponent implements OnInit {
         ledger_id:    this.recLedgerId,
       }).toPromise();
       this.recResult = res;
-      this._setStep(this.recSteps, 1, 'done',
-        `Balance diff: ${res.summary.balance_diff}`);
+      this._setStep(this.recSteps, 1, 'done', `Balance diff: ${res.summary.balance_diff}`);
     } catch (e: any) {
       this._setStep(this.recSteps, 1, 'error', e.message);
       this.recRunning = false; this.cdr.markForCheck(); return;
@@ -448,5 +639,9 @@ export class WorkflowComponent implements OnInit {
 
   stepIcon(status: WfStep['status']): string {
     return ({ pending:'○', running:'…', done:'✓', hitl:'👤', approved:'✓', rejected:'✗', error:'✗' })[status] || '○';
+  }
+
+  fieldKeys(fields: Record<string, string>): string[] {
+    return Object.keys(fields || {});
   }
 }

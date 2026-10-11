@@ -1,0 +1,76 @@
+<header class="tb">
+  <form class="tb-search" (ngSubmit)="search()" role="search">
+    <i class="ti ti-search"></i>
+    <input id="udv-search" name="q" [(ngModel)]="query" autocomplete="off"
+           [placeholder]="'Search documents, clients and pages' | translate" aria-label="Search">
+    <kbd>⌘K</kbd>
+    <div class="tb-jumps" *ngIf="matches.length">
+      <div class="tb-jumps-h">Go to</div>
+      <button type="button" *ngFor="let j of matches" (mousedown)="go(j)"><i class="ti ti-arrow-right"></i>{{ j.label }}</button>
+      <div class="tb-jumps-h">Press Enter to search documents</div>
+    </div>
+  </form>
+
+  <div class="tb-actions">
+    <button class="tb-ai" (click)="openAskAi.emit()" title="Ask AI (⌘J)">
+      <i class="ti ti-sparkles"></i><span>{{ 'Ask AI' | translate }}</span>
+    </button>
+    <button class="tb-ic" (click)="openVoice.emit()" aria-label="Voice assistant" title="Voice assistant">
+      <i class="ti ti-microphone"></i>
+    </button>
+    <a class="tb-primary" routerLink="/upload"><i class="ti ti-upload"></i><span>{{ 'Upload' | translate }}</span></a>
+
+    <span class="tb-sep"></span>
+
+    <a class="tb-ic" routerLink="/approvals" aria-label="Approvals" title="Approvals">
+      <i class="ti ti-checkbox"></i><span class="tb-dot tb-dot--warn" *ngIf="pendingApprovals > 0">{{ pendingApprovals }}</span>
+    </a>
+    <a class="tb-ic" routerLink="/alerts" aria-label="Alerts" title="Alerts">
+      <i class="ti ti-bell"></i><span class="tb-dot" *ngIf="unreadAlerts > 0">{{ unreadAlerts }}</span>
+    </a>
+
+    <a class="tb-ic" routerLink="/integrations" routerLinkActive="tb-ic--on" aria-label="Integrations" title="Integrations">
+      <i class="ti ti-plug-connected"></i>
+    </a>
+    <a class="tb-ic" *ngIf="auth.isAdmin()" routerLink="/settings" routerLinkActive="tb-ic--on" aria-label="Settings" title="Settings">
+      <i class="ti ti-settings"></i>
+    </a>
+
+    <div class="tb-menu-wrap">
+      <button class="tb-ic" (click)="toggle('help', $event)" aria-label="Help and language" [attr.aria-expanded]="menu === 'help'">
+        <i class="ti ti-help"></i>
+      </button>
+      <div class="tb-menu" *ngIf="menu === 'help'" (click)="$event.stopPropagation()">
+        <a href="https://unidocverse.com/help.html" target="_blank" rel="noopener"><i class="ti ti-book"></i>{{ 'Help center' | translate }}</a>
+        <a routerLink="/report-issue" (click)="menu=''"><i class="ti ti-bug"></i>{{ 'Report issue' | translate }}</a>
+        <div class="tb-menu-sep"></div>
+        <label class="tb-menu-row"><i class="ti ti-language"></i>
+          <select [ngModel]="languageService.currentLang()" (ngModelChange)="changeLanguage($event)" aria-label="Language">
+            <option *ngFor="let l of languages" [value]="l.code">{{ l.name }}</option>
+          </select>
+        </label>
+      </div>
+    </div>
+
+    <div class="tb-menu-wrap">
+      <button class="tb-user" (click)="toggle('user', $event)" [attr.aria-expanded]="menu === 'user'" aria-label="Account menu">
+        <span class="tb-av" [style.background]="auth.currentUser()?.avatar_color || '#1f4fd1'">{{ auth.getInitials() }}</span>
+        <i class="ti ti-chevron-down"></i>
+      </button>
+      <div class="tb-menu tb-menu--user" *ngIf="menu === 'user'" (click)="$event.stopPropagation()">
+        <div class="tb-who">
+          <b>{{ auth.currentUser()?.full_name || 'User' }}</b>
+          <span>{{ auth.currentUser()?.role | titlecase }} · {{ 'Trial' | translate }}</span>
+        </div>
+        <div class="tb-menu-sep"></div>
+        <a *ngIf="auth.isAdmin()" routerLink="/settings" (click)="menu=''"><i class="ti ti-settings"></i>{{ 'Settings' | translate }}</a>
+        <a *ngIf="auth.isAdmin()" routerLink="/settings" [queryParams]="{ tab: 'tokens' }" (click)="menu=''"><i class="ti ti-key"></i>{{ 'API tokens' | translate }}</a>
+        <a routerLink="/license" (click)="menu=''"><i class="ti ti-certificate"></i>{{ 'Licence' | translate }}</a>
+        <a routerLink="/disclaimer" (click)="menu=''"><i class="ti ti-file-info"></i>{{ 'Disclaimer and terms' | translate }}</a>
+        <button (click)="theme.toggle()"><i class="ti" [class.ti-moon]="!theme.isDark" [class.ti-sun]="theme.isDark"></i>{{ (theme.isDark ? 'Light mode' : 'Dark mode') | translate }}</button>
+        <div class="tb-menu-sep"></div>
+        <button (click)="logout()"><i class="ti ti-logout"></i>{{ 'Sign out' | translate }}</button>
+      </div>
+    </div>
+  </div>
+</header>

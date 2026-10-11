@@ -1,15 +1,16 @@
+import { DomainDocumentsComponent } from '../../components/domain-documents/domain-documents.component';
 import { Component, OnInit, NgZone } from '@angular/core';
 import { authFetch } from '../../lib/api';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { ActivatedRoute, RouterModule } from '@angular/router';
-import { HttpClient, HttpClientModule } from '@angular/common/http';
+import { HttpClient } from '@angular/common/http';
 import { ToastService } from '../../services/toast.service';
 
 @Component({
   selector: 'app-healthcare',
   standalone: true,
-  imports: [CommonModule, FormsModule, RouterModule, HttpClientModule],
+  imports: [CommonModule, FormsModule, RouterModule, DomainDocumentsComponent],
   template: `
     <div class="p-6 page-container">
       <!-- Topbar Header -->
@@ -175,7 +176,7 @@ import { ToastService } from '../../services/toast.service';
             </div>
           </div>
         </div>
-        <div *ngIf="patientCharts.length === 0" class="p-8 text-center bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl">
+        <div *ngIf="patientCharts.length === 0 && domainDocCount === 0" class="p-8 text-center bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl">
           <span style="font-size: 36px">🩺</span>
           <h3 class="text-md font-bold mt-3 text-slate-900 dark:text-white">No Patient Charts Found</h3>
           <p class="text-xs text-slate-500 mt-2 font-sans">Upload medical chart documents to dynamically view patient profiles and clinical stats.</p>
@@ -186,7 +187,7 @@ import { ToastService } from '../../services/toast.service';
       </div>
 
       <!-- Management / Global Tabs -->
-      <div class="mb-6 flex flex-wrap gap-2 border-b border-slate-200 dark:border-slate-800 pb-3" *ngIf="patientCharts.length > 0">
+      <div class="mb-6 flex flex-wrap gap-2 border-b border-slate-200 dark:border-slate-800 pb-3">
         <button 
           *ngFor="let item of managementMenu"
           (click)="activeTab = item.id"
@@ -200,7 +201,9 @@ import { ToastService } from '../../services/toast.service';
       </div>
 
       <!-- Content Pane -->
-      <div class="min-w-0" *ngIf="patientCharts.length > 0">
+      <app-domain-documents domain="healthcare" [tab]="activeTab" (count)="domainDocCount = $event"></app-domain-documents>
+
+      <div class="min-w-0">
         <div [ngSwitch]="activeTab">
           <!-- 1. Prescriptions -->
           <div *ngSwitchCase="'prescriptions'" class="bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-800 p-6 shadow-sm animate-fade-in space-y-4">
@@ -835,6 +838,7 @@ import { ToastService } from '../../services/toast.service';
 })
 export class HealthcareComponent implements OnInit {
   activeTab = 'prescriptions';
+  domainDocCount = 0;
   piiMasked = false;
   searchCodeQuery = '';
   encounterPatient = '';

@@ -1,285 +1,158 @@
-<div class="page">
+<div class="home">
 
-  <!-- TOPBAR -->
-  <div class="topbar">
-    <!-- Left: greeting -->
-    <div class="tb-left">
-      <div class="topbar-title">{{ greeting }} 👋</div>
-      <div class="topbar-sub">{{ today }} · {{ docs.length }} document{{ docs.length === 1 ? '' : 's' }} analyzed</div>
+  <!-- Page header -->
+  <header class="ph">
+    <div>
+      <h1>{{ greeting }}{{ firstName ? ', ' + firstName : '' }}</h1>
+      <p>{{ today }} · {{ docs.length }} document{{ docs.length === 1 ? '' : 's' }} in your workspace</p>
     </div>
+    <div class="ph-actions">
+      <a class="btn btn-sec" routerLink="/documents"><i class="ti ti-files"></i>All documents</a>
+      <a class="btn btn-pri" routerLink="/upload"><i class="ti ti-upload"></i>Upload documents</a>
+    </div>
+  </header>
 
-    <!-- Center: search bar -->
-    <div class="tb-center">
-      <div class="tb-search">
-        <span class="tb-search-icon">🔍</span>
-        <input placeholder="Search across all documents…" (keydown.enter)="goSearch()">
-        <kbd>⌘K</kbd>
-      </div>
+  <!-- Disclaimer: compact, dismissible, full text one click away -->
+  <div class="notice" *ngIf="disclaimerVisible" role="note">
+    <i class="ti ti-info-circle"></i>
+    <div class="notice-body">
+      <b>AI results can be wrong.</b>
+      Verify extracted figures, classifications and summaries before relying on them for legal, financial or compliance decisions.
+      Not a substitute for professional advice.
+      <a routerLink="/disclaimer">Read the full disclaimer</a>
     </div>
-
-    <!-- Right: action buttons -->
-    <div class="tb-right">
-      <button class="tb-btn tb-sec" routerLink="/upload">↑ Upload</button>
-      <button class="tb-btn tb-voice" (click)="openVoice()">🎙️ Voice</button>
-      <button class="tb-btn tb-pri" routerLink="/search">✦ Ask AI</button>
-      <button class="tb-btn tb-integrations" routerLink="/integrations">🔌 Integrations</button>
-      <button class="tb-logout" routerLink="/settings" title="Settings">
-        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24"
-             fill="none" stroke="currentColor" stroke-width="2.2"
-             stroke-linecap="round" stroke-linejoin="round">
-          <circle cx="12" cy="12" r="3"/>
-          <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/>
-        </svg>
-      </button>
-      <button class="tb-logout" (click)="logout()" title="Sign out">
-        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24"
-             fill="none" stroke="currentColor" stroke-width="2.2"
-             stroke-linecap="round" stroke-linejoin="round">
-          <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/>
-          <polyline points="16 17 21 12 16 7"/>
-          <line x1="21" y1="12" x2="9" y2="12"/>
-        </svg>
-      </button>
-      <div class="tb-av">A</div>
-    </div>
+    <span class="notice-tag">Beta</span>
+    <button class="notice-x" (click)="dismissDisclaimer()">I understand</button>
   </div>
 
-  <!-- DISCLAIMER BANNER -->
-  <div class="disclaimer-banner" *ngIf="disclaimerVisible">
-    <div class="disc-stripe"></div>
-    <div class="disc-body">
-      <div class="disc-left">
-        <div class="disc-icon">⚠️</div>
-        <div class="disc-text">
-          <div class="disc-title">Important — AI Accuracy & Compliance Disclaimer</div>
-          <div class="disc-lines">
-            <div class="disc-line">
-              <span class="disc-bullet">◆</span>
-              <span><strong>UniDocVerse may produce incorrect, incomplete, or misleading results.</strong>
-              AI-extracted data, classifications, and summaries have not been exhaustively validated
-              across all document types, formats, or edge cases.</span>
-            </div>
-            <div class="disc-line">
-              <span class="disc-bullet">◆</span>
-              <span><strong>Do not rely on this tool for legally binding decisions.</strong>
-              Insurance coverage, policy limits, claim eligibility, financial figures, and
-              compliance-related data must always be independently verified by a licensed professional
-              before any action is taken.</span>
-            </div>
-            <div class="disc-line">
-              <span class="disc-bullet">◆</span>
-              <span><strong>Not a substitute for professional advice.</strong>
-              Output from this application does not constitute legal, financial, insurance, or
-              regulatory counsel. Always consult qualified professionals for decisions that carry
-              legal or financial consequences.</span>
-            </div>
-            <div class="disc-line">
-              <span class="disc-bullet">◆</span>
-              <span><strong>Testing coverage is limited.</strong>
-              This software is under active development and has not been thoroughly tested across
-              all verticals, document structures, or languages. Results may vary significantly
-              for complex, multi-page, scanned, or non-standard documents.</span>
-            </div>
-            <div class="disc-line">
-              <span class="disc-bullet">◆</span>
-              <span><strong>Data privacy.</strong>
-              Uploaded documents are processed locally. Verify your deployment configuration
-              before uploading sensitive, regulated (HIPAA, GDPR, PCI-DSS), or confidential material.</span>
-            </div>
-          </div>
-        </div>
-      </div>
-      <div class="disc-actions">
-        <button class="disc-ack" (click)="dismissDisclaimer()">I Understand — Dismiss</button>
-        <div class="disc-badge">BETA</div>
-      </div>
-    </div>
-  </div>
+  <!-- KPIs -->
+  <section class="kpis" [class.kpis--4]="!features.immigrationMode()">
+    <a class="kpi" routerLink="/documents">
+      <span class="kpi-l"><i class="ti ti-files"></i>Documents</span>
+      <span class="kpi-v">{{ docs.length }}</span>
+      <span class="kpi-s">All analysed by AI</span>
+    </a>
+    <a class="kpi" routerLink="/insights" [class.kpi--bad]="anomalyCount > 0">
+      <span class="kpi-l"><i class="ti ti-alert-triangle"></i>Open exceptions</span>
+      <span class="kpi-v">{{ anomalyCount }}</span>
+      <span class="kpi-s">{{ anomalyCount ? 'Need review' : 'Nothing flagged' }}</span>
+    </a>
+    <a class="kpi" routerLink="/approvals" [class.kpi--warn]="pendingApprovals > 0">
+      <span class="kpi-l"><i class="ti ti-user-check"></i>Awaiting approval</span>
+      <span class="kpi-v">{{ pendingApprovals }}</span>
+      <span class="kpi-s">Agent actions held for you</span>
+    </a>
+    <a class="kpi" routerLink="/deadlines" [class.kpi--warn]="dueThisWeek > 0">
+      <span class="kpi-l"><i class="ti ti-calendar-due"></i>Due this week</span>
+      <span class="kpi-v">{{ dueThisWeek }}</span>
+      <span class="kpi-s">{{ deadlines.length }} upcoming in total</span>
+    </a>
+    <a class="kpi" *ngIf="features.immigrationMode()" routerLink="/immigration" [class.kpi--bad]="immExpired + immCritical > 0" [class.kpi--warn]="immExpired + immCritical === 0 && immHigh > 0">
+      <span class="kpi-l"><i class="ti ti-world"></i>Visa and immigration</span>
+      <span class="kpi-v">{{ immExpired + immCritical + immHigh }}</span>
+      <span class="kpi-s">{{ immExpired }} expired · {{ immCritical }} critical · {{ immHigh }} soon</span>
+    </a>
+  </section>
 
-  <!-- STAT CARDS -->
-  <div class="stats">
-    <div class="sc bl">
-      <div class="sc-top"><div class="sc-ico bl">📁</div><div class="sc-pill up">↑ new</div></div>
-      <div class="sc-val">{{ docs.length }}</div>
-      <div class="sc-lbl">Total Documents</div>
-    </div>
-    <div class="sc gr">
-      <div class="sc-top"><div class="sc-ico gr">✓</div><div class="sc-pill up">100%</div></div>
-      <div class="sc-val">{{ docs.length }}</div>
-      <div class="sc-lbl">AI Analyzed</div>
-    </div>
-    <div class="sc am">
-      <div class="sc-top"><div class="sc-ico am">💾</div><div class="sc-pill up">{{ storagePct }}</div></div>
-      <div class="sc-val">{{ totalStorageMB }}</div>
-      <div class="sc-lbl">MB Storage</div>
-    </div>
-    <div class="sc ro">
-      <div class="sc-top"><div class="sc-ico ro">⚠</div>
-        <div class="sc-pill warn" *ngIf="anomalyCount > 0">Review</div>
-        <div class="sc-pill up"   *ngIf="anomalyCount === 0">Clear</div>
+  <div class="grid">
+    <!-- Needs your attention -->
+    <section class="panel attn">
+      <div class="panel-h">
+        <h2>Needs your attention</h2>
+        <span class="count">{{ attention.length }}</span>
       </div>
-      <div class="sc-val">{{ anomalyCount }}</div>
-      <div class="sc-lbl">Anomalies</div>
-    </div>
-    <div class="sc sc-imm" [class.sc-imm--alert]="immCritical > 0 || immExpired > 0" routerLink="/clients">
-      <div class="sc-top">
-        <div class="sc-ico sc-ico-imm">🛂</div>
-        <div class="sc-pill warn" *ngIf="immExpired > 0 || immCritical > 0">Urgent</div>
-        <div class="sc-pill sc-pill-amber" *ngIf="immExpired === 0 && immCritical === 0 && immHigh > 0">Due Soon</div>
-        <div class="sc-pill up" *ngIf="immExpired === 0 && immCritical === 0 && immHigh === 0">All Clear</div>
+      <a class="attn-row" *ngFor="let a of attention" [routerLink]="a.link">
+        <span class="attn-ic" [ngClass]="'t-' + a.tone"><i class="ti ti-{{ a.icon }}"></i></span>
+        <span class="attn-body">
+          <span class="attn-t">{{ a.title }}</span>
+          <span class="attn-s"><span class="kind">{{ a.kind }}</span><span *ngIf="a.sub"> · {{ a.sub }}</span></span>
+        </span>
+        <span class="pill" [ngClass]="'p-' + a.tone" *ngIf="a.when">{{ a.when }}</span>
+        <i class="ti ti-chevron-right attn-go"></i>
+      </a>
+      <div class="empty" *ngIf="attention.length === 0">
+        <i class="ti ti-circle-check"></i>
+        <b>You're all caught up</b>
+        <span>No exceptions, approvals or deadlines need you right now.</span>
       </div>
-      <div class="sc-val">{{ immExpired + immCritical + immHigh }}</div>
-      <div class="sc-lbl">Visa / Immigration Alerts</div>
-    </div>
-  </div>
-
-  <!-- MAIN GRID -->
-  <div class="dash-grid">
-
-    <!-- Recent Documents -->
-    <div class="card">
-      <div class="ch">
-        <div class="ct">Recent Documents</div>
-        <button class="ca" routerLink="/documents">View All →</button>
-      </div>
-      <div *ngFor="let d of docs.slice(0,6)" class="fr"
-           [class.fr-locked]="d.status === 'password_required'"
-           (click)="d.status !== 'password_required' && openDoc(d)">
-        <div class="fico" [ngClass]="d.status === 'password_required' ? 'ico-locked' : icoClass(d.doc_type, d)">
-          {{ d.status === 'password_required' ? '🔒' : icoTxt(d.doc_type, d) }}
-        </div>
-        <div class="fbody">
-          <div class="fn">{{ d.filename }}</div>
-          <div class="fm">
-            <span>{{ d.created_at | date:'MMM d' }}</span>
-            <span *ngIf="d.status !== 'password_required'">{{ d.doc_type?.replace('_',' ') }}</span>
-            <span *ngIf="d.status === 'password_required'" class="locked-label">Password required</span>
-          </div>
-        </div>
-        <span *ngIf="d.status !== 'password_required'" class="fbg" [ngClass]="badgeClass(d.doc_type, d)">{{ d.doc_type?.replace('_',' ') || d.filename?.split('.').pop()?.toUpperCase() }}</span>
-        <span *ngIf="d.status === 'password_required'" class="fbg fbg-locked">🔒 Locked</span>
-        <span class="fsz">{{ fmtSize(d.file_size) }}</span>
-        <div class="fax">
-          <button *ngIf="d.status !== 'password_required'" class="fa" (click)="$event.stopPropagation();openDoc(d)" title="View">👁</button>
-          <button *ngIf="d.status !== 'password_required'" class="fa" (click)="$event.stopPropagation();openDoc(d)" title="Analytics">📊</button>
-          <button *ngIf="d.status !== 'password_required'" class="fa" (click)="$event.stopPropagation();openDoc(d)" title="Ask AI">💬</button>
-          <button *ngIf="d.status === 'password_required'" class="fa fa-unlock" (click)="$event.stopPropagation();promptUnlock(d)" title="Unlock">🔑 Unlock</button>
-        </div>
-      </div>
-      <div class="empty-row" *ngIf="docs.length === 0">
-        <span>No documents yet.</span>
-        <button class="ca" routerLink="/upload">Upload now →</button>
-      </div>
-    </div>
+    </section>
 
     <!-- Right column -->
-    <div class="rcol">
+    <div class="side">
+      <section class="panel">
+        <div class="panel-h"><h2>Storage</h2><span class="muted">{{ storageLabel }}</span></div>
+        <div class="bar"><div class="bar-fill" [style.width]="storagePct"></div></div>
+        <div class="bar-legend"><span>{{ totalStorageMB }} MB used</span><span>{{ (10240 - totalStorageMB).toFixed(0) }} MB free</span></div>
+      </section>
 
-      <!-- Storage donut -->
-      <div class="stc">
-        <div class="stc-t">Storage</div>
-        <div class="stc-s">{{ storageLabel }}</div>
-        <div class="dw">
-          <svg width="90" height="90" viewBox="0 0 90 90" style="flex-shrink:0">
-            <circle cx="45" cy="45" r="37" fill="none" stroke="#eef2ff" stroke-width="10"/>
-            <circle cx="45" cy="45" r="37" fill="none" stroke="#4f46e5" stroke-width="10"
-              stroke-dasharray="18 215" stroke-dashoffset="-56"
-              transform="rotate(-90 45 45)" stroke-linecap="round"/>
-            <circle cx="45" cy="45" r="37" fill="none" stroke="#0891b2" stroke-width="10"
-              stroke-dasharray="11 222" stroke-dashoffset="-74"
-              transform="rotate(-90 45 45)" stroke-linecap="round"/>
-            <circle cx="45" cy="45" r="37" fill="none" stroke="#059669" stroke-width="10"
-              stroke-dasharray="8 225" stroke-dashoffset="-85"
-              transform="rotate(-90 45 45)" stroke-linecap="round"/>
-            <text x="45" y="49" text-anchor="middle" fill="#0f172a"
-              font-size="11" font-weight="800" font-family="JetBrains Mono">{{ storagePct }}</text>
-          </svg>
-          <div class="leg">
-            <div class="li"><div class="lil"><div class="lid" style="background:#4f46e5"></div>PDFs</div><span class="liv">{{ totalStorageMB }} MB</span></div>
-            <div class="li"><div class="lil"><div class="lid" style="background:#e2e8f4"></div>Free</div><span class="liv">{{ (10240 - totalStorageMB).toFixed(0) }} MB</span></div>
-          </div>
-        </div>
-      </div>
-
-      <!-- Immigration Expiry Widget -->
-      <div class="card imm-widget" *ngIf="immExpiring.length > 0">
-        <div class="ch">
-          <div class="ct">🛂 Visa / Immigration Expiry</div>
-          <button class="ca" routerLink="/clients">All Clients →</button>
-        </div>
-        <div class="imm-w-row" *ngFor="let r of immExpiring"
-             [routerLink]="['/clients', r.client_id]"
-             [queryParams]="{tab:'immigration'}"
-             [ngClass]="immUrgencyClass(r.urgency)">
-          <div class="imm-w-badge" [ngClass]="immUrgencyClass(r.urgency)">
-            {{ r.urgency === 'expired' ? '🔴' : r.urgency === 'critical' ? '🔴' : '🟠' }}
-          </div>
-          <div class="imm-w-body">
-            <div class="imm-w-label">{{ r.doc_label }}</div>
-            <div class="imm-w-sub">
-              <span *ngIf="r.beneficiary_name">{{ r.beneficiary_name }}</span>
-              <span *ngIf="r.visa_class" class="imm-w-class">{{ r.visa_class }}</span>
-            </div>
-          </div>
-          <div class="imm-w-right">
-            <div class="imm-w-days" [ngClass]="immUrgencyClass(r.urgency)">
-              {{ r.days_to_expiry < 0 ? (r.days_to_expiry * -1) + 'd ago' : r.days_to_expiry + 'd' }}
-            </div>
-            <div class="imm-w-date">{{ r.valid_until | date:'MMM d, y' }}</div>
-          </div>
-        </div>
-      </div>
-
-      <!-- No immigration alerts — show placeholder only if feature is used -->
-      <div class="card imm-widget imm-widget--clear" *ngIf="immExpiring.length === 0 && (immExpired + immCritical + immHigh) === 0">
-        <div class="ch"><div class="ct">🛂 Visa / Immigration</div></div>
-        <div class="imm-w-clear">
-          <div class="imm-w-clear-ico">✅</div>
-          <div class="imm-w-clear-txt">No upcoming immigration expiries</div>
-        </div>
-      </div>
-
-      <!-- Activity — built from real recent docs -->
-      <div class="card">
-        <div class="ch"><div class="ct">Activity</div></div>
-        <div *ngFor="let a of activity" class="ai">
-          <div class="ai-ico" [style.background]="a.bg">{{ a.ico }}</div>
-          <div class="fbody">
-            <div class="ai-t" [innerHTML]="a.title"></div>
-            <div class="ai-s">{{ a.time }}</div>
-          </div>
-          <div class="ai-d" [style.background]="a.dot"></div>
-        </div>
-        <div *ngIf="activity.length === 0" class="empty-row">
-          <span>No recent activity</span>
-        </div>
-      </div>
-
+      <section class="panel">
+        <div class="panel-h"><h2>Recent activity</h2></div>
+        <button class="act" *ngFor="let a of activity" (click)="openDoc(a.doc)">
+          <span class="act-ic"><i class="ti ti-{{ a.icon }}"></i></span>
+          <span class="act-body"><span class="act-t"><b>{{ a.name }}</b> {{ a.verb }}</span><span class="act-s">{{ a.time }}</span></span>
+        </button>
+        <div class="empty small" *ngIf="activity.length === 0"><span>No recent activity</span></div>
+      </section>
     </div>
   </div>
 
+  <!-- Recent documents -->
+  <section class="panel">
+    <div class="panel-h">
+      <h2>Recent documents</h2>
+      <a class="link" routerLink="/documents">View all <i class="ti ti-arrow-right"></i></a>
+    </div>
+    <div class="tbl-wrap">
+      <table class="tbl" *ngIf="docs.length">
+        <thead><tr><th>Name</th><th>Type</th><th>Added</th><th class="r">Size</th><th></th></tr></thead>
+        <tbody>
+          <tr *ngFor="let d of docs.slice(0, 8)" [class.locked]="d.status === 'password_required'"
+              (click)="d.status !== 'password_required' && openDoc(d)">
+            <td>
+              <span class="fname"><span class="ficon"><i class="ti ti-{{ docIcon(d) }}"></i></span><span class="ftxt">{{ d.filename }}</span></span>
+            </td>
+            <td>
+              <span class="pill p-neutral" *ngIf="d.status !== 'password_required'">{{ typeLabel(d) }}</span>
+              <span class="pill p-warn" *ngIf="d.status === 'password_required'">Password required</span>
+            </td>
+            <td class="muted">{{ d.created_at | date:'MMM d, y' }}</td>
+            <td class="r mono">{{ fmtSize(d.file_size) }}</td>
+            <td class="r actions">
+              <ng-container *ngIf="d.status !== 'password_required'">
+                <button class="icon-btn" (click)="$event.stopPropagation(); openDoc(d)" title="Open" aria-label="Open"><i class="ti ti-eye"></i></button>
+                <button class="icon-btn" (click)="$event.stopPropagation(); openDoc(d)" title="Ask AI about this document" aria-label="Ask AI"><i class="ti ti-message-question"></i></button>
+              </ng-container>
+              <button *ngIf="d.status === 'password_required'" class="btn btn-sec btn-sm" (click)="$event.stopPropagation(); promptUnlock(d)"><i class="ti ti-key"></i>Unlock</button>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="empty" *ngIf="docs.length === 0">
+      <i class="ti ti-upload"></i>
+      <b>Upload your first documents</b>
+      <span>PDFs, scans, spreadsheets and images are classified as they arrive.</span>
+      <a class="btn btn-pri" routerLink="/upload">Upload documents</a>
+    </div>
+  </section>
 </div>
 
-<!-- Doc sheet -->
+<!-- Document side panel -->
 <app-doc-sheet [doc]="selectedDoc" (closed)="selectedDoc=null"></app-doc-sheet>
 
-<!-- Unlock modal -->
+<!-- Unlock dialog -->
 <div class="unlock-backdrop" *ngIf="unlockDoc" (click)="unlockDoc=null">
-  <div class="unlock-modal" (click)="$event.stopPropagation()">
-    <div class="unlock-icon">🔒</div>
-    <div class="unlock-title">Password Protected</div>
+  <div class="unlock-modal" role="dialog" aria-modal="true" aria-labelledby="unlock-title" (click)="$event.stopPropagation()">
+    <div class="unlock-icon"><i class="ti ti-lock"></i></div>
+    <h3 id="unlock-title">Unlock document</h3>
     <div class="unlock-file">{{ unlockDoc.filename }}</div>
-    <div class="unlock-hint">Enter the document password to unlock and process it.</div>
-    <input #pwdInput class="unlock-input" type="password" placeholder="Enter password"
-           [(ngModel)]="unlockPassword"
-           (keydown.enter)="submitUnlock()"
-           [disabled]="unlockLoading" />
+    <p>Enter the document's password to unlock and process it.</p>
+    <input class="unlock-input" type="password" placeholder="Document password" [(ngModel)]="unlockPassword"
+           (keydown.enter)="submitUnlock()" [disabled]="unlockLoading" />
     <div class="unlock-error" *ngIf="unlockError">{{ unlockError }}</div>
     <div class="unlock-actions">
-      <button class="unlock-cancel" (click)="unlockDoc=null" [disabled]="unlockLoading">Cancel</button>
-      <button class="unlock-submit" (click)="submitUnlock()" [disabled]="unlockLoading || !unlockPassword">
-        {{ unlockLoading ? 'Unlocking…' : 'Unlock & Process' }}
-      </button>
+      <button class="btn btn-sec" (click)="unlockDoc=null" [disabled]="unlockLoading">Cancel</button>
+      <button class="btn btn-pri" (click)="submitUnlock()" [disabled]="unlockLoading || !unlockPassword">{{ unlockLoading ? 'Unlocking…' : 'Unlock and process' }}</button>
     </div>
   </div>
 </div>

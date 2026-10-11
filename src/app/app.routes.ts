@@ -2,6 +2,7 @@
 import { Routes, CanDeactivateFn } from '@angular/router';
 import { authGuard }   from './services/auth.guard';
 import { adminGuard }  from './guards/admin.guard';
+import { reportsGuard } from './guards/reports.guard';
 import { agencyGuard } from './guards/agency.guard';
 
 interface CanDeactivateComponent { canDeactivate(): boolean; }
@@ -15,6 +16,7 @@ export const routes: Routes = [
 
   // ── Core pages ────────────────────────────────────────────────────────────
   { path: 'disclaimer',   canActivate: [authGuard], loadComponent: () => import('./pages/disclaimer/disclaimer.component').then(m => m.DisclaimerComponent) },
+  { path: 'immigration-case', canActivate: [authGuard], loadComponent: () => import('./pages/immigration/case-page/case-page.component').then(m => m.ImmigrationCasePageComponent) },
   { path: 'immigration',  canActivate: [authGuard], loadComponent: () => import('./pages/immigration/immigration.component').then(m => m.ImmigrationComponent) },
   { path: 'dashboard',     canActivate: [authGuard], loadComponent: () => import('./pages/dashboard/dashboard.component').then(m => m.DashboardComponent) },
   { path: 'documents',     canActivate: [authGuard], loadComponent: () => import('./pages/documents/documents.component').then(m => m.DocumentsComponent) },
@@ -68,7 +70,7 @@ export const routes: Routes = [
   },
   {
     path: 'calendar',
-    canActivate: [],
+    canActivate: [authGuard],
     loadComponent: () => import('./pages/agency/calendar/calendar.component').then(m => m.CalendarComponent)
   },
   {
@@ -93,7 +95,7 @@ export const routes: Routes = [
   },
   {
     path: 'agency-reports',
-    canActivate: [authGuard, agencyGuard],
+    canActivate: [authGuard, reportsGuard],
     loadComponent: () => import('./pages/agency/reports/reports.component').then(m => m.AgencyReportsComponent)
   },
 
@@ -108,6 +110,7 @@ export const routes: Routes = [
   // ── Analytics & Insights ──────────────────────────────────────────────────
   { path: 'analytics-hub',        canActivate: [authGuard], loadComponent: () => import('./pages/analytics-hub/analytics-hub.component').then(m => m.AnalyticsHubComponent) },
   { path: 'document-analytics',   canActivate: [authGuard], loadComponent: () => import('./pages/document-analytics/document-analytics.component').then(m => m.DocumentAnalyticsComponent) },
+  { path: 'conversations',        canActivate: [authGuard], loadComponent: () => import('./pages/history-hub/history-hub.component').then(m => m.HistoryHubComponent) },
   { path: 'history',              canActivate: [authGuard], loadComponent: () => import('./pages/history/history.component').then(m => m.HistoryComponent) },
 
   // ── Compliance & Risk ─────────────────────────────────────────────────────

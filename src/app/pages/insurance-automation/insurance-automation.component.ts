@@ -328,7 +328,7 @@ const LOBS = ['any', 'auto', 'homeowners', 'commercial_auto', 'commercial_proper
   `,
   styles: [`
     .ia-root {
-      min-height: 100vh;
+      min-height: var(--content-h);
       background: #f8fafc;
       color: #1e293b;
       font-family: Inter, -apple-system, sans-serif;
@@ -487,7 +487,7 @@ const LOBS = ['any', 'auto', 'homeowners', 'commercial_auto', 'commercial_proper
     /* Body layout */
     .ia-body {
       display: flex;
-      height: calc(100vh - 110px);
+      height: calc(var(--content-h) - 110px);
       overflow: hidden;
     }
     .ia-rules-area {

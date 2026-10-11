@@ -1,0 +1,372 @@
+<div class="is-error" *ngIf="error" role="alert">{{ error }} <button class="is-x" (click)="error=''" aria-label="Dismiss">✕</button></div>
+
+<!-- ═══════════════ CASES ═══════════════ -->
+<ng-container *ngIf="section==='cases'">
+  <div class="is-bar">
+    <input type="search" [(ngModel)]="caseQuery" (keyup.enter)="loadCases()" placeholder="Search by name, employer, receipt #, visa class" aria-label="Search cases">
+    <select [(ngModel)]="caseStatus" (change)="loadCases()" aria-label="Filter by status">
+      <option value="">All statuses</option>
+      <option *ngFor="let s of meta.statuses" [value]="s">{{ label(s) }}</option>
+    </select>
+    <button class="is-btn" (click)="startCase()">+ New case</button>
+  </div>
+
+  <div class="is-suggest" *ngIf="suggestions.length && !newCase">
+    <div class="is-suggest-h">Suggested from your Visa Tracker</div>
+    <div class="is-suggest-row" *ngFor="let s of suggestions">
+      <div><b>{{ s.beneficiary }}</b> — {{ s.case_label }}<div class="is-muted">{{ s.reason }}</div></div>
+      <button class="is-btn is-btn-sm" (click)="startCase({beneficiary: s.beneficiary, case_type: s.case_type, petitioner: s.petitioner || '', expiry_date: s.expiry_date, visa_class: s.visa_class})">Open case</button>
+    </div>
+  </div>
+
+  <div class="is-card" *ngIf="newCase">
+    <h3>New case</h3>
+    <div class="is-grid">
+      <label>Beneficiary *<input [(ngModel)]="newCase.beneficiary"></label>
+      <label>Case type *
+        <select [(ngModel)]="newCase.case_type"><option *ngFor="let t of types()" [value]="t.id">{{ t.label }} ({{ t.form }})</option></select>
+      </label>
+      <label>Petitioner / employer<input [(ngModel)]="newCase.petitioner"></label>
+      <label>Current status expires<input type="date" [(ngModel)]="newCase.expiry_date"></label>
+    </div>
+    <div class="is-row"><button class="is-btn" (click)="createCase()" [disabled]="busy || !newCase.beneficiary">Create case</button>
+      <button class="is-btn is-sec" (click)="newCase=null">Cancel</button></div>
+  </div>
+
+  <div class="is-split">
+    <div class="is-list">
+      <div class="is-empty" *ngIf="!cases.length">No cases yet. Open one from a suggestion above, or with “New case”.</div>
+      <button class="is-case" *ngFor="let c of cases" (click)="open(c)" [class.on]="selected?.id===c.id">
+        <div class="is-case-top"><b>{{ c.beneficiary }}</b><span class="is-pill" [attr.data-s]="c.status">{{ label(c.status) }}</span></div>
+        <div class="is-muted">{{ c.case_label }} · {{ c.form }}<span *ngIf="c.receipt_number"> · {{ c.receipt_number }}</span></div>
+        <div class="is-prog"><span [style.width.%]="c.progress"></span></div>
+        <div class="is-muted" *ngIf="c.next_deadline">{{ c.next_deadline.what }} — {{ c.next_deadline.date }} ({{ daysText(c.next_deadline.days) }})</div>
+      </button>
+    </div>
+
+    <div class="is-detail" *ngIf="selected">
+      <div class="is-detail-h">
+        <div><h3>{{ selected.beneficiary }}</h3><div class="is-muted">{{ selected.case_label }} · Form {{ selected.form }}</div></div>
+        <div style="display:flex;gap:8px">
+          <a class="is-btn is-btn-sm" routerLink="/immigration-case" [queryParams]="{ id: selected.id }">Open case page →</a>
+          <button class="is-btn is-danger is-btn-sm" (click)="deleteCase()">Delete</button>
+        </div>
+      </div>
+
+      <div class="is-grid">
+        <label>Status
+          <select [ngModel]="selected.status" (ngModelChange)="save('status', $event)">
+            <option *ngFor="let s of meta.statuses" [value]="s">{{ label(s) }}</option></select></label>
+        <label>Receipt number<input [ngModel]="selected.receipt_number" (change)="save('receipt_number', $any($event.target).value)"></label>
+        <label>Petitioner / employer<input [ngModel]="selected.petitioner" (change)="save('petitioner', $any($event.target).value)"></label>
+        <label>Visa class<input [ngModel]="selected.visa_class" (change)="save('visa_class', $any($event.target).value)"></label>
+        <label>Status expires<input type="date" [ngModel]="selected.expiry_date" (change)="save('expiry_date', $any($event.target).value)"></label>
+        <label>Filed<input type="date" [ngModel]="selected.filed_date" (change)="save('filed_date', $any($event.target).value)"></label>
+        <label>Priority date<input type="date" [ngModel]="selected.priority_date" (change)="save('priority_date', $any($event.target).value)"></label>
+        <label>RFE response due<input type="date" [ngModel]="selected.rfe_due_date" (change)="save('rfe_due_date', $any($event.target).value)"></label>
+      </div>
+
+      <div class="is-block" *ngIf="selected.deadlines.length">
+        <h4>Deadlines</h4>
+        <div class="is-dl" *ngFor="let d of selected.deadlines" [class.warn]="d.days >= 0 && d.days <= 30" [class.over]="d.days < 0">
+          <span>{{ d.what }}</span><span>{{ d.date }} · {{ daysText(d.days) }}</span></div>
+      </div>
+
+      <div class="is-block">
+        <div class="is-block-h"><h4>Evidence checklist · {{ selected.progress }}%</h4>
+          <button class="is-btn is-sec is-btn-sm" (click)="matchDocs()">Match uploaded documents</button></div>
+        <label class="is-check" *ngFor="let i of selected.checklist">
+          <input type="checkbox" [checked]="i.done" (change)="toggle(i)"> <span [class.done]="i.done">{{ i.item }}</span>
+          <span class="is-muted" *ngIf="i.document_id"> · matched</span></label>
+      </div>
+
+      <div class="is-block">
+        <h4>Client links</h4>
+        <div class="is-row">
+          <select [(ngModel)]="intakeLang" aria-label="Questionnaire language"><option *ngFor="let l of langs()" [value]="l.id">{{ l.name }}</option></select>
+          <button class="is-btn is-btn-sm" (click)="sendIntake()">Create intake questionnaire link</button>
+        </div>
+        <div class="is-grid is-mt">
+          <label>Document to sign
+            <select [(ngModel)]="sigForm.document_id"><option value="">(no file — acknowledgement only)</option>
+              <option *ngFor="let d of docs" [value]="d.id">{{ d.filename }}</option></select></label>
+          <label>Title *<input [(ngModel)]="sigForm.title" placeholder="e.g. G-28 / engagement letter"></label>
+          <label>Signer name *<input [(ngModel)]="sigForm.signer_name"></label>
+          <label>Signer email<input type="email" [(ngModel)]="sigForm.signer_email"></label>
+        </div>
+        <button class="is-btn is-btn-sm is-mt" (click)="requestSignature()" [disabled]="!sigForm.title || !sigForm.signer_name">Create signing link</button>
+        <div class="is-link" *ngIf="lastLink">
+          <b>{{ lastLink.kind }}</b> — send this to your client (shown once):
+          <code>{{ lastLink.url }}</code><button class="is-btn is-sec is-btn-sm" (click)="copy(lastLink.url)">Copy</button>
+      <button class="is-btn is-sec is-btn-sm" (click)="openLink(lastLink.url)" title="Open it here — e.g. to fill it in with the client on a call, or sign in person">Open</button>
+      <div class="is-linkwarn" *ngIf="lastLink.warning">⚠ {{ lastLink.warning }}</div>
+        </div>
+        <div class="is-mini" *ngFor="let i of selected.intakes">📝 Intake ({{ meta.languages[i.language] }}) — {{ i.status }} · {{ i.answered }} answers</div>
+        <div class="is-mini" *ngFor="let s of selected.signatures">✍️ {{ s.title }} — {{ s.signer_name }} · {{ s.status }}</div>
+      </div>
+
+      <div class="is-block" *ngIf="caseForms.length">
+        <div class="is-block-h"><h4>Official forms</h4>
+          <span><button class="is-btn is-sec is-btn-sm" *ngFor="let f of caseForms" (click)="openForm(f)">Fill {{ f }}</button></span></div>
+        <ng-container *ngIf="ff">
+          <div class="is-ffhead">
+            <b>{{ ff.form }}</b> · edition {{ ff.report.edition }} · {{ ff.report.filled }} of {{ ff.report.total }} fields filled
+            <span *ngIf="!ff.report.edition_ok" class="is-warn">⚠ The stored form isn't edition {{ ff.report.edition }} — re-check the field mapping.</span>
+          </div>
+          <div class="is-linkwarn" *ngIf="ff.report.missing_required.length">Still needed: {{ ff.report.missing_required.join(' · ') }}</div>
+          <p class="is-muted">Values come from what you enter here, then the client's questionnaire, then the case. “Derived” values (a name split into parts, an address parsed) need a check. Signatures and signature dates are never filled.</p>
+          <details class="is-ffgroup" *ngFor="let g of ffGroups()" open>
+            <summary>{{ g.name }}</summary>
+            <div class="is-ffrow" *ngFor="let f of $any(g.fields)" [class.need]="f.required && !f.value && ff.edits[f.key] === undefined">
+              <label [for]="'ff-' + f.key">{{ f.label }}<span *ngIf="f.required" class="is-req">*</span></label>
+              <input [id]="'ff-' + f.key" [ngModel]="ff.edits[f.key] ?? f.value" (ngModelChange)="ffEdit(f, $event)">
+              <span class="is-src" [attr.data-s]="ff.edits[f.key] !== undefined ? 'entered' : f.source">{{ ff.edits[f.key] !== undefined ? 'edited' : (f.source || 'missing') }}</span>
+            </div>
+          </details>
+          <div class="is-row">
+            <button class="is-btn is-sec is-btn-sm" (click)="saveForm()" [disabled]="!(ff.edits | keyvalue).length">Save values</button>
+            <button class="is-btn is-btn-sm" (click)="downloadForm()">Download filled {{ ff.form }}</button>
+            <button class="is-x" (click)="ff=null" aria-label="Close form">✕</button>
+          </div>
+        </ng-container>
+      </div>
+
+      <div class="is-block">
+        <div class="is-block-h"><h4>Filing packet</h4>
+          <button class="is-btn is-sec is-btn-sm" *ngIf="!pk" (click)="openPacket()">Assemble packet</button>
+          <button class="is-x" *ngIf="pk" (click)="pk=null" aria-label="Close packet">✕</button></div>
+        <p class="is-muted" *ngIf="!pk">Combine a cover page, contents, cover letter, questionnaire and evidence into one PDF, in the order you choose.</p>
+        <ng-container *ngIf="pk">
+          <div class="is-grid">
+            <label>Preparer (shown on the cover)<input [(ngModel)]="pk.preparer" placeholder="e.g. Philip Martin, Esq."></label>
+            <label>Add another document
+              <select [(ngModel)]="pk.addId" (change)="pkAdd()"><option value="">Choose…</option>
+                <option *ngFor="let d of pk.others" [value]="d.id">{{ d.title }}</option></select></label>
+          </div>
+          <ol class="is-pk">
+            <li *ngFor="let it of pk.items; let i = index; let first = first; let last = last" [class.off]="!it.on">
+              <label class="is-check"><input type="checkbox" [(ngModel)]="it.on">
+                <span>{{ it.title }}<span class="is-muted" *ngIf="it.note"> · {{ it.note }}</span></span></label>
+              <span class="is-pk-move">
+                <button class="is-x" (click)="pkMove(i,-1)" [disabled]="first" [attr.aria-label]="'Move ' + it.title + ' up'">▲</button>
+                <button class="is-x" (click)="pkMove(i,1)" [disabled]="last" [attr.aria-label]="'Move ' + it.title + ' down'">▼</button></span>
+            </li>
+          </ol>
+          <div *ngIf="pkLetterOn()">
+            <label class="is-full">Cover letter<textarea [(ngModel)]="pk.letter" rows="8" placeholder="Write the cover letter, or draft it from the case and the enclosures"></textarea></label>
+            <button class="is-btn is-sec is-btn-sm is-mt" (click)="draftCoverLetter()" [disabled]="pkBusy">{{ pkBusy ? 'Drafting…' : 'Draft with Legal AI' }}</button>
+          </div>
+          <button class="is-btn is-mt" (click)="buildPacket()" [disabled]="pkBusy || !pkCount() || (pkLetterOn() && !pk.letter.trim())">
+            {{ pkBusy ? 'Building…' : 'Build PDF (' + pkCount() + ' parts)' }}</button>
+        </ng-container>
+      </div>
+
+      <div class="is-block">
+        <h4>Timeline</h4>
+        <div class="is-row"><input [(ngModel)]="note" (keyup.enter)="addNote()" placeholder="Add a note" aria-label="Add a note">
+          <button class="is-btn is-btn-sm" (click)="addNote()">Add</button></div>
+        <div class="is-ev" *ngFor="let e of selected.events"><span class="is-ev-k">{{ e.kind }}</span>
+          <span>{{ e.text }}</span><span class="is-muted">{{ e.at | date:'MMM d, y, h:mm a' }}</span></div>
+      </div>
+    </div>
+  </div>
+</ng-container>
+
+<!-- ═══════════════ CRM ═══════════════ -->
+<ng-container *ngIf="section==='crm'">
+  <div class="is-bar"><span class="is-muted">Track inquiries from first contact to a retained case.</span>
+    <button class="is-btn" (click)="startLead()">+ New lead</button></div>
+  <div class="is-card" *ngIf="newLead">
+    <div class="is-grid">
+      <label>Name *<input [(ngModel)]="newLead.name"></label>
+      <label>Email<input type="email" [(ngModel)]="newLead.email"></label>
+      <label>Phone<input [(ngModel)]="newLead.phone"></label>
+      <label>Interested in
+        <select [(ngModel)]="newLead.interest"><option value="">—</option><option *ngFor="let t of types()" [value]="t.id">{{ t.label }}</option></select></label>
+      <label>Source<input [(ngModel)]="newLead.source" placeholder="Referral, website…"></label>
+      <label>Language<select [(ngModel)]="newLead.language"><option *ngFor="let l of langs()" [value]="l.id">{{ l.name }}</option></select></label>
+      <label>Next follow-up<input type="date" [(ngModel)]="newLead.next_follow_up"></label>
+      <label>Notes<input [(ngModel)]="newLead.notes"></label>
+    </div>
+    <div class="is-row"><button class="is-btn" (click)="createLead()" [disabled]="!newLead.name">Add lead</button>
+      <button class="is-btn is-sec" (click)="newLead=null">Cancel</button></div>
+  </div>
+  <div class="is-board">
+    <div class="is-col" *ngFor="let st of meta.lead_stages">
+      <div class="is-col-h">{{ label(st) }} <span>{{ leadsIn(st).length }}</span></div>
+      <div class="is-lead" *ngFor="let l of leadsIn(st)">
+        <b>{{ l.name }}</b>
+        <div class="is-muted">{{ meta.case_types[l.interest]?.label || 'No case type yet' }}</div>
+        <div class="is-muted" *ngIf="l.email || l.phone">{{ l.email }} {{ l.phone }}</div>
+        <div class="is-muted" *ngIf="l.next_follow_up">Follow up {{ l.next_follow_up }}</div>
+        <div class="is-row is-mt">
+          <select [ngModel]="l.stage" (ngModelChange)="moveLead(l, $event)" aria-label="Move to stage">
+            <option *ngFor="let s of meta.lead_stages" [value]="s">{{ label(s) }}</option></select>
+          <button class="is-btn is-btn-sm" *ngIf="!l.case_id" (click)="convert(l)">Open case</button>
+          <button class="is-x" (click)="removeLead(l)" aria-label="Delete lead">🗑</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</ng-container>
+
+<!-- ═══════════════ FORMS ═══════════════ -->
+<ng-container *ngIf="section==='forms'">
+  <div class="is-card">
+    <h3>Send a questionnaire</h3>
+    <p class="is-muted">The client gets a private link, answers in their language, and their answers fill the case and export as a form-ready data sheet.</p>
+    <div class="is-grid">
+      <label>For
+        <select [(ngModel)]="fq.case_id" (change)="fq.beneficiary=''">
+          <option value="">New person…</option>
+          <option *ngFor="let c of cases" [value]="c.id">{{ c.beneficiary }} — {{ c.case_label }}</option></select></label>
+      <label *ngIf="!fq.case_id">Person's full name *<input [(ngModel)]="fq.beneficiary"></label>
+      <label *ngIf="!fq.case_id">Form
+        <select [(ngModel)]="fq.case_type"><option *ngFor="let t of types()" [value]="t.id">{{ t.label }} ({{ t.form }})</option></select></label>
+      <label>Language<select [(ngModel)]="fq.language"><option *ngFor="let l of langs()" [value]="l.id">{{ l.name }}</option></select></label>
+    </div>
+    <button class="is-btn is-mt" (click)="sendQuestionnaire()" [disabled]="busy || (!fq.case_id && !fq.beneficiary.trim())">Create questionnaire link</button>
+    <div class="is-link" *ngIf="lastLink">
+      <b>{{ lastLink.kind }}</b> — send this to your client (shown once):
+      <code>{{ lastLink.url }}</code><button class="is-btn is-sec is-btn-sm" (click)="copy(lastLink.url)">Copy</button>
+      <button class="is-btn is-sec is-btn-sm" (click)="openLink(lastLink.url)" title="Open it here — e.g. to fill it in with the client on a call, or sign in person">Open</button>
+      <div class="is-linkwarn" *ngIf="lastLink.warning">⚠ {{ lastLink.warning }}</div>
+    </div>
+  </div>
+
+  <h3 class="is-h">Sent questionnaires</h3>
+  <div class="is-empty" *ngIf="!intakes.length">None sent yet.</div>
+  <div class="is-wrap" *ngIf="intakes.length">
+    <table class="is-table"><thead><tr><th>Client</th><th>Case type</th><th>Language</th><th>Status</th><th>Answers</th><th>Sent</th><th></th></tr></thead>
+      <tbody><tr *ngFor="let i of intakes">
+        <td><b>{{ i.beneficiary }}</b></td><td>{{ meta.case_types[i.case_type]?.label }}</td><td>{{ meta.languages[i.language] }}</td>
+        <td><span class="is-pill" [attr.data-s]="i.status">{{ label(i.status) }}</span></td><td>{{ i.answered }}</td>
+        <td>{{ i.created_at | date:'MMM d' }}</td>
+        <td class="is-actions"><button class="is-btn is-sec is-btn-sm" (click)="viewIntake(i)">View</button>
+          <button class="is-btn is-sec is-btn-sm" (click)="download(api + '/intakes/' + i.id + '/pdf', 'intake_' + i.beneficiary + '.pdf')">Data sheet PDF</button></td>
+      </tr></tbody></table>
+  </div>
+  <div class="is-card" *ngIf="intakeView">
+    <div class="is-block-h"><h3>Answers</h3><button class="is-x" (click)="intakeView=null" aria-label="Close">✕</button></div>
+    <div *ngFor="let s of intakeView.schema"><h4>{{ s.title }}</h4>
+      <div class="is-qa" *ngFor="let f of s.fields"><span>{{ f.label }}</span><b>{{ intakeView.answers[f.key] || '—' }}</b></div></div>
+  </div>
+
+  <h3 class="is-h">Form library</h3>
+  <div class="is-lib">
+    <details class="is-libitem" *ngFor="let t of types()">
+      <summary><b>{{ t.label }}</b> <span class="is-chip">{{ t.form }}</span>
+        <span class="is-muted">{{ t.sections.length }} sections · {{ questionCount(t) }} questions · {{ t.evidence.length }} evidence items</span></summary>
+      <div class="is-libbody">
+        <div><h4>Questionnaire</h4>
+          <div *ngFor="let s of t.sections"><b class="is-small">{{ s.title }}</b>
+            <ul><li *ngFor="let q of s.questions">{{ q }}</li></ul></div></div>
+        <div><h4>Evidence checklist</h4><ul><li *ngFor="let e of t.evidence">{{ e }}</li></ul></div>
+      </div>
+      <button class="is-btn is-sec is-btn-sm" (click)="fq.case_id=''; fq.case_type=t.id; scrollTop()">Send this questionnaire</button>
+    </details>
+  </div>
+</ng-container>
+
+<!-- ═══════════════ E-SIGNATURE ═══════════════ -->
+<ng-container *ngIf="section==='esign'">
+  <div class="is-card">
+    <h3>Request a signature</h3>
+    <p class="is-muted">The signer opens a private link, reviews the document, types their name and agrees — time, IP address and browser are recorded and the document is fingerprinted.</p>
+    <div class="is-grid">
+      <label>For case
+        <select [(ngModel)]="sq.case_id"><option value="">New person…</option>
+          <option *ngFor="let c of cases" [value]="c.id">{{ c.beneficiary }} — {{ c.case_label }}</option></select></label>
+      <label *ngIf="!sq.case_id">Person's full name *<input [(ngModel)]="sq.beneficiary"></label>
+      <label *ngIf="!sq.case_id">Case type
+        <select [(ngModel)]="sq.case_type"><option *ngFor="let t of types()" [value]="t.id">{{ t.label }}</option></select></label>
+      <label>Document to sign
+        <select [(ngModel)]="sq.document_id"><option value="">(no file — acknowledgement only)</option>
+          <option *ngFor="let d of docs" [value]="d.id">{{ d.filename }}</option></select></label>
+      <label>Title *<input [(ngModel)]="sq.title" list="sig-titles" placeholder="e.g. Engagement letter">
+        <datalist id="sig-titles"><option *ngFor="let t of sigTitles" [value]="t"></option></datalist></label>
+      <label>Signer name *<input [(ngModel)]="sq.signer_name" [placeholder]="sq.beneficiary || 'Full legal name'"></label>
+      <label>Signer email<input type="email" [(ngModel)]="sq.signer_email"></label>
+    </div>
+    <button class="is-btn is-mt" (click)="sendSignature()" [disabled]="busy || !sq.title.trim() || !(sq.signer_name || sq.beneficiary).trim() || (!sq.case_id && !sq.beneficiary.trim())">Create signing link</button>
+    <div class="is-link" *ngIf="lastLink">
+      <b>{{ lastLink.kind }}</b> — send this to the signer (shown once):
+      <code>{{ lastLink.url }}</code><button class="is-btn is-sec is-btn-sm" (click)="copy(lastLink.url)">Copy</button>
+      <button class="is-btn is-sec is-btn-sm" (click)="openLink(lastLink.url)" title="Open it here — e.g. to fill it in with the client on a call, or sign in person">Open</button>
+      <div class="is-linkwarn" *ngIf="lastLink.warning">⚠ {{ lastLink.warning }}</div>
+    </div>
+  </div>
+
+  <h3 class="is-h">Signature requests</h3>
+  <div class="is-empty" *ngIf="!signatures.length">None yet.</div>
+  <div class="is-wrap" *ngIf="signatures.length">
+    <table class="is-table"><thead><tr><th>Document</th><th>Signer</th><th>Case</th><th>Status</th><th>Signed</th><th></th></tr></thead>
+      <tbody><tr *ngFor="let s of signatures">
+        <td><b>{{ s.title }}</b></td><td>{{ s.signer_name }}<div class="is-muted">{{ s.signer_email }}</div></td><td>{{ s.beneficiary }}</td>
+        <td><span class="is-pill" [attr.data-s]="s.status">{{ s.status }}</span></td>
+        <td>{{ s.signed_at ? (s.signed_at | date:'MMM d, y, h:mm a') : '—' }}</td>
+        <td class="is-actions">
+          <button class="is-btn is-sec is-btn-sm" *ngIf="s.status==='signed'" (click)="download(api + '/signatures/' + s.id + '/certificate', 'signed_' + s.title + '.pdf')">Certificate PDF</button>
+          <button class="is-btn is-sec is-btn-sm" *ngIf="s.status==='sent' || s.status==='viewed'" (click)="voidSig(s)">Cancel</button></td>
+      </tr></tbody></table>
+  </div>
+  <p class="is-note">USCIS accepts electronic signatures only in specific cases — check the form instructions before filing an e-signed form.</p>
+</ng-container>
+
+<!-- ═══════════════ REPORTS ═══════════════ -->
+<ng-container *ngIf="section==='reports' && report">
+  <div class="is-bar is-bar-end">
+    <span class="is-muted">Live figures for your cases, leads and signatures.</span>
+    <button class="is-btn is-sec" (click)="download(api + '/report/export?format=xlsx', 'immigration_report.xlsx')">⬇ Excel</button>
+    <button class="is-btn is-sec" (click)="download(api + '/report/export?format=pdf', 'immigration_report.pdf')">⬇ PDF</button>
+  </div>
+  <div class="is-kpis">
+    <div class="is-kpi"><span>Open cases</span><b>{{ report.totals.open }}</b></div>
+    <div class="is-kpi"><span>Filed this month</span><b>{{ report.totals.filed_this_month }}</b></div>
+    <div class="is-kpi"><span>Open RFEs</span><b>{{ report.totals.rfe_open }}</b></div>
+    <div class="is-kpi"><span>Approved</span><b>{{ report.totals.approved }}</b></div>
+    <div class="is-kpi"><span>Lead → retained</span><b>{{ report.totals.conversion_pct }}%</b></div>
+    <div class="is-kpi"><span>Signatures pending</span><b>{{ report.totals.signatures_pending }}</b></div>
+  </div>
+  <div class="is-cols">
+    <div class="is-card"><h4>Cases by status</h4>
+      <div class="is-barrow" *ngFor="let r of report.by_status"><span>{{ label(r.key) }}</span><i [style.width.%]="100*r.count/maxCount(report.by_status)"></i><b>{{ r.count }}</b></div>
+      <div class="is-empty" *ngIf="!report.by_status.length">No cases yet.</div></div>
+    <div class="is-card"><h4>Cases by type</h4>
+      <div class="is-barrow" *ngFor="let r of report.by_type"><span>{{ r.key }}</span><i [style.width.%]="100*r.count/maxCount(report.by_type)"></i><b>{{ r.count }}</b></div>
+      <div class="is-empty" *ngIf="!report.by_type.length">No cases yet.</div></div>
+    <div class="is-card"><h4>Lead pipeline</h4>
+      <div class="is-barrow" *ngFor="let r of report.pipeline"><span>{{ label(r.key) }}</span><i [style.width.%]="100*r.count/maxCount(report.pipeline)"></i><b>{{ r.count }}</b></div>
+      <div class="is-empty" *ngIf="!report.pipeline.length">No leads yet.</div></div>
+  </div>
+  <div class="is-card"><h4>Deadlines in the next 90 days</h4>
+    <div class="is-empty" *ngIf="!report.upcoming.length">Nothing due in the next 90 days.</div>
+    <div class="is-dl" *ngFor="let u of report.upcoming" [class.warn]="u.days <= 30"><span><b>{{ u.beneficiary }}</b> · {{ u.case }} · {{ u.what }}</span><span>{{ u.date }} · {{ daysText(u.days) }}</span></div>
+  </div>
+</ng-container>
+
+<!-- ═══════════════ LEGAL AI ═══════════════ -->
+<ng-container *ngIf="section==='ai'">
+  <div class="is-card">
+    <div class="is-grid">
+      <label>Case<select [(ngModel)]="aiCase"><option value="">Choose a case…</option>
+        <option *ngFor="let c of cases" [value]="c.id">{{ c.beneficiary }} — {{ c.case_label }}</option></select></label>
+      <label>Draft<select [(ngModel)]="aiKind"><option *ngFor="let k of draftKinds" [value]="k.id">{{ k.label }}</option></select></label>
+    </div>
+    <label class="is-full">Extra instructions (optional)<textarea [(ngModel)]="aiInstr" rows="2" placeholder="e.g. mention the new work site in Austin"></textarea></label>
+    <button class="is-btn is-mt" (click)="runDraft()" [disabled]="busy">{{ busy ? 'Drafting… (about 20 seconds)' : 'Draft' }}</button>
+  </div>
+  <div class="is-card" *ngIf="aiOut"><div class="is-note">{{ aiOut.notice }}</div><pre class="is-out">{{ aiOut.draft }}</pre>
+    <button class="is-btn is-sec is-btn-sm" (click)="copy(aiOut.draft)">Copy</button></div>
+</ng-container>
+
+<!-- ═══════════════ TRANSLATIONS ═══════════════ -->
+<ng-container *ngIf="section==='translate'">
+  <div class="is-card">
+    <label class="is-full">Text to translate<textarea [(ngModel)]="trText" rows="6" placeholder="Paste a message for a client, or text from a document"></textarea></label>
+    <div class="is-row is-mt"><select [(ngModel)]="trLang" aria-label="Target language"><option *ngFor="let l of langs()" [value]="l.id">{{ l.name }}</option></select>
+      <button class="is-btn" (click)="runTranslate()" [disabled]="busy || !trText.trim()">{{ busy ? 'Translating…' : 'Translate' }}</button></div>
+  </div>
+  <div class="is-card" *ngIf="trOut"><div class="is-note">{{ trOut.notice }}</div><pre class="is-out">{{ trOut.translation }}</pre>
+    <button class="is-btn is-sec is-btn-sm" (click)="copy(trOut.translation)">Copy</button></div>
+</ng-container>

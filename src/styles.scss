@@ -3,19 +3,22 @@
 *,*::before,*::after { box-sizing: border-box; margin: 0; padding: 0; }
 
 :root {
-  --surf:#fff; --surf2:#f5f7ff; --surf3:#eef1ff;
-  --bdr:#e2e8f4; --bdr2:#c7d2fe;
-  --t1:#0f172a; --t2:#475569; --t3:#94a3b8;
-  --blue:#4f46e5; --bluedark:#3730a3; --bluebg:#eef2ff; --bluebdr:#c7d2fe;
-  --green:#059669; --greenbg:#ecfdf5; --greenbdr:#6ee7b7; --greendark:#047857;
-  --amber:#d97706; --amberbg:#fef3c7;
-  --rose:#e11d48; --rosebg:#ffe4e6;
-  --font:'Plus Jakarta Sans',system-ui,sans-serif;
-  --mono:'JetBrains Mono',monospace;
-  --sh1:0 2px 8px rgba(79,70,229,.08),0 1px 3px rgba(0,0,0,.04);
-  --sh2:0 8px 32px rgba(79,70,229,.14),0 2px 8px rgba(0,0,0,.06);
-  --sh3:0 24px 64px rgba(79,70,229,.22),0 8px 24px rgba(0,0,0,.12);
-  --r:16px;
+  --surf:#fff; --surf2:#f6f8fb; --surf3:#edf1f6;
+  --bdr:#e1e7ef; --bdr2:#cbd4e1;
+  --t1:#0b1a2e; --t2:#4a5568; --t3:#76839a;
+  --blue:#1f4fd1; --bluedark:#173c9f; --bluebg:#eef3fd; --bluebdr:#d8e3fb;
+  --green:#0f7a55; --greenbg:#e7f5ef; --greenbdr:#bfe3d3; --greendark:#0b5e41;
+  --amber:#a85b06; --amberbg:#fdf3e4;
+  --rose:#b42318; --rosebg:#fdecea;
+  --ink:#0b1a2e;
+  --font:'IBM Plex Sans',system-ui,-apple-system,'Segoe UI',sans-serif;
+  --mono:'IBM Plex Mono',ui-monospace,monospace;
+  --sh1:0 1px 2px rgba(11,26,46,.06),0 1px 1px rgba(11,26,46,.04);
+  --sh2:0 12px 32px rgba(11,26,46,.10);
+  --sh3:0 30px 70px rgba(11,26,46,.16);
+  --r:10px;
+  --topbar-h:60px;
+  --content-h:calc(100vh - var(--topbar-h));
 }
 
 
