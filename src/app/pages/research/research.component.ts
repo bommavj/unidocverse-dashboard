@@ -4,6 +4,7 @@ import { FormsModule } from '@angular/forms';
 import { HttpClient } from '@angular/common/http';
 import { ActivatedRoute, Router } from '@angular/router';
 import { DomSanitizer, SafeHtml } from '@angular/platform-browser';
+import { FeatureFlagService } from '../../services/feature-flag.service';
 import { Observable, Subject } from 'rxjs';
 
 const API = 'http://localhost:7979';
@@ -81,6 +82,10 @@ interface ResearchSession {
   priorQA?: { q: string; a: string }[]; // conversation history
   thread?: { question: string; answer: string; sources: string[]; chartData?: any; matchedDocIds?: string[] }[]; // prior turns in this conversation
   rootQuestion?: string; // the first question — shown in sidebar, never overwritten by follow-ups
+  // Cloud model consent: the documents that would be sent, and the request to repeat
+  cloudConfirm?: { provider: string; model: string; documents: string[]; masked: boolean; resume?: string };
+  cloudChoice?: 'ok' | 'local';   // remembered for the rest of this conversation
+  streamParams?: string;
 }
 
 @Component({
@@ -195,7 +200,14 @@ export class ResearchComponent implements OnInit, OnDestroy {
     private route: ActivatedRoute,
     private router: Router,
     private zone: NgZone,
+    private flags: FeatureFlagService,
   ) {}
+
+  /** The tax-return review is for organisations with the Finance module and tax forms on file. */
+  get showTaxReview(): boolean {
+    return this.flags.financeMode() &&
+      this.docs.some(d => /^(w2|form_10\d\d|form_1099|schedule_k1|form_8949|form_1065|tax_form)/.test(d.doc_type || ''));
+  }
 
   ngOnInit() {
     this.loadDocs();
@@ -291,6 +303,12 @@ export class ResearchComponent implements OnInit, OnDestroy {
   get filteredDocs(): ResearchDoc[] {
     const q = this.docSearch.toLowerCase();
     return q ? this.docs.filter(d => d.filename.toLowerCase().includes(q)) : this.docs;
+  }
+
+  clearSelection() {
+    this.selectedDocIds.clear();
+    this.selectAll = false;
+    this.cdr.markForCheck();
   }
 
   toggleDoc(id: string) {
@@ -592,6 +610,30 @@ ${sources ? `<div class="sources"><strong>Sources:</strong> ${sources}</div>` : 
     this.activeSession = session;
     this.cdr.markForCheck();
 
+    session.streamParams = params.toString();
+    this._es = new EventSource(`${API}/api/research/ask/stream?${params}`);
+    this._attachSSEHandler(this._es, session);
+  }
+
+  /** The user's answer to "send these documents to the cloud model?" — repeat the question with it. */
+  async answerCloud(session: ResearchSession, choice: 'ok' | 'local') {
+    if (!session.streamParams || this.running) return;
+    const provider = session.cloudConfirm?.provider || 'the cloud model';
+    const params = new URLSearchParams(session.streamParams);
+    params.set('cloud', choice);
+    if (session.cloudConfirm?.resume) params.set('resume', session.cloudConfirm.resume);   // finish only the last step
+    session.cloudChoice = choice;
+    const jwt = await _getValidJwt(this.http);
+    if (jwt) params.set('jwt', jwt);
+    session.cloudConfirm = undefined;
+    session.answer = '';
+    session.steps = [];
+    this.running = true;
+    this.liveSteps = [];
+    this.liveThinking = choice === 'ok' ? `Asking ${provider}…` : 'Using the local answer…';
+    this.streamingAnswer = '';
+    this.cdr.markForCheck();
+    if (this._es) { this._es.close(); this._es = null; }
     this._es = new EventSource(`${API}/api/research/ask/stream?${params}`);
     this._attachSSEHandler(this._es, session);
   }
@@ -660,12 +702,17 @@ ${sources ? `<div class="sources"><strong>Sources:</strong> ${sources}</div>` : 
         session.chartType = msg.chart?.type || 'bar';
         this.cdr.markForCheck();
 
+      } else if (msg.type === 'cloud_confirm') {
+        session.cloudConfirm = { provider: msg.provider, model: msg.model, documents: msg.documents || [], masked: !!msg.masked, resume: msg.resume || undefined };
+        this.cdr.markForCheck();
+
       } else if (msg.type === 'done') {
         es.close();
         if (this._es === es) this._es = null;
         this.running = false;
         this.liveThinking = '';
         this.streamingAnswer = '';
+        if (msg.cloud_confirm) { this.cdr.markForCheck(); if (onDone) onDone(); return; }
         // Use done.answer as fallback if no tokens arrived
         if (msg.answer && !session.answer) session.answer = msg.answer;
         // Last resort: show a generic message instead of blank
@@ -774,8 +821,10 @@ ${sources ? `<div class="sources"><strong>Sources:</strong> ${sources}</div>` : 
         this.cdr.markForCheck();
       },
       error: err => {
-        step.hitlStatus = 'pending';
-        step.observation = { ...step.observation, error: 'Action failed. Please try again.' };
+        const msg = err?.error?.detail || 'Action failed. Please try again.';
+        if (err?.status === 409 || err?.status === 404) { step.hitlPending = false; step.hitlStatus = undefined; }
+        else step.hitlStatus = 'pending';
+        step.observation = { ...step.observation, error: msg };
         this.cdr.markForCheck();
       }
     });
@@ -891,6 +940,9 @@ ${sources ? `<div class="sources"><strong>Sources:</strong> ${sources}</div>` : 
     if (this._es) { this._es.close(); this._es = null; }
 
     this.cdr.markForCheck();
+    if (prev.cloudChoice) params.set('cloud', prev.cloudChoice);     // the choice made earlier in this conversation
+    prev.streamParams = params.toString();
+    prev.cloudConfirm = undefined;
     this._es = new EventSource(`${API}/api/research/ask/stream?${params}`);
 
     // After done, refresh thread from DB so all prior turns are visible

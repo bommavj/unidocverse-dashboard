@@ -5,6 +5,199 @@
         <p class="ig-sub">Connect UniDocVerse with the tools your team already uses.</p>
       </div>
 
+      <!-- AI Models -->
+      <div class="ig-section" [class.ig-section--inactive]="activeProvider">
+        <div class="ig-sec-label">
+          <span class="ig-sec-bar" style="background: linear-gradient(180deg, #10b981, #059669)"></span>
+          <div>
+            <div class="ig-sec-title">BYOM (Bring Your Own Model)</div>
+            <div class="ig-sec-desc" *ngIf="!activeProvider">Switch the active model used for document analysis and chat. Currently using <strong>{{ currentModel || '…' }}</strong>.</div>
+            <div class="ig-sec-desc" *ngIf="activeProvider">Inactive while <strong>{{ activeProviderLabel }}</strong> answers questions. <strong>{{ currentModel }}</strong> still processes uploads.</div>
+          </div>
+        </div>
+
+        <div class="ig-model-grid">
+          <div *ngIf="loadingModels" class="ig-model-loading">Loading installed models…</div>
+          <button
+            *ngFor="let m of models"
+            class="ig-model-card"
+            [class.active]="m === currentModel && !activeProvider"
+            (click)="switchModel(m)"
+            [disabled]="switchingModel || !!activeProvider">
+            <div class="ig-model-icon">🤖</div>
+            <div class="ig-model-name">{{ m }}</div>
+            <div class="ig-model-status" *ngIf="m === currentModel && !activeProvider">● Active</div>
+            <div class="ig-model-status ig-model-status--idle" *ngIf="m === currentModel && activeProvider">Inactive</div>
+            <div class="ig-model-status ig-model-status--idle" *ngIf="m !== currentModel">Switch</div>
+          </button>
+        </div>
+
+      </div>
+
+      <!-- Cloud models: frontier providers with the organisation's own key (admins only) -->
+      <div class="ig-section" *ngIf="providers.length">
+        <div class="ig-sec-label">
+          <span class="ig-sec-bar" style="background: linear-gradient(180deg, #6366f1, #8b5cf6)"></span>
+          <div>
+            <div class="ig-sec-title">Cloud models</div>
+            <div class="ig-sec-desc">
+              Use a frontier model with your own API key. While one is active it answers questions and chat;
+              questions and the documents they draw on are sent to that provider. Uploads are still processed by the local model.
+            </div>
+          </div>
+        </div>
+
+        <div class="ig-risk" role="alert">
+          <strong>Risk of data leaving your network.</strong>
+          When a cloud model is active, your documents may be sent to that provider.
+        </div>
+
+        <div class="ig-cloud-banner" *ngIf="activeProvider">
+          <span>Answers use <strong>{{ activeProviderLabel }}</strong>. The local model is inactive.</span>
+          <button class="ig-btn ig-btn--ghost" (click)="setActiveProvider(null)">Switch back to local</button>
+        </div>
+
+        <div class="ig-model-grid">
+          <button *ngFor="let p of providers" class="ig-model-card ig-cloud-card"
+                  [class.active]="p.provider === activeProvider" (click)="openProvider(p)">
+            <div class="ig-cloud-initial">{{ p.label.charAt(0) }}</div>
+            <div class="ig-model-name">{{ p.label }}</div>
+            <div class="ig-model-status" *ngIf="p.provider === activeProvider">● Active · {{ p.model }}</div>
+            <div class="ig-model-status ig-model-status--idle" *ngIf="p.provider !== activeProvider">
+              {{ p.configured ? 'Key saved · ' + p.model : 'Add key' }}
+            </div>
+          </button>
+        </div>
+
+        <div class="ig-cloud-edit" *ngIf="editing">
+          <div class="ig-cloud-edit-head">
+            <strong>{{ editing.label }}</strong>
+            <button class="ig-cloud-x" (click)="closeProvider()" aria-label="Close">✕</button>
+          </div>
+          <label class="ig-field" *ngIf="editing.needs_url">
+            <span>API base URL</span>
+            <input [(ngModel)]="editUrl" placeholder="https://your-endpoint/v1" (blur)="loadProviderModels()">
+          </label>
+          <label class="ig-field">
+            <span>API key</span>
+            <input type="password" autocomplete="off" [(ngModel)]="editKey" (blur)="loadProviderModels()"
+                   [placeholder]="editing.configured ? 'Saved (' + editing.key_hint + ') — leave blank to keep' : 'Paste API key'">
+          </label>
+          <label class="ig-field">
+            <span>Model <em *ngIf="modelsLoading">loading models from {{ editing.label }}…</em></span>
+            <select *ngIf="modelOptions.length" [ngModel]="customModel ? OTHER : editModel" (ngModelChange)="onModelPick($event)">
+              <option value="" disabled>Choose a model</option>
+              <option *ngFor="let m of modelOptions" [value]="m">{{ m }}</option>
+              <option [value]="OTHER">Other — type a model id</option>
+            </select>
+            <input *ngIf="customModel || !modelOptions.length" [(ngModel)]="editModel"
+                   [placeholder]="modelOptions.length ? 'Type the model id' : 'Paste your API key above to load the model list, or type a model id'">
+            <small class="ig-field-note" *ngIf="modelsNote">{{ modelsNote }}</small>
+          </label>
+          <div class="ig-cloud-test" *ngIf="testResult" [class.err]="!testResult.ok">{{ testResult.text }}</div>
+          <div class="ig-cloud-actions">
+            <button class="ig-btn ig-btn--ghost" (click)="testProvider()" [disabled]="providerBusy">Test connection</button>
+            <button class="ig-btn ig-btn--ghost" (click)="saveProvider(false)" [disabled]="providerBusy">Save</button>
+            <button class="ig-btn" (click)="saveProvider(true)" [disabled]="providerBusy">Save and use this model</button>
+            <button class="ig-btn ig-btn--danger" *ngIf="editing.configured" (click)="removeProvider()">Remove key</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Data protection + usage for cloud models -->
+      <div class="ig-section" *ngIf="providers.length && policy">
+        <div class="ig-sec-label">
+          <span class="ig-sec-bar" style="background: linear-gradient(180deg, #0f766e, #14b8a6)"></span>
+          <div>
+            <div class="ig-sec-title">Data protection for cloud models</div>
+            <div class="ig-sec-desc">
+              Only the final answer step uses a cloud model; question analysis and upload processing stay local.
+              These rules decide what that step may send.
+            </div>
+          </div>
+        </div>
+        <div class="ig-dp">
+          <label class="ig-dp-row">
+            <input type="checkbox" [(ngModel)]="policy.cascade_local_first" (ngModelChange)="savePolicy()">
+            <span><strong>Try the local model first.</strong> The cloud model is used only when the local answer can't be verified
+              against your documents. Saves cost and keeps most questions on this machine.</span>
+          </label>
+          <label class="ig-dp-row">
+            <input type="checkbox" [(ngModel)]="policy.ask_before_send" (ngModelChange)="savePolicy()">
+            <span><strong>Ask before sending.</strong> Show which documents would be sent and let the person choose Send or Answer locally.</span>
+          </label>
+          <label class="ig-dp-row">
+            <input type="checkbox" [(ngModel)]="policy.mask_identifiers" (ngModelChange)="savePolicy()">
+            <span><strong>Mask identifiers.</strong> Replace SSNs, A-numbers, emails, phone numbers and account, receipt and invoice numbers with placeholders before sending, and restore them in the answer. Names and addresses are not masked.</span>
+          </label>
+          <div class="ig-dp-types">
+            <button class="ig-dp-toggle" (click)="showTypes = !showTypes" [attr.aria-expanded]="showTypes">
+              {{ showTypes ? '▾' : '▸' }} Never-send document types ({{ policy.blocked_types.length }}) — customise
+            </button>
+            <div class="ig-dp-chips" *ngIf="showTypes">
+              <button *ngFor="let t of knownTypes" class="ig-chip" [class.on]="isBlocked(t)" (click)="toggleBlocked(t)"
+                      [attr.aria-pressed]="isBlocked(t)">{{ isBlocked(t) ? '🔒 ' : '' }}{{ typeLabel(t) }}</button>
+            </div>
+          </div>
+        </div>
+
+        <div class="ig-dp ig-dp--upload">
+          <label class="ig-dp-row">
+            <input type="checkbox" [(ngModel)]="policy.upload_cloud" (ngModelChange)="savePolicy()">
+            <span><strong>Use the cloud model when processing uploads.</strong> Field extraction (amounts, dates, parties) for the
+              document types below goes to the cloud model: one call per document, masked and logged. Type detection, OCR and
+              search indexing stay local. Off by default.</span>
+          </label>
+          <ng-container *ngIf="policy.upload_cloud">
+            <div class="ig-dp-types">
+              <div class="ig-dp-types-title">Send these document types for extraction</div>
+              <div class="ig-dp-chips">
+                <button *ngFor="let t of uploadCandidates" class="ig-chip ig-chip--cloud" [class.on]="isUploadType(t)"
+                        (click)="toggleUploadType(t)" [attr.aria-pressed]="isUploadType(t)">{{ isUploadType(t) ? '☁️ ' : '' }}{{ typeLabel(t) }}</button>
+              </div>
+              <small class="ig-field-note">Never-send types aren't listed. Nothing is sent until you choose at least one type.</small>
+            </div>
+            <label class="ig-field ig-field--narrow">
+              <span>Model for uploads <em>optional — a cheaper, faster model keeps extraction costs down</em></span>
+              <input [(ngModel)]="policy.upload_model" (blur)="savePolicy()" placeholder="Same as the active cloud model">
+            </label>
+          </ng-container>
+          <label class="ig-field ig-field--narrow">
+            <span>Monthly cloud budget (USD) <em>after this, questions and uploads use the local model</em></span>
+            <input type="number" min="0" step="1" [ngModel]="policy.monthly_budget_usd" (blur)="onBudgetChange($any($event.target).value)" placeholder="No limit">
+            <small class="ig-field-note">Spent this month: {{ monthSpend | currency:'USD':'symbol':'1.2-4' }} (estimated; only Claude models are priced)</small>
+          </label>
+        </div>
+
+        <div class="ig-usage" *ngIf="usage">
+          <div class="ig-dp-types-title">Cloud usage — last {{ usage.days }} days</div>
+          <div class="ig-usage-totals">
+            <span><b>{{ usage.totals.calls }}</b> calls</span>
+            <span><b>{{ usage.totals.chars_sent | number }}</b> characters sent</span>
+            <span><b>{{ usage.totals.input_tokens | number }}</b> input / <b>{{ usage.totals.output_tokens | number }}</b> output tokens</span>
+            <span *ngIf="usage.totals.est_cost_usd !== null">≈ <b>{{ usage.totals.est_cost_usd | currency:'USD':'symbol':'1.2-4' }}</b></span>
+          </div>
+          <div class="ig-usage-table" *ngIf="usage.calls.length">
+            <table>
+              <thead><tr><th>When</th><th>User</th><th>Model</th><th>Documents sent</th><th class="num">Chars</th><th class="num">Masked</th><th class="num">Tokens in/out</th><th class="num">Cost</th></tr></thead>
+              <tbody>
+                <tr *ngFor="let c of usage.calls">
+                  <td>{{ c.at | date:'MMM d, h:mm a' }}</td>
+                  <td>{{ c.user || '—' }}</td>
+                  <td>{{ c.provider }} · {{ c.model }}</td>
+                  <td>{{ c.documents.join(', ') || '—' }}</td>
+                  <td class="num">{{ c.chars_sent | number }}</td>
+                  <td class="num">{{ c.masked_values }}</td>
+                  <td class="num">{{ c.input_tokens ?? '—' }} / {{ c.output_tokens ?? '—' }}</td>
+                  <td class="num">{{ c.est_cost_usd !== null ? (c.est_cost_usd | currency:'USD':'symbol':'1.2-4') : '—' }}</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+          <div class="ig-field-note" *ngIf="!usage.calls.length">No data has been sent to a cloud model in this period.</div>
+        </div>
+      </div>
+
       <!-- Chat & Messaging -->
       <div class="ig-section">
         <div class="ig-sec-label">
@@ -164,31 +357,306 @@
         </div>
       </div>
 
-      <!-- AI Models -->
-      <div class="ig-section">
+      <!-- Accounting & webhooks (admins) -->
+      <div class="ig-section" *ngIf="qb || sf || hookEventKeys.length">
         <div class="ig-sec-label">
-          <span class="ig-sec-bar" style="background: linear-gradient(180deg, #10b981, #059669)"></span>
+          <span class="ig-sec-bar" style="background: linear-gradient(180deg, #2ca01c, #108000)"></span>
           <div>
-            <div class="ig-sec-title">BYOM (Bring Your Own Model)</div>
-            <div class="ig-sec-desc">Switch the active model used for document analysis and chat. Currently using <strong>{{ currentModel || '…' }}</strong>.</div>
+            <div class="ig-sec-title">Accounting, CRM &amp; webhooks</div>
+            <div class="ig-sec-desc">Send documents and extracted fields to QuickBooks, Salesforce and other systems.</div>
           </div>
         </div>
 
-        <div class="ig-model-grid">
-          <div *ngIf="loadingModels" class="ig-model-loading">Loading installed models…</div>
-          <button
-            *ngFor="let m of models"
-            class="ig-model-card"
-            [class.active]="m === currentModel"
-            (click)="switchModel(m)"
-            [disabled]="switchingModel">
-            <div class="ig-model-icon">🤖</div>
-            <div class="ig-model-name">{{ m }}</div>
-            <div class="ig-model-status" *ngIf="m === currentModel">● Active</div>
-            <div class="ig-model-status ig-model-status--idle" *ngIf="m !== currentModel">Switch</div>
+        <!-- One tile per system: click to set up, see status and what was sent -->
+        <div class="ig-sys-grid">
+          <button class="ig-sys" *ngFor="let k of sysKeys" (click)="openSystem(k)" [class.ig-sys--on]="sysSummary[k]?.connected">
+            <ng-container *ngTemplateOutlet="sysIcon; context: { $implicit: k }"></ng-container>
+            <span class="ig-sys-name">{{ sysMeta[k].name }}</span>
+            <span class="ig-sys-what">{{ sysMeta[k].what }}</span>
+            <span class="ig-sys-state" *ngIf="sysSummary[k]?.connected"><i class="ti ti-circle-check"></i>Connected<span *ngIf="sysSummary[k]?.account"> · {{ sysSummary[k].account }}</span></span>
+            <span class="ig-sys-state ig-sys-state--off" *ngIf="!sysSummary[k]?.connected">Not connected — click to set up</span>
+            <span class="ig-sys-stats" *ngIf="sysSummary[k]?.connected">
+              {{ sysSummary[k].sent_7d }} sent this week<span class="ig-sys-bad" *ngIf="sysSummary[k].failed_7d"> · {{ sysSummary[k].failed_7d }} failed</span>
+              <span *ngIf="sysSummary[k].last_sent_at"> · last {{ sysSummary[k].last_sent_at | date:'MMM d, h:mm a' }}</span>
+            </span>
           </button>
+          <a class="ig-sys ig-sys--ask" routerLink="/report-issue" [queryParams]="{ topic: 'connector' }">
+            <span class="ig-sys-icon ig-sys-icon--ask"><i class="ti ti-plus"></i></span>
+            <span class="ig-sys-name">Another system</span>
+            <span class="ig-sys-what">Xero, HubSpot, Clio… tell us what you use. Until then, webhooks reach almost anything through Zapier or Make.</span>
+          </a>
         </div>
 
+        <ng-template #sysIcon let-k>
+          <span class="ig-sys-icon" [ngSwitch]="k">
+            <svg *ngSwitchCase="'quickbooks'" viewBox="0 0 40 40" aria-hidden="true"><circle cx="20" cy="20" r="18" fill="#2ca01c"/>
+              <text x="20" y="25.5" text-anchor="middle" font-family="Arial, sans-serif" font-weight="700" font-size="15" fill="#fff">qb</text></svg>
+            <svg *ngSwitchCase="'salesforce'" viewBox="0 0 40 40" aria-hidden="true">
+              <g fill="#00a1e0"><circle cx="13" cy="21" r="7"/><circle cx="20" cy="15" r="8"/><circle cx="28" cy="18" r="7"/><circle cx="24" cy="25" r="6"/><rect x="9" y="19" width="22" height="10" rx="5"/></g>
+              <text x="20" y="25" text-anchor="middle" font-family="Arial, sans-serif" font-weight="700" font-size="9" fill="#fff">sf</text></svg>
+            <span *ngSwitchCase="'webhooks'" class="ig-sys-icon--hook"><i class="ti ti-webhook"></i></span>
+          </span>
+        </ng-template>
+
+        <!-- Drawer: the selected system's setup, status and send history -->
+        <div class="ig-drawer-bg" *ngIf="openSys" (click)="closeSystem()"></div>
+        <aside class="ig-drawer" *ngIf="openSys" role="dialog" [attr.aria-label]="sysMeta[openSys].name">
+          <header class="ig-drawer-head">
+            <ng-container *ngTemplateOutlet="sysIcon; context: { $implicit: openSys }"></ng-container>
+            <div>
+              <div class="ig-drawer-title">{{ sysMeta[openSys].name }}</div>
+              <div class="ig-drawer-sub">{{ sysMeta[openSys].what }}</div>
+            </div>
+            <button class="ig-cloud-x" (click)="closeSystem()" aria-label="Close">✕</button>
+          </header>
+
+          <div class="ig-banner ig-banner--ok" *ngIf="justConnected === openSys">
+            <i class="ti ti-circle-check"></i>
+            <div><strong>{{ sysMeta[openSys].name }} is connected.</strong> Pick a document below and choose Review. Nothing is sent until you approve it, and every send shows up under "Sent from UniDocVerse".</div>
+          </div>
+          <div class="ig-banner ig-banner--err" *ngIf="connectError && connectError.sys === openSys">
+            <i class="ti ti-alert-triangle"></i>
+            <div><strong>Sign-in didn't complete.</strong> {{ connectError.reason }}. Check the keys and the callback URL, then try Connect again.</div>
+          </div>
+
+          <div class="ig-drawer-body">
+        <!-- QuickBooks Online -->
+        <div class="ig-panel ig-panel--bare" *ngIf="qb && openSys === 'quickbooks'">
+          <div class="ig-panel-head">
+            <div class="ig-qb-logo">qb</div>
+            <div>
+              <div class="ig-panel-title">QuickBooks Online</div>
+              <div class="ig-panel-sub" *ngIf="qb.connected">Connected to <strong>{{ qb.company_name || 'your company' }}</strong> · {{ qb.environment }}</div>
+              <div class="ig-panel-sub" *ngIf="!qb.connected">Turn vendor invoices into bills. Every bill is reviewed and approved before it's posted.</div>
+            </div>
+            <button class="ig-btn ig-btn--danger ig-panel-act" *ngIf="qb.connected" (click)="disconnectQb()">Disconnect</button>
+          </div>
+
+          <ng-container *ngIf="!qb.connected">
+            <ol class="ig-steps">
+              <li>Create an app at <strong>developer.intuit.com</strong> (Accounting scope).</li>
+              <li>Add this redirect URI to the app: <code>{{ qb.redirect_uri }}</code>
+                <button class="ig-link" (click)="copy(qb.redirect_uri)">Copy</button></li>
+              <li>Paste the app's keys below, save, then connect.</li>
+            </ol>
+            <div class="ig-form-grid">
+              <label class="ig-field"><span>Client ID</span><input [(ngModel)]="qbForm.client_id" autocomplete="off"></label>
+              <label class="ig-field"><span>Client secret</span>
+                <input type="password" [(ngModel)]="qbForm.client_secret" autocomplete="off"
+                       [placeholder]="qb.configured ? 'Saved — leave blank to keep' : ''"></label>
+              <label class="ig-field"><span>Environment</span>
+                <select [(ngModel)]="qbForm.environment"><option value="sandbox">Sandbox (testing)</option><option value="production">Production</option></select>
+              </label>
+            </div>
+            <div class="ig-cloud-actions">
+              <button class="ig-btn ig-btn--ghost" (click)="saveQbApp()" [disabled]="qbBusy || !qbForm.client_id">Save app</button>
+              <button class="ig-btn" (click)="connectQb()" [disabled]="!qb.configured">Connect QuickBooks</button>
+            </div>
+          </ng-container>
+
+          <ng-container *ngIf="qb.connected">
+            <label class="ig-field ig-field--narrow">
+              <span>Expense account for bill lines</span>
+              <select [ngModel]="qb.expense_account_id" (ngModelChange)="setQbAccount($event)">
+                <option [ngValue]="null" disabled>Choose an account</option>
+                <option *ngFor="let a of qbAccounts" [value]="a.id">{{ a.name }}</option>
+              </select>
+            </label>
+
+            <div class="ig-dp-types-title" style="margin-top:14px">Bills to review</div>
+            <div class="ig-usage-table" *ngIf="qbBills.length">
+              <table>
+                <thead><tr><th>Invoice</th><th>Vendor</th><th class="num">Total</th><th>Due</th><th>Status</th><th></th></tr></thead>
+                <tbody>
+                  <tr *ngFor="let b of qbBills">
+                    <td>{{ b.filename }}</td>
+                    <td>{{ b.vendor || '—' }}</td>
+                    <td class="num">{{ b.total || '—' }}</td>
+                    <td>{{ b.due_date || '—' }}</td>
+                    <td>
+                      <span class="ig-pill ig-pill--ok" *ngIf="b.status === 'posted'">Posted · bill {{ b.qb_bill_id }}</span>
+                      <span class="ig-pill ig-pill--err" *ngIf="b.status === 'failed'" [title]="b.error">Failed</span>
+                      <span class="ig-pill" *ngIf="!b.status || b.status === 'draft' || b.status === 'discarded'">Not posted</span>
+                    </td>
+                    <td><button class="ig-link" *ngIf="b.status !== 'posted'" (click)="prepareBill(b.id)" [disabled]="qbBusy">Review</button></td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+            <div class="ig-field-note" *ngIf="!qbBills.length">No invoices with extracted fields yet.</div>
+
+            <div class="ig-cloud-edit" *ngIf="qbDraft">
+              <div class="ig-cloud-edit-head"><strong>New bill — {{ qbDraft.draft.filename }}</strong>
+                <button class="ig-cloud-x" (click)="qbDraft = null" aria-label="Close">✕</button></div>
+              <div class="ig-form-grid">
+                <label class="ig-field"><span>Vendor</span><input [(ngModel)]="qbDraft.edit.vendor"></label>
+                <label class="ig-field"><span>Total</span><input type="number" step="0.01" [(ngModel)]="qbDraft.edit.total"></label>
+                <label class="ig-field"><span>Bill date</span><input type="date" [(ngModel)]="qbDraft.edit.bill_date"></label>
+                <label class="ig-field"><span>Due date</span><input type="date" [(ngModel)]="qbDraft.edit.due_date"></label>
+                <label class="ig-field"><span>Invoice number</span><input [(ngModel)]="qbDraft.edit.doc_number"></label>
+              </div>
+              <ul class="ig-checks">
+                <li *ngFor="let c of qbDraft.checks" [class.ok]="c.ok">{{ c.ok ? '✓' : '⚠' }} {{ c.check }}</li>
+              </ul>
+              <div class="ig-field-note" *ngIf="!qbDraftOk">Some checks didn't pass. Correct the fields above before posting.</div>
+              <div class="ig-cloud-actions">
+                <button class="ig-btn" (click)="approveBill()" [disabled]="qbBusy || !qb.expense_account_id">Approve and post to QuickBooks</button>
+                <button class="ig-btn ig-btn--ghost" (click)="discardBill()">Discard</button>
+              </div>
+              <div class="ig-field-note" *ngIf="!qb.expense_account_id">Choose the expense account above first.</div>
+            </div>
+          </ng-container>
+        </div>
+
+        <!-- Salesforce -->
+        <div class="ig-panel ig-panel--bare" *ngIf="sf && openSys === 'salesforce'">
+          <div class="ig-panel-head">
+            <div class="ig-qb-logo ig-qb-logo--sf">sf</div>
+            <div>
+              <div class="ig-panel-title">Salesforce</div>
+              <div class="ig-panel-sub" *ngIf="sf.connected">Connected to <strong>{{ sf.org_name || sf.instance_url }}</strong><span *ngIf="sf.user_name"> as {{ sf.user_name }}</span></div>
+              <div class="ig-panel-sub" *ngIf="!sf.connected">Send documents to the client's Account — the file, a summary and the key facts. Every send is reviewed and approved first.</div>
+            </div>
+            <button class="ig-btn ig-btn--danger ig-panel-act" *ngIf="sf.connected" (click)="disconnectSf()">Disconnect</button>
+          </div>
+
+          <ng-container *ngIf="!sf.connected">
+            <ol class="ig-steps">
+              <li>In Salesforce Setup → App Manager, create a <strong>connected app</strong> with OAuth enabled and the scopes
+                <em>Manage user data via APIs (api)</em> and <em>Perform requests at any time (refresh_token, offline_access)</em>.</li>
+              <li>Set its callback URL to <code>{{ sf.redirect_uri }}</code>
+                <button class="ig-link" (click)="copy(sf.redirect_uri)">Copy</button></li>
+              <li>Paste the consumer key and secret below, save, then connect.</li>
+            </ol>
+            <div class="ig-form-grid">
+              <label class="ig-field"><span>Consumer key</span><input [(ngModel)]="sfForm.client_id" autocomplete="off"></label>
+              <label class="ig-field"><span>Consumer secret</span>
+                <input type="password" [(ngModel)]="sfForm.client_secret" autocomplete="off"
+                       [placeholder]="sf.configured ? 'Saved — leave blank to keep' : ''"></label>
+              <label class="ig-field"><span>Org</span>
+                <input [(ngModel)]="sfForm.environment" list="sf-envs" placeholder="production, sandbox or https://yourco.my.salesforce.com">
+                <datalist id="sf-envs"><option value="production"></option><option value="sandbox"></option></datalist>
+              </label>
+            </div>
+            <div class="ig-cloud-actions">
+              <button class="ig-btn ig-btn--ghost" (click)="saveSfApp()" [disabled]="sfBusy || !sfForm.client_id">Save app</button>
+              <button class="ig-btn" (click)="connectSf()" [disabled]="!sf.configured">Connect Salesforce</button>
+            </div>
+          </ng-container>
+
+          <ng-container *ngIf="sf.connected">
+            <div class="ig-dp-types-title" style="margin-top:4px">Documents</div>
+            <label class="ig-field ig-field--narrow"><span>Filter</span>
+              <input [(ngModel)]="sfFilter" placeholder="File name or type"></label>
+            <div class="ig-usage-table" *ngIf="sfDocsShown.length">
+              <table>
+                <thead><tr><th>Document</th><th>Type</th><th>Status</th><th></th></tr></thead>
+                <tbody>
+                  <tr *ngFor="let d of sfDocsShown">
+                    <td>{{ d.filename }}</td>
+                    <td>{{ d.doc_type || '—' }}</td>
+                    <td>
+                      <span class="ig-pill ig-pill--ok" *ngIf="d.status === 'sent'">Sent · {{ d.draft?.account_name }}</span>
+                      <span class="ig-pill ig-pill--err" *ngIf="d.status === 'failed'" [title]="d.error">Failed</span>
+                      <span class="ig-pill" *ngIf="!d.status || d.status === 'draft' || d.status === 'discarded'">Not sent</span>
+                    </td>
+                    <td><button class="ig-link" *ngIf="d.status !== 'sent'" (click)="prepareSf(d.id)" [disabled]="sfBusy">Review</button></td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+            <div class="ig-field-note" *ngIf="!sfDocsShown.length">No processed documents{{ sfFilter ? ' match' : ' yet' }}.</div>
+
+            <div class="ig-cloud-edit" *ngIf="sfDraft">
+              <div class="ig-cloud-edit-head"><strong>Send to Salesforce — {{ sfDraft.draft.filename }}</strong>
+                <button class="ig-cloud-x" (click)="sfDraft = null" aria-label="Close">✕</button></div>
+              <div class="ig-form-grid">
+                <label class="ig-field"><span>Account</span><input [(ngModel)]="sfDraft.edit.account_name" placeholder="Client / company name"></label>
+                <label class="ig-field"><span>Activity subject</span><input [(ngModel)]="sfDraft.edit.subject"></label>
+              </div>
+              <div class="ig-field-note">An existing Account with this exact name is used; otherwise a new one is created. The file is attached to it and a completed Task records the summary and key facts.</div>
+              <pre class="ig-sf-facts" *ngIf="sfDraft.draft.facts">{{ sfDraft.draft.facts }}</pre>
+              <ul class="ig-checks">
+                <li *ngFor="let c of sfDraft.checks" [class.ok]="c.ok">{{ c.ok ? '✓' : '⚠' }} {{ c.check }}</li>
+              </ul>
+              <div class="ig-cloud-actions">
+                <button class="ig-btn" (click)="approveSf()" [disabled]="sfBusy || !sfDraft.edit.account_name">Approve and send to Salesforce</button>
+                <button class="ig-btn ig-btn--ghost" (click)="discardSf()">Discard</button>
+              </div>
+            </div>
+          </ng-container>
+        </div>
+
+        <!-- Webhooks -->
+        <div class="ig-panel ig-panel--bare" *ngIf="openSys === 'webhooks'">
+          <div class="ig-panel-head">
+            <div class="ig-qb-logo ig-qb-logo--hook">↗</div>
+            <div>
+              <div class="ig-panel-title">Webhooks</div>
+              <div class="ig-panel-sub">Notify Zapier, Make, n8n or your own system when something happens. Each request is signed (X-UDV-Signature).</div>
+            </div>
+          </div>
+
+          <div class="ig-secret" *ngIf="hookSecret">
+            <strong>Signing secret — copy it now, it won't be shown again:</strong>
+            <code>{{ hookSecret.secret }}</code>
+            <button class="ig-link" (click)="copy(hookSecret.secret)">Copy</button>
+            <button class="ig-link" (click)="hookSecret = null">Done</button>
+          </div>
+
+          <div class="ig-hook" *ngFor="let h of hooks">
+            <div class="ig-hook-row">
+              <div class="ig-hook-url">{{ h.url }}</div>
+              <span class="ig-pill" [class.ig-pill--err]="h.failed > 0">{{ h.failed > 0 ? h.failed + ' failed' : (h.last_ok ? 'Delivering' : 'No deliveries yet') }}</span>
+              <button class="ig-link" (click)="testHook(h.id)">Send test</button>
+              <button class="ig-link" (click)="showDeliveries(h.id)">{{ hookDeliveries[h.id] ? 'Hide log' : 'Delivery log' }}</button>
+              <button class="ig-link ig-link--danger" (click)="deleteHook(h.id)">Remove</button>
+            </div>
+            <div class="ig-field-note">{{ h.events.length ? h.events.join(', ') : 'All events' }}</div>
+            <div class="ig-usage-table" *ngIf="hookDeliveries[h.id]?.length">
+              <table>
+                <thead><tr><th>When</th><th>Event</th><th>Status</th><th class="num">HTTP</th><th class="num">Tries</th><th></th></tr></thead>
+                <tbody>
+                  <tr *ngFor="let d of hookDeliveries[h.id]">
+                    <td>{{ d.created_at | date:'MMM d, h:mm:ss a' }}</td>
+                    <td>{{ d.event }}</td>
+                    <td><span class="ig-pill" [class.ig-pill--ok]="d.status === 'delivered'" [class.ig-pill--err]="d.status === 'failed'">{{ d.status }}</span></td>
+                    <td class="num">{{ d.response_code || '—' }}</td>
+                    <td class="num">{{ d.attempts }}</td>
+                    <td><button class="ig-link" *ngIf="d.status !== 'delivered'" (click)="redeliver(d.id, h.id)">Retry now</button></td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+          <div class="ig-hook-add">
+            <label class="ig-field"><span>Endpoint URL</span><input [(ngModel)]="hookForm.url" placeholder="https://hooks.zapier.com/…"></label>
+            <div class="ig-dp-chips">
+              <button *ngFor="let e of hookEventKeys" class="ig-chip ig-chip--cloud ig-chip--code" [class.on]="hookForm.events.includes(e)"
+                      (click)="toggleHookEvent(e)" [title]="hookEvents[e]">{{ e }}</button>
+            </div>
+            <div class="ig-field-note">No events selected = all events.</div>
+            <div class="ig-cloud-actions"><button class="ig-btn" (click)="addHook()" [disabled]="hookBusy || !hookForm.url">Add webhook</button></div>
+          </div>
+        </div>
+
+            <section class="ig-hist" *ngIf="sysSummary[openSys]?.connected">
+              <div class="ig-dp-types-title">Sent from UniDocVerse</div>
+              <div class="ig-field-note" *ngIf="!sysSends.length">Nothing sent yet.</div>
+              <ul class="ig-hist-list" *ngIf="sysSends.length">
+                <li *ngFor="let x of sysSends" [class.bad]="x.status === 'failed'">
+                  <i class="ti" [class.ti-circle-check]="x.status === 'sent'" [class.ti-alert-circle]="x.status === 'failed'" [class.ti-clock]="x.status === 'pending'"></i>
+                  <div>
+                    <div class="ig-hist-main">{{ x.filename || 'Event' }} <span class="ig-hist-arrow">→</span> {{ x.target }}</div>
+                    <div class="ig-hist-meta">{{ x.at | date:'MMM d, h:mm a' }} · {{ x.by }}<span *ngIf="x.error"> · {{ x.error }}</span></div>
+                  </div>
+                  <a *ngIf="x.url" [href]="x.url" target="_blank" rel="noopener" class="ig-link">Open in {{ sysMeta[x.system].name }}</a>
+                </li>
+              </ul>
+            </section>
+          </div>
+        </aside>
       </div>
 
       <!-- MCP Clients -->

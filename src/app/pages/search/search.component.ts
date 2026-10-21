@@ -1,5 +1,5 @@
 import { Component, OnInit } from '@angular/core';
-import { ActivatedRoute } from '@angular/router';
+import { ActivatedRoute, Router } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { ApiService } from '../../services/api.service';
@@ -18,7 +18,7 @@ export class SearchComponent implements OnInit {
   selectedDoc: any = null;
   chips = ['bank statement balance','tax refund 2024','invoice payment terms','payoff amount'];
 
-  constructor(private api: ApiService, private route: ActivatedRoute) {}
+  constructor(private api: ApiService, private route: ActivatedRoute, private router: Router) {}
 
   ngOnInit(): void {
     // The top-bar search box navigates here with ?q=
@@ -45,6 +45,14 @@ export class SearchComponent implements OnInit {
       },
       error: () => { this.results = []; this.loading = false; }
     });
+  }
+
+  /** Clear the box, the results and the ?q= in the address bar. */
+  clear(): void {
+    this.query = '';
+    this.results = [];
+    this.loading = false;
+    this.router.navigate([], { relativeTo: this.route, queryParams: { q: null }, queryParamsHandling: 'merge', replaceUrl: true });
   }
 
   openDoc(doc: any): void { this.selectedDoc = doc; }

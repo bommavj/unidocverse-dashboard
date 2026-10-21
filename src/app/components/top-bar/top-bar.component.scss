@@ -30,6 +30,13 @@
   input::placeholder { color: var(--t3); }
   kbd { font-family: var(--mono); font-size: 11px; color: var(--t3); border: 1px solid var(--bdr); border-radius: 4px; padding: 1px 5px; background: var(--surf); }
 }
+.tb-clear {
+  display: inline-flex; align-items: center; justify-content: center; width: 24px; height: 24px; flex-shrink: 0;
+  border: none; border-radius: 50%; background: var(--bdr2, #e5e7eb); color: var(--t2, #374151); cursor: pointer; padding: 0;
+  i { font-size: 14px; }
+  &:hover { background: var(--blue, #2563eb); color: #fff; }
+  &:focus-visible { outline: 2px solid var(--blue, #2563eb); outline-offset: 1px; }
+}
 .tb-jumps {
   position: absolute; top: 44px; left: 0; right: 0;
   background: var(--surf); border: 1px solid var(--bdr); border-radius: 8px; box-shadow: var(--sh2); padding: 6px;

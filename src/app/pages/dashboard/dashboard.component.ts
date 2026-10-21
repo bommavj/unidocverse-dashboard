@@ -81,6 +81,42 @@ export class DashboardComponent implements OnInit {
   immHigh     = 0;
   immExpired  = 0;
 
+  engine: any = null;          // { ollama: {reachable, models}, cloud, ready }
+
+  loadEngine(): void {
+    this.http.get<any>('http://localhost:7979/api/llm-providers/engine-status').subscribe({
+      next: e => this.engine = e, error: () => this.engine = null });
+  }
+
+  brief: any = null;
+  briefOpen = true;
+  briefRunning = false;
+
+  get briefSections(): { name: string; severity: string; items: any[] }[] {
+    const out: any[] = [];
+    for (const i of this.brief?.items || []) {
+      let sec = out.find(x => x.name === i.section);
+      if (!sec) out.push(sec = { name: i.section, severity: i.severity, items: [] });
+      sec.items.push(i);
+    }
+    return out;
+  }
+
+  loadBrief(): void {
+    this.http.get<any>('http://localhost:7979/api/brief/today').subscribe({ next: b => this.brief = b, error: () => this.brief = null });
+  }
+
+  refreshBrief(): void {
+    this.briefRunning = true;
+    this.http.post<any>('http://localhost:7979/api/brief/run', {}).subscribe({
+      next: b => { this.brief = b; this.briefRunning = false; }, error: () => this.briefRunning = false });
+  }
+
+  openBriefItem(i: any): void {
+    const [path, q] = String(i.link || '/').split('?');
+    this.router.navigateByUrl(q ? `${path}?${q}` : path);
+  }
+
   constructor(
     private api: ApiService,
     private router: Router,
@@ -101,6 +137,8 @@ export class DashboardComponent implements OnInit {
     this.loadAlerts();
     if (this.features.immigrationMode()) this.loadImmigrationExpiry();
     this.loadApprovals();
+    this.loadBrief();
+    this.loadEngine();
     this.loadDeadlines();
     this.firstName = (this.auth.currentUser()?.full_name || '').split(' ')[0];
   }

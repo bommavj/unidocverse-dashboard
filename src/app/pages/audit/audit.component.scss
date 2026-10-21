@@ -102,3 +102,29 @@
 .td-empty  { text-align: center; color: #cbd5e1; padding: 40px; }
 
 .action-chip { font-size: 10.5px; font-weight: 800; padding: 2px 8px; border-radius: 20px; white-space: nowrap; }
+
+
+/* Retention */
+.ret-btn { margin-left: auto; margin-right: 10px; font: inherit; font-size: 12.5px; font-weight: 600; padding: 6px 12px;
+  border-radius: 8px; border: 1px solid #c7d2fe; background: #fff; color: #4338ca; cursor: pointer;
+  &:hover { background: #eef2ff; } &:focus-visible { outline: 2px solid #6366f1; outline-offset: 2px; } }
+.ret-panel { background: #fff; border: 1px solid #e0e7ff; border-radius: 14px; padding: 16px 18px; margin-bottom: 16px;
+  display: flex; flex-direction: column; gap: 12px; max-width: 860px; }
+.ret-head { display: flex; flex-direction: column; gap: 2px; font-size: 14px; color: #111827; }
+.ret-sub { font-size: 12.5px; color: #6b7280; }
+.ret-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 12px; }
+.ret-field { display: flex; flex-direction: column; gap: 4px; font-size: 12px; font-weight: 600; color: #374151;
+  select { font: inherit; font-weight: 400; font-size: 13px; padding: 7px 10px; border: 1px solid #d1d5db; border-radius: 8px; background: #fff; }
+  small { font-weight: 400; color: #6b7280; } }
+.ret-hold { display: flex; gap: 8px; align-items: flex-start; font-size: 13px; color: #374151; cursor: pointer;
+  input { margin-top: 3px; accent-color: #4f46e5; } }
+.ret-actions { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
+.ret-primary, .ret-secondary { font: inherit; font-size: 12.5px; font-weight: 600; padding: 7px 14px; border-radius: 8px; cursor: pointer;
+  &:disabled { opacity: .55; cursor: not-allowed; } &:focus-visible { outline: 2px solid #6366f1; outline-offset: 2px; } }
+.ret-primary { background: #4f46e5; color: #fff; border: 1px solid #4f46e5; }
+.ret-secondary { background: #fff; color: #3730a3; border: 1px solid #c7d2fe; }
+.ret-msg { font-size: 12.5px; color: #047857; }
+.ret-foot { font-size: 12px; color: #6b7280; }
+.ret-archives { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; }
+.ret-archive { font: inherit; font-size: 12px; padding: 4px 10px; border-radius: 999px; border: 1px solid #e5e7eb; background: #f9fafb;
+  cursor: pointer; color: #374151; span { color: #9ca3af; margin-left: 4px; } &:hover { border-color: #6366f1; color: #4338ca; } }

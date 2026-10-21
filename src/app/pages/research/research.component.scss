@@ -44,12 +44,25 @@
   &:hover, &.active { color: #6366f1; border-color: #6366f1; }
 }
 
-.doc-search-wrap { padding: 0 10px 8px; flex-shrink: 0; }
+.doc-search-wrap { padding: 0 10px 8px; flex-shrink: 0; position: relative; }
+.doc-search-clear {
+  position: absolute; right: 16px; top: 4px; width: 20px; height: 20px; border: none; border-radius: 50%;
+  background: transparent; color: var(--t3); font-size: 11px; cursor: pointer; line-height: 20px; padding: 0;
+  &:hover { background: var(--surf2, #f3f4f6); color: var(--t1); }
+  &:focus-visible { outline: 2px solid #6366f1; }
+}
+.sel-clear-btn {
+  margin-left: 6px; font: inherit; font-size: 11.5px; font-weight: 600; padding: 4px 9px; border-radius: 6px;
+  border: 1px solid #fecaca; background: #fef2f2; color: #b91c1c; cursor: pointer;
+  &:hover { background: #b91c1c; color: #fff; }
+  &:focus-visible { outline: 2px solid #6366f1; outline-offset: 1px; }
+}
 .doc-search {
   width: 100%; box-sizing: border-box;
   padding: 6px 10px; border: 1px solid var(--bdr); border-radius: 6px;
   font-size: 12px; background: var(--surf); color: var(--t1);
   outline: none;
+  padding-right: 28px;
   &:focus { border-color: #6366f1; }
 }
 
@@ -926,3 +939,25 @@
   transition: background .15s;
   &:hover { background: #4f46e5; }
 }
+
+
+/* Cloud model consent */
+.cloud-confirm {
+  border: 1.5px solid #c7d2fe; background: #f5f7ff; border-radius: 14px; padding: 18px 20px; margin-bottom: 16px;
+  display: flex; flex-direction: column; gap: 10px; max-width: 760px;
+}
+.cloud-confirm-title { font-size: 15px; font-weight: 700; color: #1e1b4b; }
+.cloud-confirm-text, .cloud-confirm-note { margin: 0; font-size: 13.5px; color: #374151; line-height: 1.5; }
+.cloud-confirm-note { font-size: 12.5px; color: #6b7280; }
+.cloud-confirm-docs {
+  margin: 0; padding: 8px 12px 8px 28px; background: #fff; border: 1px solid #e0e7ff; border-radius: 8px;
+  font-size: 13px; color: #111827; overflow-wrap: anywhere;
+}
+.cloud-confirm-actions { display: flex; gap: 8px; flex-wrap: wrap; }
+.cc-btn {
+  font: inherit; font-size: 13px; font-weight: 600; padding: 8px 14px; border-radius: 8px; cursor: pointer;
+  border: 1px solid #c7d2fe; background: #fff; color: #3730a3;
+  &:hover { background: #eef2ff; }
+  &:focus-visible { outline: 2px solid #6366f1; outline-offset: 2px; }
+}
+.cc-btn--primary { background: #4f46e5; border-color: #4f46e5; color: #fff; &:hover { background: #4338ca; } }

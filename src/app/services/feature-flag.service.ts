@@ -13,7 +13,16 @@ export interface FeatureFlags {
   supply_chain_mode: boolean;
   compliance_mode: boolean;
   operations_mode: boolean;
+  clm_mode: boolean;
 }
+
+/** Module switch for each domain (agent sector, workflow pipeline, report) — matches the backend's DOMAIN_FLAG. */
+export const DOMAIN_FLAG: Record<string, keyof FeatureFlags> = {
+  insurance: 'agency_mode', claims: 'agency_mode', renewals: 'agency_mode', immigration: 'immigration_mode',
+  legal: 'legal_mode', medical: 'medical_mode', finance: 'finance_mode', real_estate: 'real_estate_mode',
+  hr: 'hr_mode', payroll: 'hr_mode', supply_chain: 'supply_chain_mode', procurement: 'supply_chain_mode',
+  compliance: 'compliance_mode', operations: 'operations_mode', clm: 'clm_mode',
+};
 
 const DEFAULT_FLAGS: FeatureFlags = {
   agency_mode: false,
@@ -26,6 +35,7 @@ const DEFAULT_FLAGS: FeatureFlags = {
   supply_chain_mode: false,
   compliance_mode: false,
   operations_mode: false,
+  clm_mode: false,
 };
 
 const FLAGS_KEY = 'udv_feature_flags';
@@ -51,6 +61,13 @@ export class FeatureFlagService {
   supplyChainMode = () => this._flags().supply_chain_mode;
   complianceMode = () => this._flags().compliance_mode;
   operationsMode = () => this._flags().operations_mode;
+  clmMode = () => this._flags().clm_mode;
+
+  /** Is this domain's module switched on? Unknown domains are shown. */
+  domainOn = (domain: string): boolean => {
+    const f = DOMAIN_FLAG[domain];
+    return f ? !!this._flags()[f] : true;
+  };
 
   /** Full flags object — for future expansion */
   flags = this._flags.asReadonly();

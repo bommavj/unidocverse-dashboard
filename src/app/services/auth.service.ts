@@ -49,6 +49,9 @@ export class AuthService {
         this.isLoggedIn.set(true);
         // Restore flags instantly from cache — no flicker on reload
         this.features.restoreFlags();
+        // …then refresh from the server: module switches may have changed since this session began.
+        // Deferred: the HTTP interceptor needs this service, which is still being constructed here.
+        setTimeout(() => this.features.load(), 0);
       } catch {
         this.clearSession();
       }
@@ -74,6 +77,12 @@ export class AuthService {
   }
 
   logout() {
+    // Record the sign-out in the audit trail while the token is still valid; don't wait for it
+    const token = localStorage.getItem(this.ACCESS_KEY);
+    if (token) {
+      this.http.post('http://localhost:7979/api/auth/logout', {}, { headers: { Authorization: `Bearer ${token}` } })
+        .subscribe({ error: () => {} });
+    }
     this.features.clear();
     this.clearSession();
     window.dispatchEvent(new CustomEvent('udv-logout'));

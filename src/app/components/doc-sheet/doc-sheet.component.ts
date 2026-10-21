@@ -69,6 +69,20 @@ export class DocSheetComponent implements OnChanges {
   heroMetrics: { label: string; value: string; icon: string }[] = [];
   analyticsCharts: { title: string; rows: { label: string; value: string; pct: number }[] }[] = [];
 
+  // Where this document was sent (QuickBooks, Salesforce, webhooks)
+  sends: any[] = [];
+  readonly sysNames: Record<string, string> = { quickbooks: 'QuickBooks', salesforce: 'Salesforce', webhooks: 'Webhook' };
+
+  loadSends(id: string): void {
+    this.sends = [];
+    authFetch(`http://localhost:7979/api/integrations/sends?document_id=${encodeURIComponent(id)}&limit=20`)
+      .then(r => r.ok ? r.json() : { sends: [] })
+      .then(r => this.zone.run(() => {
+        if (this.doc?.id === id) { this.sends = (r.sends || []).filter((x: any) => x.status !== 'pending'); this.cdr.markForCheck(); }
+      }))
+      .catch(() => {});
+  }
+
   tabs = [
     { id: 'summary',    label: '📝 Summary'       },
     { id: 'keypoints',  label: '✦ Key Points'     },
@@ -91,6 +105,7 @@ export class DocSheetComponent implements OnChanges {
         text: `I have <strong>${this.doc.filename}</strong> in full context. Ask me anything.`
       }];
       this._populate(this.doc);
+      this.loadSends(this.doc.id);
       if (this.activeTab === 'askai') { this.loadQaHistory(); }
 
       this.loadingDoc = true;

@@ -4,6 +4,7 @@ import {
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { HttpClient } from '@angular/common/http';
+import { FeatureFlagService } from '../../services/feature-flag.service';
 import { UdvSelectComponent, SelectOption } from '../../components/udv-select/udv-select.component';
 
 const API = 'http://localhost:7979/api';
@@ -166,7 +167,13 @@ export class WorkflowComponent implements OnInit {
   historyLog: any[] = [];
   historyLoading = false;
 
-  constructor(private http: HttpClient, private cdr: ChangeDetectorRef) {}
+  constructor(private http: HttpClient, private cdr: ChangeDetectorRef, public flags: FeatureFlagService) {}
+
+  /** Domain pipelines follow the organisation's module switches (Settings → Features). */
+  get anyDomainPipeline(): boolean {
+    return ['procurement', 'clm', 'claims', 'renewals', 'payroll', 'medical', 'legal', 'real_estate']
+      .some(k => this.flags.domainOn(k));
+  }
 
   ngOnInit(): void {
     this.loadDocs();

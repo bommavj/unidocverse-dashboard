@@ -30,8 +30,9 @@ export const routes: Routes = [
   { path: 'watch-folders', canActivate: [authGuard], loadComponent: () => import('./pages/watch-folders/watch-folders.component').then(m => m.WatchFoldersComponent) },
   { path: 'gmail',         canActivate: [authGuard], loadComponent: () => import('./pages/gmail/gmail-integration.component').then(m => m.GmailIntegrationComponent) },
   { path: 'insights',      canActivate: [authGuard], loadComponent: () => import('./pages/insights-dashboard/insights-dashboard.component').then(m => m.InsightsDashboardComponent) },
-  { path: 'alerts',        canActivate: [authGuard], loadComponent: () => import('./services/alerts.component').then(m => m.AlertsComponent) },
+  { path: 'alerts',        redirectTo: 'deadlines' },   // expiring documents now live on the Deadline board
   { path: 'settings',      canActivate: [authGuard], loadComponent: () => import('./pages/settings/settings.component').then(m => m.SettingsComponent) },
+  { path: 'help',          canActivate: [authGuard], loadComponent: () => import('./pages/help/help.component').then(m => m.HelpComponent) },
   { path: 'report-issue',  canActivate: [authGuard], loadComponent: () => import('./pages/report-issue/report-issue.component').then(m => m.ReportIssueComponent) },
   { path: 'notes',         canActivate: [authGuard], loadComponent: () => import('./pages/personal/notes/notes.component').then(m => m.NotesComponent) },
   { path: 'planner',       canActivate: [authGuard], loadComponent: () => import('./pages/personal/planner/planner.component').then(m => m.PlannerComponent) },
@@ -69,11 +70,6 @@ export const routes: Routes = [
     loadComponent: () => import('./pages/agency/renewals/renewals.component').then(m => m.RenewalsComponent)
   },
   {
-    path: 'calendar',
-    canActivate: [authGuard],
-    loadComponent: () => import('./pages/agency/calendar/calendar.component').then(m => m.CalendarComponent)
-  },
-  {
     path: 'commission',
     canActivate: [authGuard, agencyGuard],
     loadComponent: () => import('./pages/agency/commission/commission.component').then(m => m.CommissionComponent)
@@ -108,13 +104,13 @@ export const routes: Routes = [
   { path: 'insurance-automation', canActivate: [authGuard], loadComponent: () => import('./pages/insurance-automation/insurance-automation.component').then(m => m.InsuranceAutomationComponent) },
 
   // ── Analytics & Insights ──────────────────────────────────────────────────
-  { path: 'analytics-hub',        canActivate: [authGuard], loadComponent: () => import('./pages/analytics-hub/analytics-hub.component').then(m => m.AnalyticsHubComponent) },
+  { path: 'analytics-hub',        redirectTo: 'insights' },   // it only re-wrapped Insights and Timeline
   { path: 'document-analytics',   canActivate: [authGuard], loadComponent: () => import('./pages/document-analytics/document-analytics.component').then(m => m.DocumentAnalyticsComponent) },
   { path: 'conversations',        canActivate: [authGuard], loadComponent: () => import('./pages/history-hub/history-hub.component').then(m => m.HistoryHubComponent) },
   { path: 'history',              canActivate: [authGuard], loadComponent: () => import('./pages/history/history.component').then(m => m.HistoryComponent) },
 
   // ── Compliance & Risk ─────────────────────────────────────────────────────
-  { path: 'compliance',           canActivate: [authGuard], loadComponent: () => import('./pages/compliance/compliance.component').then(m => m.ComplianceComponent) },
+  { path: 'compliance',           redirectTo: 'deadlines' },  // Deadlines and Audit have their own pages
   { path: 'risk',                 canActivate: [authGuard], loadComponent: () => import('./pages/risk/risk.component').then(m => m.RiskComponent) },
   { path: 'audit',                canActivate: [authGuard], loadComponent: () => import('./pages/audit/audit.component').then(m => m.AuditComponent) },
   { path: 'deadlines',            canActivate: [authGuard], loadComponent: () => import('./pages/deadlines/deadlines.component').then(m => m.DeadlinesComponent) },

@@ -5,6 +5,7 @@
       <h1 class="audit-title">Audit Trail</h1>
       <p class="audit-sub">Immutable log of every action taken on documents</p>
     </div>
+    <button class="ret-btn" (click)="toggleRetention()" [attr.aria-expanded]="showRetention">Retention</button>
     <div class="view-toggle">
       <button [class.active]="view==='timeline'" (click)="view='timeline'">
         <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
@@ -15,6 +16,51 @@
         Table
       </button>
     </div>
+  </div>
+
+  <!-- Retention -->
+  <div class="ret-panel" *ngIf="showRetention">
+    <div class="ret-head">
+      <strong>Retention</strong>
+      <span class="ret-sub">Older entries are archived to a compressed file, then removed from the live trail. Runs nightly.</span>
+    </div>
+    <div class="ret-msg" *ngIf="!retention && retentionMsg">{{ retentionMsg }}</div>
+    <ng-container *ngIf="retention">
+      <div class="ret-grid">
+        <label class="ret-field">
+          <span>Views, searches and AI questions</span>
+          <select [(ngModel)]="retention.read_days">
+            <option *ngFor="let d of retention.read_choices" [ngValue]="d">{{ readLabel(d) }}</option>
+          </select>
+        </label>
+        <label class="ret-field">
+          <span>Changes and security events</span>
+          <select [(ngModel)]="retention.change_days">
+            <option *ngFor="let d of retention.change_choices" [ngValue]="d">{{ changeLabel(d) }}</option>
+          </select>
+          <small>Sign-ins, uploads, deletes, settings, cloud calls, QuickBooks. Regulated firms usually keep these 3–7 years.</small>
+        </label>
+      </div>
+      <label class="ret-hold">
+        <input type="checkbox" [(ngModel)]="retention.legal_hold">
+        <span><strong>Legal hold</strong> — keep everything; pause all cleanup.</span>
+      </label>
+      <div class="ret-actions">
+        <button class="ret-primary" (click)="saveRetention()" [disabled]="retentionSaving">Save</button>
+        <button class="ret-secondary" (click)="runRetention()" [disabled]="retentionSaving">Run cleanup now</button>
+        <span class="ret-msg">{{ retentionMsg }}</span>
+      </div>
+      <div class="ret-foot">
+        {{ retention.rows | number }} entries in the live trail ·
+        Last cleanup: {{ retention.last_run_at ? (retention.last_run_at | date:'MMM d, h:mm a') : 'not yet' }}
+      </div>
+      <div class="ret-archives" *ngIf="archives.length">
+        <div class="ret-sub">Archives</div>
+        <button class="ret-archive" *ngFor="let a of archives" (click)="downloadArchive(a.name)">
+          ⬇ {{ a.name }} <span>{{ a.size / 1024 | number:'1.0-1' }} KB</span>
+        </button>
+      </div>
+    </ng-container>
   </div>
 
   <!-- Summary stats -->

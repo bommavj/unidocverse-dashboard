@@ -2,8 +2,12 @@
   <form class="tb-search" (ngSubmit)="search()" role="search">
     <i class="ti ti-search"></i>
     <input id="udv-search" name="q" [(ngModel)]="query" autocomplete="off"
-           [placeholder]="'Search documents, clients and pages' | translate" aria-label="Search">
-    <kbd>⌘K</kbd>
+           [placeholder]="'Search documents, clients and pages' | translate" aria-label="Search"
+           (keydown.escape)="query = ''">
+    <button type="button" class="tb-clear" *ngIf="query" (click)="query = ''" aria-label="Clear search">
+      <i class="ti ti-x"></i>
+    </button>
+    <kbd *ngIf="!query">⌘K</kbd>
     <div class="tb-jumps" *ngIf="matches.length">
       <div class="tb-jumps-h">Go to</div>
       <button type="button" *ngFor="let j of matches" (mousedown)="go(j)"><i class="ti ti-arrow-right"></i>{{ j.label }}</button>
@@ -22,7 +26,7 @@
 
     <span class="tb-sep"></span>
 
-    <a class="tb-ic" routerLink="/approvals" aria-label="Approvals" title="Approvals">
+    <a class="tb-ic" routerLink="/approvals" aria-label="Approvals" title="Waiting for your approval" *ngIf="pendingApprovals > 0">
       <i class="ti ti-checkbox"></i><span class="tb-dot tb-dot--warn" *ngIf="pendingApprovals > 0">{{ pendingApprovals }}</span>
     </a>
     <a class="tb-ic" routerLink="/alerts" aria-label="Alerts" title="Alerts">
@@ -41,7 +45,7 @@
         <i class="ti ti-help"></i>
       </button>
       <div class="tb-menu" *ngIf="menu === 'help'" (click)="$event.stopPropagation()">
-        <a href="https://unidocverse.com/help.html" target="_blank" rel="noopener"><i class="ti ti-book"></i>{{ 'Help center' | translate }}</a>
+        <a routerLink="/help" (click)="menu=''"><i class="ti ti-book"></i>{{ 'Help center' | translate }}</a>
         <a routerLink="/report-issue" (click)="menu=''"><i class="ti ti-bug"></i>{{ 'Report issue' | translate }}</a>
         <div class="tb-menu-sep"></div>
         <label class="tb-menu-row"><i class="ti ti-language"></i>

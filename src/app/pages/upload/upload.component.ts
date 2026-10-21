@@ -6,7 +6,8 @@ import { ApiService } from '../../services/api.service';
 import { ToastService } from '../../services/toast.service';
 import { Router } from '@angular/router';
 
-interface UploadFile { name:string; pct:number; state:'uploading'|'done'|'error'; status:string; file:File; }
+interface UploadFile { name:string; pct:number; state:'uploading'|'done'|'error'|'duplicate'; status:string; file:File;
+  existing?: { id: string; filename: string; uploaded_at?: string } }
 
 const ALLOWED = new Set([
   // Documents
@@ -107,7 +108,13 @@ export class UploadComponent implements OnInit {
     });
   }
 
-  uploadReal(item: UploadFile): void {
+  /** The person chose to keep a second copy of a file that's already uploaded. */
+  uploadAnyway(item: UploadFile): void {
+    item.state = 'uploading'; item.status = 'Uploading…'; item.pct = 0; item.existing = undefined;
+    this.uploadReal(item, true);
+  }
+
+  uploadReal(item: UploadFile, allowDuplicate = false): void {
     let fake = 0;
     const iv = setInterval(() => {
       if (fake < 85) { fake += Math.random()*8+2; item.pct = Math.min(Math.round(fake), 85); }
@@ -116,7 +123,7 @@ export class UploadComponent implements OnInit {
       else                    item.status = 'Running phi3:mini…';
     }, 120);
 
-    this.api.uploadDocument(item.file, this.selectedClientId || undefined).subscribe({
+    this.api.uploadDocument(item.file, this.selectedClientId || undefined, allowDuplicate).subscribe({
       next: () => {
         clearInterval(iv);
         item.pct = 90; item.status = 'Finalizing…';
@@ -124,6 +131,13 @@ export class UploadComponent implements OnInit {
       },
       error: (err) => {
         clearInterval(iv);
+        if (err?.status === 409 && err?.error?.detail?.code === 'duplicate') {
+          item.state = 'duplicate';
+          item.existing = err.error.detail.existing;
+          item.status = 'Same file already uploaded';
+          item.pct = 100;
+          return;
+        }
         item.state = 'error';
         item.status = err?.error?.detail || 'Upload failed. Try again.';
         item.pct = Math.max(item.pct, 20);

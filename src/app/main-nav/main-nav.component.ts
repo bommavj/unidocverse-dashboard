@@ -74,6 +74,7 @@ export class MainNavComponent implements OnInit, OnDestroy {
       { label: 'Documents', icon: 'files', link: '/documents-hub', badge: 'docs', also: ['/documents'] },
       { label: 'Insights', icon: 'bulb', link: '/insights' },
       { label: 'Timeline', icon: 'timeline', link: '/timeline' },
+      { label: 'Deadlines', icon: 'calendar-due', link: '/deadlines', also: ['/alerts'] },
       { label: 'Watch folders', icon: 'folder-search', link: '/watch-folders' },
       { label: 'Gmail import', icon: 'mail', link: '/gmail' },
     ]},
@@ -143,14 +144,12 @@ export class MainNavComponent implements OnInit, OnDestroy {
         { label: 'AI reports', link: '/agency-reports', query: { type: 'supply_chain' } } ]},
       { label: 'Operations', icon: 'briefcase', flag: 'operationsMode', items: [
         { label: 'Matters', link: '/matters' }, { label: 'Claims', link: '/claims' }, { label: 'Quotes', link: '/quotes' },
-        { label: 'CLM', link: '/clm' }, { label: 'Jurisdiction', link: '/jurisdiction' },
+        { label: 'CLM', link: '/clm', flag: 'clmMode' }, { label: 'Jurisdiction', link: '/jurisdiction' },
         { label: 'AI reports', link: '/agency-reports', query: { type: 'operations' } } ]},
     ]},
     { key: 'governance', label: 'Governance', flag: 'complianceMode', items: [
-      { label: 'Compliance', icon: 'shield-lock', link: '/compliance' },
       { label: 'Risk', icon: 'alert-triangle', link: '/risk' },
       { label: 'Audit', icon: 'list-search', link: '/audit' },
-      { label: 'Deadlines', icon: 'calendar-due', link: '/deadlines' },
       { label: 'AI reports', icon: 'report-analytics', link: '/agency-reports', query: { type: 'compliance' } },
     ]},
     { key: 'productivity', label: 'Productivity', items: [

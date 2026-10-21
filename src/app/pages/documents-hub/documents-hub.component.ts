@@ -5,14 +5,13 @@ import { HubTabsComponent, HubTab } from '../../components/hub-tabs/hub-tabs.com
 import { DocumentsComponent } from '../documents/documents.component';
 import { ClmComponent } from '../clm/clm.component';
 import { ApprovalsComponent } from '../approvals/approvals.component';
-import { RiskComponent } from '../risk/risk.component';
-import { WorkflowComponent } from '../workflow/workflow.component';
+import { HttpClient } from '@angular/common/http';
 import { FeatureFlagService } from '../../services/feature-flag.service';
 
 @Component({
   selector: 'app-documents-hub',
   standalone: true,
-  imports: [CommonModule, HubTabsComponent, DocumentsComponent, ClmComponent, ApprovalsComponent, RiskComponent, WorkflowComponent],
+  imports: [CommonModule, HubTabsComponent, DocumentsComponent, ClmComponent, ApprovalsComponent],
   template: `
 <div class="hub-page">
   <app-hub-tabs [tabs]="tabs" [active]="activeTab" (select)="setTab($event)" />
@@ -20,8 +19,6 @@ import { FeatureFlagService } from '../../services/feature-flag.service';
     <app-documents  *ngIf="activeTab==='all'" />
     <app-clm        *ngIf="activeTab==='clm'" />
     <app-approvals  *ngIf="activeTab==='approvals'" />
-    <app-workflow   *ngIf="activeTab==='workflow'" />
-    <app-risk       *ngIf="activeTab==='risk'" />
   </div>
 </div>
   `,
@@ -39,10 +36,15 @@ export class DocumentsHubComponent implements OnInit {
     private route: ActivatedRoute,
     private router: Router,
     private flags: FeatureFlagService,
+    private http: HttpClient,
   ) {}
+
+  pendingApprovals = 0;
 
   ngOnInit() {
     this.buildTabs();
+    this.http.get<any>('http://localhost:7979/api/approvals/stats').subscribe({
+      next: r => { this.pendingApprovals = r?.pending ?? 0; this.buildTabs(); }, error: () => {} });
     this.route.queryParams.subscribe(p => {
       if (p['tab'] && this.tabs.find(t => t.key === p['tab'])) {
         this.activeTab = p['tab'];
@@ -55,19 +57,16 @@ export class DocumentsHubComponent implements OnInit {
   buildTabs() {
     this.tabs = [{ key: 'all', label: 'All Documents', icon: '📄' }];
 
-    if (this.flags.legalMode() || this.flags.agencyMode()) {
-      this.tabs.push({ key: 'approvals',  label: 'Approvals',           icon: '✅' });
-      this.tabs.push({ key: 'workflow',   label: 'Approval Workflows',  icon: '🔀' });
+    // Sign-offs between people: the tab appears only while something is waiting (or when linked to directly).
+    // The research agent asks for its own confirmations in the chat.
+    if (this.pendingApprovals > 0 || this.route.snapshot.queryParams['tab'] === 'approvals') {
+      this.tabs.push({ key: 'approvals', label: `Approvals (${this.pendingApprovals})`, icon: '✅' });
     }
 
-    if (this.flags.legalMode() || this.flags.operationsMode()) {
+    if (this.flags.clmMode()) {
       this.tabs.push({ key: 'clm', label: 'Contracts (CLM)', icon: '📝' });
     }
 
-    // Document risk and health scores belong to the Compliance and Risk module
-    if (this.flags.complianceMode()) {
-      this.tabs.push({ key: 'risk', label: 'Risk & Health', icon: '🏥' });
-    }
   }
 
   setTab(key: string) {

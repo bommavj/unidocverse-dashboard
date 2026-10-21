@@ -1,12 +1,24 @@
 // src/app/pages/integrations/integrations.component.ts
 import {
   Component, OnInit, OnDestroy, ViewChild,
-  ElementRef, ChangeDetectorRef, NgZone
-} from '@angular/core';
+  ElementRef, ChangeDetectorRef, NgZone, HostListener } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 import { HttpClient } from '@angular/common/http';
+
+interface CloudProvider {
+  provider: string;
+  label: string;
+  models: string[];
+  default_model: string;
+  needs_url: boolean;
+  base_url: string | null;
+  configured: boolean;
+  key_hint: string | null;
+  model: string;
+  active: boolean;
+}
 
 interface Integration {
   provider: string;
@@ -38,6 +50,70 @@ export class IntegrationsComponent implements OnInit, OnDestroy {
   currentModel   = '';
   switchingModel = false;
   loadingModels  = true;
+
+  // Cloud models (frontier providers with the organisation's own API key)
+  providers:       CloudProvider[] = [];
+  activeProvider:  string | null = null;
+  editing:         CloudProvider | null = null;
+  editKey          = '';
+  editModel        = '';
+  editUrl          = '';
+  providerBusy     = false;
+  testResult:      { ok: boolean; text: string } | null = null;
+  modelOptions:    string[] = [];        // from the provider's own model list for this key
+  modelsLoading    = false;
+  modelsNote       = '';
+  customModel      = false;              // "Other…" chosen: type any model id
+  readonly OTHER   = '__other__';
+
+  // Data protection + usage for cloud models
+  policy: {
+    ask_before_send: boolean; mask_identifiers: boolean; blocked_types: string[];
+    upload_cloud: boolean; upload_types: string[]; upload_model: string | null; monthly_budget_usd: number | null;
+    cascade_local_first: boolean;
+  } | null = null;
+  monthSpend = 0;
+  showTypes = false;
+  knownTypes: string[] = [];
+  policySaving = false;
+  usage: any = null;
+
+  // QuickBooks Online
+  qb: any = null;
+  qbForm = { client_id: '', client_secret: '', environment: 'sandbox' };
+  qbAccounts: { id: string; name: string }[] = [];
+  qbBills: any[] = [];
+  qbDraft: any = null;          // { push_id, draft, checks, edit }
+  qbBusy = false;
+
+  // Outbound systems: tiles + drawer
+  readonly sysKeys = ['quickbooks', 'salesforce', 'webhooks'];
+  readonly sysMeta: Record<string, { name: string; what: string }> = {
+    quickbooks: { name: 'QuickBooks Online', what: 'Vendor invoices become bills, after your approval.' },
+    salesforce: { name: 'Salesforce', what: "Documents go to the client's Account — file, summary and key facts." },
+    webhooks:   { name: 'Webhooks', what: 'Signed events to Zapier, Make, n8n or your own system.' },
+  };
+  sysSummary: Record<string, any> = {};
+  sysSends: any[] = [];
+  openSys: string | null = null;
+  justConnected: string | null = null;
+  connectError: { sys: string; reason: string } | null = null;
+
+  // Salesforce
+  sf: any = null;
+  sfForm = { client_id: '', client_secret: '', environment: 'production' };
+  sfDocs: any[] = [];
+  sfDraft: any = null;          // { push_id, draft, checks, edit }
+  sfBusy = false;
+  sfFilter = '';
+
+  // Webhooks
+  hookEvents: Record<string, string> = {};
+  hooks: any[] = [];
+  hookForm = { url: '', description: '', events: [] as string[] };
+  hookSecret: { id: number; secret: string } | null = null;
+  hookDeliveries: Record<number, any[]> = {};
+  hookBusy = false;
 
   // Integrations list
   integrations: Integration[] = [];
@@ -375,6 +451,18 @@ curl -X POST "http://localhost:7979/mcp/messages/?session_id=<ID>" \\
 
   ngOnInit(): void {
     this.loadModels();
+    this.loadProviders();
+    this.loadQuickBooks();
+    this.loadSalesforce();
+    this.loadHooks();
+
+    this.loadSysSummary();
+    const qs = new URLSearchParams(window.location.search);
+    for (const [param, sys] of [['qb', 'quickbooks'], ['sf', 'salesforce']]) {
+      if (qs.get(param) === 'connected') { this.justConnected = sys; this.openSystem(sys); }
+      if (qs.get(param) === 'error') { this.connectError = { sys, reason: qs.get('reason') || 'unknown error' }; this.openSystem(sys); }
+    }
+    if (qs.get('qb') || qs.get('sf')) history.replaceState(null, '', window.location.pathname);
     this.loadIntegrations();
     this.loadMcpSettings();
     this.loadClaudeDesktopSnippet();
@@ -394,6 +482,438 @@ curl -X POST "http://localhost:7979/mcp/messages/?session_id=<ID>" \\
     this.http.get<{ selected_model: string }>('http://localhost:7979/api/models/get-model').subscribe({
       next: (res) => { this.currentModel = res.selected_model; this.cdr.markForCheck(); },
       error: () => {}
+    });
+  }
+
+  private readonly providersApi = 'http://localhost:7979/api/llm-providers';
+  private readonly qbApi = 'http://localhost:7979/api/quickbooks';
+  private readonly hooksApi = 'http://localhost:7979/api/webhooks';
+
+  // ── QuickBooks ─────────────────────────────────────────────────────────────
+  loadQuickBooks(): void {
+    this.http.get<any>(`${this.qbApi}/status`).subscribe({
+      next: (s) => {
+        this.qb = s;
+        this.qbForm = { client_id: s.client_id || '', client_secret: '', environment: s.environment || 'sandbox' };
+        if (s.connected) { this.loadQbAccounts(); this.loadQbBills(); }
+        this.loadSysSummary();
+        this.cdr.markForCheck();
+      },
+      error: () => { this.qb = null; this.cdr.markForCheck(); }
+    });
+  }
+
+  saveQbApp(): void {
+    this.qbBusy = true;
+    this.http.put(`${this.qbApi}/app`, { ...this.qbForm, client_secret: this.qbForm.client_secret || null }).subscribe({
+      next: () => { this.qbBusy = false; this.showToast('QuickBooks app saved'); this.loadQuickBooks(); },
+      error: (e) => { this.qbBusy = false; this.showToast(e?.error?.detail || 'Could not save', true); this.cdr.markForCheck(); }
+    });
+  }
+
+  connectQb(): void {
+    this.http.get<{ url: string }>(`${this.qbApi}/connect`).subscribe({
+      next: (r) => { window.location.href = r.url; },
+      error: (e) => this.showToast(e?.error?.detail || 'Could not start QuickBooks sign-in', true)
+    });
+  }
+
+  disconnectQb(): void {
+    this.http.post(`${this.qbApi}/disconnect`, {}).subscribe({
+      next: () => { this.showToast('QuickBooks disconnected'); this.loadQuickBooks(); },
+      error: () => this.showToast('Could not disconnect', true)
+    });
+  }
+
+  loadQbAccounts(): void {
+    this.http.get<{ accounts: any[] }>(`${this.qbApi}/accounts`).subscribe({
+      next: (r) => { this.qbAccounts = r.accounts; this.cdr.markForCheck(); },
+      error: (e) => this.showToast(e?.error?.detail || 'Could not load QuickBooks accounts', true)
+    });
+  }
+
+  setQbAccount(id: string): void {
+    this.http.put(`${this.qbApi}/expense-account`, { expense_account_id: id }).subscribe({
+      next: () => { if (this.qb) this.qb.expense_account_id = id; this.showToast('Expense account saved'); },
+      error: () => this.showToast('Could not save', true)
+    });
+  }
+
+  loadQbBills(): void {
+    this.http.get<{ bills: any[] }>(`${this.qbApi}/bills`).subscribe({
+      next: (r) => { this.qbBills = r.bills; this.cdr.markForCheck(); },
+      error: () => {}
+    });
+  }
+
+  prepareBill(docId: string): void {
+    this.qbBusy = true;
+    this.http.post<any>(`${this.qbApi}/bills/prepare/${docId}`, {}).subscribe({
+      next: (r) => {
+        this.qbDraft = { push_id: r.id, draft: r.draft, checks: r.checks,
+                         edit: { vendor: r.draft.vendor, total: r.draft.total, bill_date: r.draft.bill_date,
+                                 due_date: r.draft.due_date, doc_number: r.draft.doc_number } };
+        this.qbBusy = false; this.cdr.markForCheck();
+      },
+      error: (e) => { this.qbBusy = false; this.showToast(e?.error?.detail || 'Could not prepare the bill', true); this.cdr.markForCheck(); }
+    });
+  }
+
+  get qbDraftOk(): boolean { return !!this.qbDraft && this.qbDraft.checks.every((c: any) => c.ok); }
+
+  approveBill(): void {
+    if (!this.qbDraft) return;
+    this.qbBusy = true;
+    this.http.post<any>(`${this.qbApi}/bills/${this.qbDraft.push_id}/approve`, this.qbDraft.edit).subscribe({
+      next: (r) => {
+        this.qbBusy = false; this.qbDraft = null;
+        this.showToast(`Bill ${r.bill_id} created in QuickBooks`); this.loadQbBills(); this.afterSend();
+      },
+      error: (e) => { this.qbBusy = false; this.showToast(e?.error?.detail || 'QuickBooks rejected the bill', true); this.loadQbBills(); this.cdr.markForCheck(); }
+    });
+  }
+
+  discardBill(): void {
+    if (!this.qbDraft) return;
+    this.http.post(`${this.qbApi}/bills/${this.qbDraft.push_id}/discard`, {}).subscribe({
+      next: () => { this.qbDraft = null; this.loadQbBills(); this.cdr.markForCheck(); }
+    });
+  }
+
+  // ── Outbound systems ───────────────────────────────────────────────────────
+  loadSysSummary(): void {
+    this.http.get<any>('http://localhost:7979/api/integrations/summary').subscribe({
+      next: (r) => { this.sysSummary = r || {}; this.cdr.markForCheck(); }, error: () => {} });
+  }
+
+  openSystem(k: string): void {
+    this.openSys = k;
+    this.sysSends = [];
+    this.http.get<any>(`http://localhost:7979/api/integrations/sends?system=${k}&limit=30`).subscribe({
+      next: (r) => { if (this.openSys === k) { this.sysSends = r.sends || []; this.cdr.markForCheck(); } }, error: () => {} });
+    this.cdr.markForCheck();
+  }
+
+  @HostListener('document:keydown.escape') onEsc(): void { if (this.openSys) this.closeSystem(); }
+
+  closeSystem(): void {
+    this.openSys = null; this.justConnected = null; this.connectError = null;
+    this.cdr.markForCheck();
+  }
+
+  private afterSend(): void {
+    this.loadSysSummary();
+    if (this.openSys) this.openSystem(this.openSys);
+  }
+
+  // ── Salesforce ─────────────────────────────────────────────────────────────
+  private readonly sfApi = 'http://localhost:7979/api/salesforce';
+
+  loadSalesforce(): void {
+    this.http.get<any>(`${this.sfApi}/status`).subscribe({
+      next: (s) => {
+        this.sf = s;
+        const env = s.login_host === 'https://test.salesforce.com' ? 'sandbox'
+          : s.login_host === 'https://login.salesforce.com' ? 'production' : s.login_host;
+        this.sfForm = { client_id: s.client_id || '', client_secret: '', environment: env || 'production' };
+        if (s.connected) this.loadSfDocs();
+        this.loadSysSummary();
+        this.cdr.markForCheck();
+      },
+      error: () => { this.sf = null; this.cdr.markForCheck(); }
+    });
+  }
+
+  saveSfApp(): void {
+    this.sfBusy = true;
+    this.http.put(`${this.sfApi}/app`, { ...this.sfForm, client_secret: this.sfForm.client_secret || null }).subscribe({
+      next: () => { this.sfBusy = false; this.showToast('Salesforce app saved'); this.loadSalesforce(); },
+      error: (e) => { this.sfBusy = false; this.showToast(e?.error?.detail || 'Could not save', true); this.cdr.markForCheck(); }
+    });
+  }
+
+  connectSf(): void {
+    this.http.get<{ url: string }>(`${this.sfApi}/connect`).subscribe({
+      next: (r) => { window.location.href = r.url; },
+      error: (e) => this.showToast(e?.error?.detail || 'Could not start Salesforce sign-in', true)
+    });
+  }
+
+  disconnectSf(): void {
+    this.http.post(`${this.sfApi}/disconnect`, {}).subscribe({
+      next: () => { this.showToast('Salesforce disconnected'); this.loadSalesforce(); },
+      error: () => this.showToast('Could not disconnect', true)
+    });
+  }
+
+  loadSfDocs(): void {
+    this.http.get<{ documents: any[] }>(`${this.sfApi}/documents`).subscribe({
+      next: (r) => { this.sfDocs = r.documents; this.cdr.markForCheck(); },
+      error: () => {}
+    });
+  }
+
+  get sfDocsShown(): any[] {
+    const q = this.sfFilter.trim().toLowerCase();
+    return q ? this.sfDocs.filter(d => (d.filename + ' ' + (d.doc_type || '')).toLowerCase().includes(q)) : this.sfDocs;
+  }
+
+  prepareSf(docId: string): void {
+    this.sfBusy = true;
+    this.http.post<any>(`${this.sfApi}/documents/prepare/${docId}`, {}).subscribe({
+      next: (r) => {
+        this.sfDraft = { push_id: r.id, draft: r.draft, checks: r.checks,
+                         edit: { account_name: r.draft.account_name, subject: r.draft.subject } };
+        this.sfBusy = false; this.cdr.markForCheck();
+      },
+      error: (e) => { this.sfBusy = false; this.showToast(e?.error?.detail || 'Could not prepare', true); this.cdr.markForCheck(); }
+    });
+  }
+
+  approveSf(): void {
+    if (!this.sfDraft) return;
+    this.sfBusy = true;
+    this.http.post<any>(`${this.sfApi}/pushes/${this.sfDraft.push_id}/approve`, this.sfDraft.edit).subscribe({
+      next: (r) => {
+        this.sfBusy = false; this.sfDraft = null;
+        this.showToast(`Sent to Salesforce — ${r.account_id}`); this.loadSfDocs(); this.afterSend();
+      },
+      error: (e) => { this.sfBusy = false; this.showToast(e?.error?.detail || 'Salesforce rejected it', true); this.loadSfDocs(); this.cdr.markForCheck(); }
+    });
+  }
+
+  discardSf(): void {
+    if (!this.sfDraft) return;
+    this.http.post(`${this.sfApi}/pushes/${this.sfDraft.push_id}/discard`, {}).subscribe({
+      next: () => { this.sfDraft = null; this.loadSfDocs(); this.cdr.markForCheck(); }
+    });
+  }
+
+  // ── Webhooks ───────────────────────────────────────────────────────────────
+  loadHooks(): void {
+    this.http.get<any>(this.hooksApi).subscribe({
+      next: (r) => { this.hooks = r.endpoints; this.hookEvents = r.events; this.cdr.markForCheck(); },
+      error: () => {}
+    });
+  }
+
+  get hookEventKeys(): string[] { return Object.keys(this.hookEvents); }
+
+  toggleHookEvent(e: string): void {
+    const set = new Set(this.hookForm.events);
+    set.has(e) ? set.delete(e) : set.add(e);
+    this.hookForm.events = Array.from(set);
+  }
+
+  addHook(): void {
+    this.hookBusy = true;
+    this.http.post<{ id: number; secret: string }>(this.hooksApi, this.hookForm).subscribe({
+      next: (r) => {
+        this.hookBusy = false; this.hookSecret = r;
+        this.hookForm = { url: '', description: '', events: [] };
+        this.loadHooks(); this.cdr.markForCheck();
+      },
+      error: (e) => { this.hookBusy = false; this.showToast(e?.error?.detail || 'Could not add webhook', true); this.cdr.markForCheck(); }
+    });
+  }
+
+  testHook(id: number): void {
+    this.http.post<any>(`${this.hooksApi}/${id}/test`, {}).subscribe({
+      next: (r) => { this.showToast(r.ok ? `Test delivered (HTTP ${r.status_code})` : `Test failed: ${r.status_code || ''} ${r.response || ''}`, !r.ok); this.showDeliveries(id, true); },
+      error: (e) => this.showToast(e?.error?.detail || 'Test failed', true)
+    });
+  }
+
+  deleteHook(id: number): void {
+    this.http.delete(`${this.hooksApi}/${id}`).subscribe({ next: () => { this.loadHooks(); this.showToast('Webhook removed'); } });
+  }
+
+  showDeliveries(id: number, force = false): void {
+    if (this.hookDeliveries[id] && !force) { delete this.hookDeliveries[id]; this.cdr.markForCheck(); return; }
+    this.http.get<any>(`${this.hooksApi}/${id}/deliveries`).subscribe({
+      next: (r) => { this.hookDeliveries[id] = r.deliveries; this.cdr.markForCheck(); }
+    });
+  }
+
+  redeliver(deliveryId: number, endpointId: number): void {
+    this.http.post<any>(`${this.hooksApi}/deliveries/${deliveryId}/redeliver`, {}).subscribe({
+      next: (r) => { this.showToast(r.ok ? 'Redelivered' : 'Still failing', !r.ok); this.showDeliveries(endpointId, true); }
+    });
+  }
+
+  copy(text: string): void {
+    navigator.clipboard?.writeText(text).then(() => this.showToast('Copied'));
+  }
+
+  loadProviders(): void {
+    this.http.get<{ providers: CloudProvider[]; active: string | null }>(this.providersApi).subscribe({
+      next: (res) => { this.providers = res.providers; this.activeProvider = res.active; this.loadPolicy(); this.cdr.markForCheck(); },
+      error: () => { this.providers = []; this.cdr.markForCheck(); }   // non-admins get 403: section stays hidden
+    });
+  }
+
+  loadPolicy(): void {
+    this.http.get<any>(`${this.providersApi}/policy`).subscribe({
+      next: (r) => {
+        this.policy = {
+          ask_before_send: r.ask_before_send, mask_identifiers: r.mask_identifiers, blocked_types: r.blocked_types,
+          upload_cloud: r.upload_cloud, upload_types: r.upload_types || [], upload_model: r.upload_model,
+          monthly_budget_usd: r.monthly_budget_usd, cascade_local_first: r.cascade_local_first !== false,
+        };
+        this.monthSpend = r.month_spend_usd || 0;
+        this.knownTypes = r.known_types; this.cdr.markForCheck();
+      },
+      error: () => {}
+    });
+    this.http.get<any>(`${this.providersApi}/usage?days=30`).subscribe({
+      next: (r) => { this.usage = r; this.cdr.markForCheck(); },
+      error: () => {}
+    });
+  }
+
+  isBlocked(t: string): boolean { return !!this.policy?.blocked_types.includes(t); }
+
+  isUploadType(t: string): boolean { return !!this.policy?.upload_types.includes(t); }
+
+  /** Types that may be chosen for cloud extraction: never-send types are excluded. */
+  get uploadCandidates(): string[] { return this.knownTypes.filter(t => !this.isBlocked(t)); }
+
+  toggleUploadType(t: string): void {
+    if (!this.policy) return;
+    const set = new Set(this.policy.upload_types);
+    set.has(t) ? set.delete(t) : set.add(t);
+    this.policy.upload_types = Array.from(set).sort();
+    this.savePolicy();
+  }
+
+  onBudgetChange(v: string | number | null): void {
+    if (!this.policy) return;
+    const n = v === '' || v === null ? null : Number(v);
+    this.policy.monthly_budget_usd = n === null || isNaN(n) ? null : n;
+    this.savePolicy();
+  }
+
+  toggleBlocked(t: string): void {
+    if (!this.policy) return;
+    const set = new Set(this.policy.blocked_types);
+    set.has(t) ? set.delete(t) : set.add(t);
+    this.policy.blocked_types = Array.from(set).sort();
+    this.policy.upload_types = this.policy.upload_types.filter(x => !set.has(x));   // never-send wins
+    this.savePolicy();
+  }
+
+  savePolicy(): void {
+    if (!this.policy) return;
+    this.policySaving = true;
+    this.http.put(`${this.providersApi}/policy`, this.policy).subscribe({
+      next: () => { this.policySaving = false; this.cdr.markForCheck(); },
+      error: () => { this.policySaving = false; this.showToast('Could not save data protection settings', true); this.cdr.markForCheck(); }
+    });
+  }
+
+  typeLabel(t: string): string { return t.replace(/_/g, ' '); }
+
+  get activeProviderLabel(): string {
+    return this.providers.find(p => p.provider === this.activeProvider)?.label ?? '';
+  }
+
+  openProvider(p: CloudProvider): void {
+    this.editing = p;
+    this.editKey = '';
+    this.editModel = p.model || p.default_model || '';
+    this.editUrl = p.base_url || '';
+    this.testResult = null;
+    this.modelOptions = [...p.models];
+    this.customModel = false;
+    this.modelsNote = '';
+    if (p.configured) this.loadProviderModels();
+    this.cdr.markForCheck();
+  }
+
+  /** Ask the provider which models this key can use; the admin can still type any id. */
+  loadProviderModels(): void {
+    if (!this.editing || (!this.editKey.trim() && !this.editing.configured)) return;
+    if (this.editing.needs_url && !this.editUrl.trim() && !this.editing.base_url) return;
+    const pinned = this.editing.models;
+    this.modelsLoading = true;
+    this.modelsNote = '';
+    this.http.post<{ models: string[]; error: string | null }>(
+      `${this.providersApi}/${this.editing.provider}/models`, this.providerBody()).subscribe({
+      next: (r) => {
+        this.modelOptions = Array.from(new Set([...pinned, ...r.models]));
+        const rejected = !!r.error && /401|403|authentication|api key|invalid.*key/i.test(r.error);
+        this.modelsNote = rejected ? `${this.editing?.label} rejected this API key — check it and try again.`
+                        : r.error ? "This provider didn't return a model list. Choose Other and type the model id."
+                        : r.models.length ? '' : 'No models returned for this key.';
+        if (!this.editModel && this.modelOptions.length) this.editModel = this.modelOptions[0];
+        this.customModel = !!this.editModel && !this.modelOptions.includes(this.editModel);
+        this.modelsLoading = false; this.cdr.markForCheck();
+      },
+      error: () => { this.modelsLoading = false; this.modelsNote = 'Could not load models.'; this.cdr.markForCheck(); }
+    });
+  }
+
+  onModelPick(value: string): void {
+    this.customModel = value === this.OTHER;
+    this.editModel = this.customModel ? '' : value;
+    this.cdr.markForCheck();
+  }
+
+  closeProvider(): void { this.editing = null; this.cdr.markForCheck(); }
+
+  private providerBody() {
+    return { api_key: this.editKey.trim() || null, model: this.editModel.trim(), base_url: this.editUrl.trim() || null };
+  }
+
+  testProvider(): void {
+    if (!this.editing || this.providerBusy) return;
+    this.providerBusy = true;
+    this.testResult = null;
+    this.http.post<{ success: boolean; reply?: string; error?: string }>(
+      `${this.providersApi}/${this.editing.provider}/test`, this.providerBody()).subscribe({
+      next: (r) => {
+        this.testResult = r.success ? { ok: true, text: `Connected — model replied "${r.reply}"` }
+                                    : { ok: false, text: r.error || 'Connection failed' };
+        this.providerBusy = false; this.cdr.markForCheck();
+      },
+      error: (e) => {
+        this.testResult = { ok: false, text: e?.error?.detail || 'Connection failed' };
+        this.providerBusy = false; this.cdr.markForCheck();
+      }
+    });
+  }
+
+  saveProvider(activate = false): void {
+    if (!this.editing || this.providerBusy) return;
+    const provider = this.editing.provider;
+    this.providerBusy = true;
+    this.http.put(`${this.providersApi}/${provider}`, this.providerBody()).subscribe({
+      next: () => {
+        this.providerBusy = false;
+        if (activate) { this.setActiveProvider(provider); } else { this.showToast('Saved'); this.loadProviders(); }
+        this.editing = null; this.cdr.markForCheck();
+      },
+      error: (e) => { this.providerBusy = false; this.showToast(e?.error?.detail || 'Could not save', true); this.cdr.markForCheck(); }
+    });
+  }
+
+  setActiveProvider(provider: string | null): void {
+    this.http.post<{ active: string | null }>(`${this.providersApi}/activate`, { provider }).subscribe({
+      next: (r) => {
+        this.activeProvider = r.active;
+        this.showToast(r.active ? `Answers now use ${this.activeProviderLabel || r.active}` : `Answers now use the local model (${this.currentModel})`);
+        this.loadProviders();
+      },
+      error: (e) => this.showToast(e?.error?.detail || 'Could not switch', true)
+    });
+  }
+
+  removeProvider(): void {
+    if (!this.editing) return;
+    const p = this.editing;
+    this.http.delete(`${this.providersApi}/${p.provider}`).subscribe({
+      next: () => { this.editing = null; this.showToast(`${p.label} key removed`); this.loadProviders(); },
+      error: () => this.showToast('Could not remove', true)
     });
   }
 
@@ -529,6 +1049,10 @@ curl -X POST "http://localhost:7979/mcp/messages/?session_id=<ID>" \\
   }
 
   switchModel(modelName: string): void {
+    if (this.activeProvider) {
+      this.showToast(`A cloud model is active. Switch back to local under Cloud models first.`, true);
+      return;
+    }
     if (modelName === this.currentModel || this.switchingModel) return;
     this.switchingModel = true;
     this.http.post<{ selected_model: string }>('http://localhost:7979/api/models/set-model', {

@@ -23,6 +23,22 @@
   <!-- ANOMALY BAR — goes inside doc-sheet.component.html -->
 <div class="content">
 
+  <!-- Sent to other systems -->
+  <div class="sent-to" *ngIf="sends.length">
+    <span class="sent-label"><i class="ti ti-send"></i>Sent to</span>
+    <ng-container *ngFor="let x of sends">
+      <a class="sent-chip" [class.bad]="x.status === 'failed'" *ngIf="x.url; else plainChip" [href]="x.url" target="_blank" rel="noopener"
+         [title]="(x.at | date:'MMM d, h:mm a') + ' · ' + x.by">
+        <i class="ti" [class.ti-circle-check]="x.status === 'sent'" [class.ti-alert-circle]="x.status === 'failed'"></i>
+        {{ sysNames[x.system] }} · {{ x.target }}<i class="ti ti-external-link"></i></a>
+      <ng-template #plainChip>
+        <span class="sent-chip" [class.bad]="x.status === 'failed'" [title]="(x.at | date:'MMM d, h:mm a') + ' · ' + x.by + (x.error ? ' · ' + x.error : '')">
+          <i class="ti" [class.ti-circle-check]="x.status === 'sent'" [class.ti-alert-circle]="x.status === 'failed'"></i>
+          {{ sysNames[x.system] }}{{ x.status === 'failed' ? ' — failed' : '' }} · {{ x.target }}</span>
+      </ng-template>
+    </ng-container>
+  </div>
+
   <!-- Has alerts -->
   <!-- ANOMALY BAR -->
     <div class="anomaly" 

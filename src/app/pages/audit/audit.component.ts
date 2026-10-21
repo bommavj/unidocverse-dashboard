@@ -44,6 +44,66 @@ export class AuditComponent implements OnInit {
   loading = true;
   view: 'timeline' | 'table' = 'timeline';
 
+  // Retention (admins): how long reads and changes are kept, legal hold, archives
+  showRetention = false;
+  retention: any = null;
+  retentionSaving = false;
+  retentionMsg = '';
+  archives: { name: string; size: number; modified: string }[] = [];
+
+  readLabel(d: number): string { return d === 30 ? '30 days' : d === 90 ? '90 days' : d === 365 ? '1 year' : `${d} days`; }
+  changeLabel(d: number): string {
+    return d === 0 ? 'Keep forever' : d === 365 ? '1 year' : d === 1095 ? '3 years' : d === 2555 ? '7 years' : `${d} days`;
+  }
+
+  async toggleRetention() {
+    this.showRetention = !this.showRetention;
+    if (this.showRetention) await this.loadRetention();
+    this.cdr.markForCheck();
+  }
+
+  async loadRetention() {
+    const [r, a] = await Promise.all([
+      authFetch(`${this.api}/api/audit/retention`).then(x => x.ok ? x.json() : null),
+      authFetch(`${this.api}/api/audit/archives`).then(x => x.ok ? x.json() : { archives: [] }),
+    ]);
+    this.retention = r;
+    this.archives = a.archives || [];
+    if (!r) this.retentionMsg = 'Only administrators can change retention.';
+    this.cdr.markForCheck();
+  }
+
+  async saveRetention() {
+    if (!this.retention) return;
+    this.retentionSaving = true; this.retentionMsg = '';
+    const res = await authFetch(`${this.api}/api/audit/retention`, {
+      method: 'PUT', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ read_days: +this.retention.read_days, change_days: +this.retention.change_days,
+                             legal_hold: !!this.retention.legal_hold }),
+    });
+    this.retentionSaving = false;
+    this.retentionMsg = res.ok ? 'Saved' : 'Could not save';
+    this.cdr.markForCheck();
+  }
+
+  async runRetention() {
+    this.retentionSaving = true; this.retentionMsg = '';
+    const res = await authFetch(`${this.api}/api/audit/retention/run`, { method: 'POST' });
+    const r = res.ok ? await res.json() : null;
+    this.retentionSaving = false;
+    this.retentionMsg = !r ? 'Cleanup failed' : r.skipped ? 'Skipped — legal hold is on'
+      : `Archived and removed ${(r.read?.archived || 0) + (r.change?.archived || 0)} entries`;
+    await this.loadRetention(); this.load();
+  }
+
+  async downloadArchive(name: string) {
+    const res = await authFetch(`${this.api}/api/audit/archives/${encodeURIComponent(name)}`);
+    if (!res.ok) return;
+    const url = URL.createObjectURL(await res.blob());
+    const a = document.createElement('a'); a.href = url; a.download = name; a.click();
+    setTimeout(() => URL.revokeObjectURL(url), 2000);
+  }
+
   filterAction = '';
   filterActor  = '';
   actions: string[] = [];

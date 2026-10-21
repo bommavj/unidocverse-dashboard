@@ -2,7 +2,8 @@
   <div class="search-hero">
     <div class="search-bar">
       <span style="font-size:18px;flex-shrink:0">🧠</span>
-      <input [(ngModel)]="query" placeholder="Search documents by meaning, not just keywords…" (keydown.enter)="search()">
+      <input [(ngModel)]="query" placeholder="Search documents by meaning, not just keywords…" (keydown.enter)="search()" (keydown.escape)="clear()">
+      <button class="clear-btn" *ngIf="query" (click)="clear()" aria-label="Clear search">✕ Clear</button>
       <button class="search-btn" (click)="search()">Search</button>
     </div>
     <div class="chips-row">

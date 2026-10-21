@@ -46,10 +46,13 @@ export class ApiService {
   }
 
   // ── upload ───────────────────────────────────────────────
-  uploadDocument(file: File, clientId?: string): Observable<any> {
+  uploadDocument(file: File, clientId?: string, allowDuplicate = false): Observable<any> {
     const fd = new FormData(); fd.append('file', file);
-    const url = clientId ? `${this.base}/upload?client_id=${encodeURIComponent(clientId)}` : `${this.base}/upload`;
-    return this.http.post(url, fd);
+    const q = new URLSearchParams();
+    if (clientId) q.set('client_id', clientId);
+    if (allowDuplicate) q.set('allow_duplicate', 'true');      // "Upload anyway" after a duplicate warning
+    const qs = q.toString();
+    return this.http.post(`${this.base}/upload${qs ? '?' + qs : ''}`, fd);
   }
 
   // ── research agent ───────────────────────────────────────

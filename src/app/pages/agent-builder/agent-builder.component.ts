@@ -2,6 +2,7 @@ import { Component, OnInit, OnDestroy, ChangeDetectorRef } from '@angular/core';
 import { CommonModule, TitleCasePipe, DatePipe } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { HttpClient } from '@angular/common/http';
+import { FeatureFlagService } from '../../services/feature-flag.service';
 const API = 'http://localhost:7979';
 
 const SECTOR_TASKS: Record<string, string[]> = {
@@ -10,9 +11,11 @@ const SECTOR_TASKS: Record<string, string[]> = {
   finance:      ['Invoice Anomaly Detection', '3-Way Match Audit', 'Bank Reconciliation', 'Custom…'],
   legal:        ['Contract Obligation Review', 'NDA Expiry Watch', 'Regulatory Filing Check', 'Custom…'],
   medical:      ['Patient Record Audit', 'Prior Auth Watch', 'EOB Reconciliation', 'Custom…'],
-  'real-estate':['Lease Renewal Watch', 'Title Deed Verification', 'Appraisal Comparison', 'Custom…'],
-  'supply-chain':['PO Mismatch Detection', 'Bill of Lading Audit', 'Vendor Sanction Check', 'Custom…'],
-  clm:          ['Claim Status Review', 'Denial Pattern Analysis', 'Settlement Recommendation', 'Custom…'],
+  real_estate:  ['Lease Renewal Watch', 'Title Deed Verification', 'Appraisal Comparison', 'Custom…'],
+  supply_chain: ['PO Mismatch Detection', 'Bill of Lading Audit', 'Vendor Sanction Check', 'Custom…'],
+  immigration:  ['Status Expiry Watch', 'RFE Deadline Check', 'Case Document Gaps', 'Custom…'],
+  compliance:   ['Policy Compliance Review', 'Risk Score Changes', 'Audit Readiness Check', 'Custom…'],
+  operations:   ['Approval Backlog Review', 'Overdue Task Check', 'Custom…'],
 };
 
 @Component({
@@ -33,23 +36,31 @@ export class AgentBuilderComponent implements OnInit, OnDestroy {
   showRunModal = false;
   private pollTimer: any;
 
-  sectors = [
+  // Ids match agent_runs.sector; only the organisation's switched-on modules are shown
+  private readonly allSectors = [
     { id: 'insurance',     icon: '🛡️', label: 'Insurance' },
+    { id: 'immigration',   icon: '🌐', label: 'Immigration' },
     { id: 'hr',            icon: '👥', label: 'HR' },
     { id: 'finance',       icon: '💰', label: 'Finance' },
     { id: 'legal',         icon: '⚖️', label: 'Legal' },
     { id: 'medical',       icon: '🏥', label: 'Medical' },
-    { id: 'real-estate',   icon: '🏠', label: 'Real Estate' },
-    { id: 'supply-chain',  icon: '📦', label: 'Supply Chain' },
-    { id: 'clm',           icon: '📋', label: 'Claims' },
+    { id: 'real_estate',   icon: '🏠', label: 'Real Estate' },
+    { id: 'supply_chain',  icon: '📦', label: 'Supply Chain' },
+    { id: 'compliance',    icon: '🛡', label: 'Compliance' },
+    { id: 'operations',    icon: '🗂', label: 'Operations' },
   ];
 
   newRun = { sector: 'insurance', task_name: '', instruction: '', approval_level: 'external' };
 
-  constructor(private http: HttpClient, private cdr: ChangeDetectorRef) {}
+  constructor(private http: HttpClient, private cdr: ChangeDetectorRef, private flags: FeatureFlagService) {}
+
+  /** Only the modules this organisation has switched on (Settings → Features). */
+  get sectors() { return this.allSectors.filter(s => this.flags.domainOn(s.id)); }
 
   ngOnInit() {
-    this.newRun.task_name = SECTOR_TASKS['insurance'][0];
+    const first = this.sectors[0]?.id || 'insurance';
+    this.newRun.sector = first;
+    this.newRun.task_name = (SECTOR_TASKS[first] || ['Custom…'])[0];
     this.loadRuns();
     this.pollTimer = setInterval(() => this.loadRuns(), 10000);
   }
@@ -58,7 +69,7 @@ export class AgentBuilderComponent implements OnInit, OnDestroy {
 
   get taskOptions(): string[] { return SECTOR_TASKS[this.newRun.sector] || []; }
   get filteredRuns(): any[] {
-    if (this.activeSector === 'all') return this.runs;
+    if (this.activeSector === 'all') return this.runs.filter(r => this.flags.domainOn(r.sector));
     return this.runs.filter(r => r.sector === this.activeSector);
   }
   get pendingCount(): number { return this.runs.filter(r => r.status === 'waiting_approval').length; }
@@ -158,7 +169,7 @@ export class AgentBuilderComponent implements OnInit, OnDestroy {
   sectorIcon(s: string): string {
     const map: Record<string, string> = {
       insurance: '🛡️', hr: '👥', finance: '💰', legal: '⚖️',
-      medical: '🏥', 'real-estate': '🏠', 'supply-chain': '📦', clm: '📋'
+      medical: '🏥', real_estate: '🏠', supply_chain: '📦', immigration: '🌐', compliance: '🛡', operations: '🗂'
     };
     return map[s] || '🤖';
   }

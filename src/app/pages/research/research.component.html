@@ -15,9 +15,14 @@
         <button class="sel-all-btn" (click)="toggleSelectAll()" [class.active]="selectAll">
           {{ selectAll ? 'Deselect All' : 'Select All' }}
         </button>
+        <button class="sel-clear-btn" *ngIf="selectedDocIds.size > 0 && !selectAll" (click)="clearSelection()"
+                [attr.aria-label]="'Clear ' + selectedDocIds.size + ' selected documents'">
+          ✕ Clear {{ selectedDocIds.size }} selected
+        </button>
       </div>
       <div class="doc-search-wrap">
         <input class="doc-search" [(ngModel)]="docSearch" placeholder="Filter documents…">
+        <button class="doc-search-clear" *ngIf="docSearch" (click)="docSearch = ''" aria-label="Clear filter">✕</button>
       </div>
       <div class="doc-list" *ngIf="!docsLoading">
         <div *ngIf="filteredDocs.length === 0" class="doc-empty">No documents found</div>
@@ -86,7 +91,7 @@
         <div class="main-title">🔬 Document Research Agent</div>
         <div class="main-sub">ReAct loop · {{ activeModel }} · Reason → Search → Answer</div>
       </div>
-      <button class="review-btn" (click)="reviewReturn()" [disabled]="running"
+      <button class="review-btn" *ngIf="showTaxReview" (click)="reviewReturn()" [disabled]="running"
               title="Check every tax form against the return: W-2s, 1099s, 1099-B / 8949, K-1s, missing forms">
         📋 Review {{ reviewYear }} tax return
       </button>
@@ -188,8 +193,30 @@
         </div>
       </div>
 
+      <!-- Cloud model consent: nothing has left the network yet -->
+      <div class="cloud-confirm" *ngIf="activeSession.cloudConfirm as cc">
+        <div class="cloud-confirm-title">Send to {{ cc.provider }}?</div>
+        <p class="cloud-confirm-text">
+          To answer this with <strong>{{ cc.model }}</strong>, your question and the text of
+          {{ cc.documents.length === 1 ? 'this document' : 'these documents' }} will be sent to {{ cc.provider }}:
+        </p>
+        <ul class="cloud-confirm-docs">
+          <li *ngFor="let d of cc.documents">{{ d }}</li>
+          <li *ngIf="!cc.documents.length"><em>No documents — only your question</em></li>
+        </ul>
+        <p class="cloud-confirm-note" *ngIf="cc.masked">
+          Account numbers, SSNs, A-numbers, emails and phone numbers are replaced with placeholders before sending.
+          Names and addresses are not.
+        </p>
+        <div class="cloud-confirm-actions">
+          <button class="cc-btn cc-btn--primary" (click)="answerCloud(activeSession, 'ok')">Send to {{ cc.provider }}</button>
+          <button class="cc-btn" (click)="answerCloud(activeSession, 'local')">Answer locally instead</button>
+        </div>
+        <p class="cloud-confirm-note">Your choice applies to the rest of this conversation.</p>
+      </div>
+
       <!-- Final answer -->
-      <div class="answer-card">
+      <div class="answer-card" *ngIf="!activeSession.cloudConfirm">
         <div class="answer-header">
           <span class="answer-ico">✅</span>
           <span class="answer-title">Answer</span>

@@ -25,8 +25,60 @@
     <button class="notice-x" (click)="dismissDisclaimer()">I understand</button>
   </div>
 
+  <!-- No answer engine yet (Lite edition, or Ollama stopped): ask the user to choose -->
+  <section class="engine" *ngIf="engine && !engine.ready" role="alert">
+    <div class="engine-h">
+      <i class="ti ti-plug-connected"></i>
+      <div>
+        <h2>Choose how UniDocVerse answers questions</h2>
+        <p>Uploading, search and reading documents work now. Answering questions needs a language model — pick one:</p>
+      </div>
+    </div>
+    <div class="engine-opts">
+      <div class="engine-opt">
+        <h3><i class="ti ti-device-desktop"></i>On this Mac (private)</h3>
+        <p *ngIf="!engine.ollama?.reachable">Install <a href="https://ollama.com/download" target="_blank" rel="noopener">Ollama</a>, then in Terminal run <code>ollama pull mistral:7b</code>. Documents never leave this computer.</p>
+        <p *ngIf="engine.ollama?.reachable && !engine.ollama?.models?.length">Ollama is running but has no models. In Terminal run <code>ollama pull mistral:7b</code>.</p>
+        <button class="btn btn-sec" (click)="loadEngine()"><i class="ti ti-refresh"></i>Check again</button>
+      </div>
+      <div class="engine-opt">
+        <h3><i class="ti ti-cloud"></i>Cloud model (your API key)</h3>
+        <p>Use Anthropic, OpenAI, Gemini and others. Identifiers are masked and you're asked before documents are sent.</p>
+        <a class="btn btn-pri" routerLink="/integrations">Add a cloud model</a>
+      </div>
+    </div>
+  </section>
+
+  <!-- Today's brief -->
+  <section class="brief" *ngIf="brief">
+    <header class="brief-h">
+      <div>
+        <h2><i class="ti ti-sun"></i>Today's brief</h2>
+        <p *ngIf="brief.counts?.total; else allClear">
+          {{ brief.counts.total }} item{{ brief.counts.total === 1 ? '' : 's' }} need attention<span *ngIf="brief.counts.critical"> · <b class="b-crit">{{ brief.counts.critical }} urgent</b></span><span *ngIf="brief.counts.new"> · {{ brief.counts.new }} new since yesterday</span><span *ngIf="brief.counts.resolved"> · {{ brief.counts.resolved }} resolved</span>
+        </p>
+        <ng-template #allClear><p>Nothing needs you today.</p></ng-template>
+      </div>
+      <div class="brief-act">
+        <button class="btn btn-sec" (click)="refreshBrief()" [disabled]="briefRunning"><i class="ti ti-refresh"></i>{{ briefRunning ? 'Checking…' : 'Check again' }}</button>
+        <button class="btn btn-sec" (click)="briefOpen = !briefOpen" [attr.aria-expanded]="briefOpen">{{ briefOpen ? 'Hide' : 'Show' }}</button>
+      </div>
+    </header>
+    <div class="brief-body" *ngIf="briefOpen && brief.counts?.total">
+      <div class="brief-sec" *ngFor="let s of briefSections" [attr.data-sev]="s.severity">
+        <h3>{{ s.name }}</h3>
+        <button class="brief-item" *ngFor="let i of s.items" (click)="openBriefItem(i)">
+          <span class="bi-who">{{ i.who }}</span>
+          <span class="bi-detail">{{ i.detail }}</span>
+          <span class="bi-new" *ngIf="i.new">New</span>
+        </button>
+      </div>
+    </div>
+    <div class="brief-prob" *ngFor="let p of brief.problems"><i class="ti ti-alert-triangle"></i>{{ p.text }}</div>
+  </section>
+
   <!-- KPIs -->
-  <section class="kpis" [class.kpis--4]="!features.immigrationMode()">
+  <section class="kpis" [style.--kpi-cols]="3 + (pendingApprovals > 0 ? 1 : 0) + (features.immigrationMode() ? 1 : 0)">
     <a class="kpi" routerLink="/documents">
       <span class="kpi-l"><i class="ti ti-files"></i>Documents</span>
       <span class="kpi-v">{{ docs.length }}</span>
@@ -37,10 +89,10 @@
       <span class="kpi-v">{{ anomalyCount }}</span>
       <span class="kpi-s">{{ anomalyCount ? 'Need review' : 'Nothing flagged' }}</span>
     </a>
-    <a class="kpi" routerLink="/approvals" [class.kpi--warn]="pendingApprovals > 0">
+    <a class="kpi kpi--warn" routerLink="/approvals" *ngIf="pendingApprovals > 0">
       <span class="kpi-l"><i class="ti ti-user-check"></i>Awaiting approval</span>
       <span class="kpi-v">{{ pendingApprovals }}</span>
-      <span class="kpi-s">Agent actions held for you</span>
+      <span class="kpi-s">Sign-offs waiting for you</span>
     </a>
     <a class="kpi" routerLink="/deadlines" [class.kpi--warn]="dueThisWeek > 0">
       <span class="kpi-l"><i class="ti ti-calendar-due"></i>Due this week</span>

@@ -28,7 +28,7 @@
       <div *ngFor="let f of uploads" class="up-fi">
         <div class="up-fi-top">
           <div class="up-fi-ico" [ngClass]="f.state">
-            {{ f.state==='done' ? '✅' : f.state==='error' ? '❌' : '📄' }}
+            {{ f.state==='done' ? '✅' : f.state==='error' ? '❌' : f.state==='duplicate' ? '⚠️' : '📄' }}
           </div>
           <div class="up-fi-name">{{ f.name }}</div>
           <button class="up-fi-action" [ngClass]="f.state" (click)="remove(f)">
@@ -41,6 +41,14 @@
         <div class="up-fi-foot">
           <span class="up-fi-status">{{ f.status }}</span>
           <span class="up-fi-pct" [ngClass]="f.state">{{ f.pct }}%</span>
+        </div>
+        <div class="up-dup" *ngIf="f.state==='duplicate' && f.existing">
+          Already uploaded as <strong>{{ f.existing.filename }}</strong>
+          <span *ngIf="f.existing.uploaded_at"> on {{ f.existing.uploaded_at | date:'MMM d, y' }}</span>.
+          <div class="up-dup-actions">
+            <button class="up-dup-btn" (click)="uploadAnyway(f)">Upload anyway</button>
+            <button class="up-dup-btn up-dup-btn--ghost" (click)="remove(f)">Skip</button>
+          </div>
         </div>
       </div>
     </div>
@@ -82,7 +90,7 @@
     <div *ngFor="let f of uploads" class="up-fi">
       <div class="up-fi-top">
         <div class="up-fi-ico" [ngClass]="f.state">
-          {{ f.state==='done' ? '✅' : f.state==='error' ? '❌' : '📄' }}
+          {{ f.state==='done' ? '✅' : f.state==='error' ? '❌' : f.state==='duplicate' ? '⚠️' : '📄' }}
         </div>
         <div class="up-fi-name">{{ f.name }}</div>
         <button class="up-fi-action" [ngClass]="f.state" (click)="remove(f)">
@@ -95,6 +103,14 @@
       <div class="up-fi-foot">
         <span class="up-fi-status">{{ f.status }}</span>
         <span class="up-fi-pct" [ngClass]="f.state">{{ f.pct }}%</span>
+      </div>
+      <div class="up-dup" *ngIf="f.state==='duplicate' && f.existing">
+        Already uploaded as <strong>{{ f.existing.filename }}</strong>
+        <span *ngIf="f.existing.uploaded_at"> on {{ f.existing.uploaded_at | date:'MMM d, y' }}</span>.
+        <div class="up-dup-actions">
+          <button class="up-dup-btn" (click)="uploadAnyway(f)">Upload anyway</button>
+          <button class="up-dup-btn up-dup-btn--ghost" (click)="remove(f)">Skip</button>
+        </div>
       </div>
     </div>
   </div>

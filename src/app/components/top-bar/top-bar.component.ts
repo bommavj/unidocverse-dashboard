@@ -35,16 +35,16 @@ export class TopBarComponent implements OnInit, OnDestroy {
 
   // Pages the search box can jump straight to ("go to COI")
   readonly jumps: Jump[] = [
-    { label: 'Home', link: '/dashboard' }, { label: 'Documents', link: '/documents' }, { label: 'Upload', link: '/upload' },
-    { label: 'Research agent', link: '/research' }, { label: 'Approvals', link: '/approvals' }, { label: 'Alerts', link: '/alerts' },
-    { label: 'Insights', link: '/insights' }, { label: 'Analytics', link: '/analytics' }, { label: 'Deadlines', link: '/deadlines', flag: 'complianceMode' },
+    { label: 'Home', link: '/dashboard' }, { label: 'Documents', link: '/documents-hub' }, { label: 'Upload', link: '/upload' },
+    { label: 'Research agent', link: '/research' }, { label: 'Approvals', link: '/documents-hub', query: { tab: 'approvals' } },
+    { label: 'Insights', link: '/insights' }, { label: 'Deadlines', link: '/deadlines' },
     { label: 'Clients', link: '/clients', flag: 'agencyMode' }, { label: 'Policies', link: '/policies', flag: 'agencyMode' }, { label: 'Renewals', link: '/renewals', flag: 'agencyMode' },
     { label: 'COI', link: '/coi', flag: 'agencyMode' }, { label: 'Claims', link: '/claims', flag: 'operationsMode' }, { label: 'Quotes', link: '/quotes', flag: 'operationsMode' },
     { label: 'Immigration', link: '/immigration', flag: 'immigrationMode' }, { label: 'Finance', link: '/finance', flag: 'financeMode' }, { label: 'Legal', link: '/legal', flag: 'legalMode' },
     { label: 'Healthcare', link: '/healthcare', flag: 'medicalMode' }, { label: 'HR', link: '/hr', flag: 'hrMode' }, { label: 'Real estate', link: '/real-estate', flag: 'realEstateMode' },
-    { label: 'Supply chain', link: '/supply-chain', flag: 'supplyChainMode' }, { label: 'Compliance', link: '/compliance', flag: 'complianceMode' }, { label: 'Risk', link: '/risk', flag: 'complianceMode' },
-    { label: 'Audit', link: '/audit', flag: 'complianceMode' }, { label: 'Matters', link: '/matters', flag: 'operationsMode' }, { label: 'CLM', link: '/clm', flag: 'operationsMode' },
-    { label: 'Settings', link: '/settings' }, { label: 'Analytics overview', link: '/analytics-hub' }, { label: 'Integrations', link: '/integrations' }, { label: 'Planner', link: '/planner' },
+    { label: 'Supply chain', link: '/supply-chain', flag: 'supplyChainMode' }, { label: 'Risk', link: '/risk', flag: 'complianceMode' },
+    { label: 'Audit', link: '/audit', flag: 'complianceMode' }, { label: 'Matters', link: '/matters', flag: 'operationsMode' }, { label: 'CLM', link: '/clm', flag: 'clmMode' },
+    { label: 'Settings', link: '/settings' }, { label: 'Integrations', link: '/integrations' }, { label: 'Planner', link: '/planner' },
     { label: 'Notes', link: '/notes' }, { label: 'Timeline', link: '/timeline' }, { label: 'Watch folders', link: '/watch-folders' },
   ];
 

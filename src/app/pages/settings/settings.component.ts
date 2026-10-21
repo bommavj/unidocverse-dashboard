@@ -312,11 +312,23 @@ interface User {
           <div class="feature-row">
             <div class="feature-info">
               <div class="feature-name"><span class="feature-icon">⚙️</span>Operations</div>
-              <div class="feature-desc">Enables Matters, Claims, Approvals, Quotes, CLM, and Jurisdiction pages in the sidebar.</div>
+              <div class="feature-desc">Enables Matters, Claims, Quotes and Jurisdiction pages in the sidebar.</div>
             </div>
             <div class="toggle-wrap">
               <button class="toggle" [class.on]="operationsMode" (click)="toggleFlag('operationsMode')" [disabled]="savingFlags"><span class="toggle-knob"></span></button>
               <span class="toggle-lbl" [class.on]="operationsMode">{{ operationsMode ? 'Enabled' : 'Disabled' }}</span>
+            </div>
+          </div>
+
+          <!-- Contracts (CLM) Flag -->
+          <div class="feature-row">
+            <div class="feature-info">
+              <div class="feature-name"><span class="feature-icon">📝</span>Contract lifecycle (CLM)</div>
+              <div class="feature-desc">Contract board (draft → review → approval → active → expiring), contract approvals and the contract workflow pipeline. For legal and procurement teams.</div>
+            </div>
+            <div class="toggle-wrap">
+              <button class="toggle" [class.on]="clmMode" (click)="toggleFlag('clmMode')" [disabled]="savingFlags"><span class="toggle-knob"></span></button>
+              <span class="toggle-lbl" [class.on]="clmMode">{{ clmMode ? 'Enabled' : 'Disabled' }}</span>
             </div>
           </div>
 
@@ -959,6 +971,7 @@ export class SettingsComponent implements OnInit {
   immigrationMode = false;
   complianceMode  = false;
   operationsMode  = false;
+  clmMode         = false;
   savingFlags = false;
   flagSuccess = '';
   flagError   = '';
@@ -1160,13 +1173,14 @@ export class SettingsComponent implements OnInit {
         this.immigrationMode = res.flags?.immigration_mode ?? res.flags?.hr_mode ?? false;
         this.complianceMode  = res.flags?.compliance_mode ?? false;
         this.operationsMode  = res.flags?.operations_mode ?? false;
+        this.clmMode         = res.flags?.clm_mode ?? false;
         this.cdr.markForCheck();
       },
       error: () => {}
     });
   }
 
-  toggleFlag(flag: 'agencyMode' | 'immigrationMode' | 'legalMode' | 'medicalMode' | 'financeMode' | 'realEstateMode' | 'hrMode' | 'supplyChainMode' | 'complianceMode' | 'operationsMode') {
+  toggleFlag(flag: 'agencyMode' | 'immigrationMode' | 'legalMode' | 'medicalMode' | 'financeMode' | 'realEstateMode' | 'hrMode' | 'supplyChainMode' | 'complianceMode' | 'operationsMode' | 'clmMode') {
     const prevValue = this[flag];
     this[flag] = !prevValue;
     this.savingFlags = true;
@@ -1184,6 +1198,7 @@ export class SettingsComponent implements OnInit {
       supply_chain_mode: this.supplyChainMode,
       compliance_mode: this.complianceMode,
       operations_mode: this.operationsMode,
+      clm_mode: this.clmMode,
     };
 
     this.http.patch<{ flags: any }>(`${this.api}/api/features`, payload).subscribe({
@@ -1198,6 +1213,7 @@ export class SettingsComponent implements OnInit {
         this.supplyChainMode = res.flags.supply_chain_mode;
         this.complianceMode  = res.flags.compliance_mode;
         this.operationsMode  = res.flags.operations_mode;
+        this.clmMode         = res.flags.clm_mode ?? false;
         this.savingFlags = false;
         this.flagSuccess = 'Feature flags updated successfully';
         this.flags.load();
