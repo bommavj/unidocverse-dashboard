@@ -30,6 +30,8 @@ import { TopBarComponent } from './components/top-bar/top-bar.component';
   styleUrls: ['./app.component.scss']
 })
 export class AppComponent implements OnInit {
+  /** Trial / licence banner — off while UniDocVerse is offered free; set true to bring it back. */
+  showLicenseBanner = false;
   askAiOpen = false;
   voiceOpen = false;
   voiceQuery = '';

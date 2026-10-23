@@ -112,6 +112,7 @@ export const routes: Routes = [
   // ── Compliance & Risk ─────────────────────────────────────────────────────
   { path: 'compliance',           redirectTo: 'deadlines' },  // Deadlines and Audit have their own pages
   { path: 'risk',                 canActivate: [authGuard], loadComponent: () => import('./pages/risk/risk.component').then(m => m.RiskComponent) },
+  { path: 'pilot-report',         canActivate: [authGuard], loadComponent: () => import('./pages/pilot-report/pilot-report.component').then(m => m.PilotReportComponent) },
   { path: 'audit',                canActivate: [authGuard], loadComponent: () => import('./pages/audit/audit.component').then(m => m.AuditComponent) },
   { path: 'deadlines',            canActivate: [authGuard], loadComponent: () => import('./pages/deadlines/deadlines.component').then(m => m.DeadlinesComponent) },
 

@@ -589,3 +589,24 @@
 .ig-hist-main { font-size: 13.5px; overflow-wrap: anywhere; }
 .ig-hist-arrow { color: #98a2b3; }
 .ig-hist-meta { font-size: 12px; color: #667085; }
+
+/* ── Model roles ─────────────────────────────────────────────────────────── */
+.ig-roles { display: flex; flex-direction: column; border: 1px solid #e4e7ec; border-radius: 10px; background: #fff; overflow: hidden; }
+.ig-role { display: flex; gap: 16px; align-items: center; justify-content: space-between; padding: 14px 16px; flex-wrap: wrap;
+  & + .ig-role { border-top: 1px solid #f2f4f7; } }
+.ig-role-text { flex: 1; min-width: 220px; }
+.ig-role-name { font-weight: 600; font-size: 14px; }
+.ig-role-help { font-size: 13px; color: #475467; }
+.ig-role-default { font-size: 12px; color: #667085; margin-top: 2px; }
+.ig-role-select { min-width: 260px; max-width: 100%; padding: 7px 10px; border: 1px solid #d0d5dd; border-radius: 8px; font: inherit; font-size: 13px; background: #fff; }
+
+.ig-vision-state { margin-top: 8px; padding: 10px 12px; border-radius: 8px; font-size: 13px; line-height: 1.5;
+  background: #fffaeb; border: 1px solid #fedf89; color: #7a2e0e;
+  &.ok { background: #ecfdf3; border-color: #abefc6; color: #054f31; }
+  code { background: rgba(0,0,0,.05); padding: 1px 5px; border-radius: 4px; font-size: 12px; } }
+
+.ig-web { display: flex; flex-wrap: wrap; align-items: flex-end; gap: 14px 20px; margin-top: 12px; }
+.ig-web-switch { display: flex; align-items: center; gap: 8px; font-weight: 600; font-size: 13.5px; color: #1d2939; }
+.ig-web-url { display: flex; flex-direction: column; gap: 4px; font-size: 12px; color: #475467; flex: 1 1 260px; max-width: 380px;
+  input { border: 1px solid #d0d5dd; border-radius: 8px; padding: 7px 10px; font: inherit; font-size: 13.5px; color: #1d2939; } }
+.ig-web-actions { display: flex; gap: 8px; }

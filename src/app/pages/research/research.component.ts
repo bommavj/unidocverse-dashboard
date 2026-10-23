@@ -209,7 +209,27 @@ export class ResearchComponent implements OnInit, OnDestroy {
       this.docs.some(d => /^(w2|form_10\d\d|form_1099|schedule_k1|form_8949|form_1065|tax_form)/.test(d.doc_type || ''));
   }
 
+  // Web search (SearxNG): shown only when an admin turned it on; the choice is remembered on this browser
+  webAvailable = false;
+  webOn = false;
+
+  toggleWeb() {
+    this.webOn = !this.webOn;
+    try { localStorage.setItem('udv.research.web', this.webOn ? '1' : '0'); } catch {}
+  }
+
+  private async loadWeb(retry = true) {
+    const jwt = await _getValidJwt(this.http);
+    this.http.get<any>(`${API}/api/web-search/settings`, { headers: jwt ? { Authorization: `Bearer ${jwt}` } : {} }).subscribe({
+      next: (r) => {
+        this.webAvailable = !!r?.enabled;
+        try { this.webOn = this.webAvailable && localStorage.getItem('udv.research.web') === '1'; } catch {}
+        this.cdr.markForCheck();
+      }, error: () => { if (retry) setTimeout(() => this.loadWeb(false), 2000); } });
+  }
+
   ngOnInit() {
+    this.loadWeb();
     this.loadDocs();
     this.loadHistory();
     this.route.queryParams.subscribe(p => {
@@ -588,6 +608,7 @@ ${sources ? `<div class="sources"><strong>Sources:</strong> ${sources}</div>` : 
       ? Array.from(this.selectedDocIds).join(',') : '';
 
     const params = new URLSearchParams({ question: q });
+    if (this.webOn) params.set('web', '1');
     if (docIds) params.set('doc_ids', docIds);
     const jwt = await _getValidJwt(this.http);
     if (jwt) params.set('jwt', jwt);
@@ -910,6 +931,7 @@ ${sources ? `<div class="sources"><strong>Sources:</strong> ${sources}</div>` : 
     // rootId = the DB id of the root session (never a child's id)
     const rootId = (prev as any)._rootId || prev.id || '';
     const params = new URLSearchParams({ question: q });
+    if (this.webOn) params.set('web', '1');
     if (contextDocIds) params.set('context_doc_ids', contextDocIds);
     if (rootId) params.set('parent_session_id', rootId);
     params.set('prior_qa', JSON.stringify(priorQA));
@@ -1023,6 +1045,8 @@ ${sources ? `<div class="sources"><strong>Sources:</strong> ${sources}</div>` : 
       });
 
       t = t
+        // [title](https://…) links (web results); only http(s), and the URL can't carry quotes
+        .replace(/\[([^\]\n]+)\]\((https?:\/\/[^\s)"'<>]+)\)/g, '<a href="$2" target="_blank" rel="noopener noreferrer">$1</a>')
         .replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>')
         .replace(/\*(.+?)\*/g, '<em>$1</em>')
         .replace(/`([^`]+)`/g, '<code>$1</code>')

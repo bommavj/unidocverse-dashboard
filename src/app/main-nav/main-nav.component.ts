@@ -150,6 +150,7 @@ export class MainNavComponent implements OnInit, OnDestroy {
     { key: 'governance', label: 'Governance', flag: 'complianceMode', items: [
       { label: 'Risk', icon: 'alert-triangle', link: '/risk' },
       { label: 'Audit', icon: 'list-search', link: '/audit' },
+      { label: 'Pilot report', icon: 'clipboard-check', link: '/pilot-report' },
       { label: 'AI reports', icon: 'report-analytics', link: '/agency-reports', query: { type: 'compliance' } },
     ]},
     { key: 'productivity', label: 'Productivity', items: [

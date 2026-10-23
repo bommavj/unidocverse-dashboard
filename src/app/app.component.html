@@ -1,5 +1,7 @@
 <div class="app-shell">
-  <app-license-warning-banner></app-license-warning-banner>
+  @if (showLicenseBanner) {
+    <app-license-warning-banner></app-license-warning-banner>
+  }
   <div class="app-body">
     @if (auth.isLoggedIn()) {
       <app-main-nav (openAskAi)="askAiOpen=true" (openVoice)="voiceOpen=true"></app-main-nav>

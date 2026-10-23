@@ -104,6 +104,63 @@
         </div>
       </div>
 
+      <!-- Web search (SearxNG) for the Research Agent -->
+      <div class="ig-section" *ngIf="webCfg">
+        <div class="ig-sec-label">
+          <span class="ig-sec-bar" style="background: linear-gradient(180deg, #10b981, #0ea5e9)"></span>
+          <div>
+            <div class="ig-sec-title">Web search</div>
+            <div class="ig-sec-desc">Lets the Research Agent also search the web through your own <a href="https://docs.searxng.org" target="_blank" rel="noopener">SearxNG</a> server. Only the question's general topic is sent — names, ID numbers, amounts and document text are removed first. Each search is written to the <a routerLink="/audit">audit trail</a> with the exact words sent and the links returned.</div>
+          </div>
+        </div>
+        <div class="ig-web">
+          <label class="ig-web-switch"><input type="checkbox" [(ngModel)]="webCfg.enabled" /> Allow web search in Research</label>
+          <label class="ig-web-url">SearxNG URL
+            <input type="url" [(ngModel)]="webCfg.searxng_url" placeholder="http://localhost:8888" />
+          </label>
+          <div class="ig-web-actions">
+            <button class="ig-btn ig-btn--ghost" (click)="testWeb()" [disabled]="webBusy">Test</button>
+            <button class="ig-btn" (click)="saveWeb()" [disabled]="webBusy">Save</button>
+          </div>
+        </div>
+        <div class="ig-field-note">The macOS app and the Docker image include SearxNG at <code>http://localhost:8888</code> — just switch it on. To use your organisation's own SearxNG instead, enter its URL (it needs <code>search.formats: [html, json]</code>).</div>
+      </div>
+
+      <!-- Model roles: one model per step -->
+      <div class="ig-section" *ngIf="roles.length">
+        <div class="ig-sec-label">
+          <span class="ig-sec-bar" style="background: linear-gradient(180deg, #0ea5e9, #6366f1)"></span>
+          <div>
+            <div class="ig-sec-title">Model roles</div>
+            <div class="ig-sec-desc">Use a different model for each step. Leave a step on <em>Default</em> to keep today's behaviour. Steps that use a cloud model still ask before documents are sent, and identifiers are masked.</div>
+          </div>
+        </div>
+        <div class="ig-roles">
+          <div class="ig-role" *ngFor="let r of roles">
+            <div class="ig-role-text">
+              <div class="ig-role-name">{{ r.label }}</div>
+              <div class="ig-role-help">{{ r.help }}</div>
+              <div class="ig-role-default" *ngIf="!r.current">Default: {{ r.default }}</div>
+            </div>
+            <select class="ig-role-select" [ngModel]="roleValue(r)" (ngModelChange)="setRole(r, $event)" [attr.aria-label]="r.label + ' model'">
+              <option value="">Default</option>
+              <optgroup label="On this computer">
+                <option *ngFor="let m of roleLocalModels" [value]="'local|' + m">{{ m }}</option>
+              </optgroup>
+              <optgroup label="Cloud (asks before sending)" *ngIf="!r.local_only && roleClouds.length">
+                <option *ngFor="let c of roleClouds" [value]="'cloud|' + c.provider + '|' + c.model">{{ c.label }} · {{ c.model }}</option>
+              </optgroup>
+            </select>
+          </div>
+        </div>
+        <div class="ig-field-note">Vision reads page images, which can't be masked, so it only uses models on this computer.</div>
+        <div class="ig-vision-state" *ngIf="vision" [class.ok]="vision.installed">
+          <ng-container *ngIf="vision.installed">✅ Vision model <code>{{ vision.model }}</code> is installed — forms and charts are read accurately at upload.</ng-container>
+          <ng-container *ngIf="!vision.installed">⚠️ Vision model <code>{{ vision.model }}</code> isn't installed, so W-2s, 1099s, passports and charts are read as plain text only and their values can be missing.
+            In Terminal run <code>{{ vision.pull }}</code> (about 10 GB; needs 16 GB of memory or more), then reprocess those documents (Documents → 🔄).</ng-container>
+        </div>
+      </div>
+
       <!-- Data protection + usage for cloud models -->
       <div class="ig-section" *ngIf="providers.length && policy">
         <div class="ig-sec-label">

@@ -25,6 +25,17 @@
     <button class="notice-x" (click)="dismissDisclaimer()">I understand</button>
   </div>
 
+  <!-- Starter edition: search model downloading on first launch -->
+  <section class="setup" *ngIf="setup" role="status" aria-live="polite">
+    <div class="setup-h">
+      <strong>{{ setup.state === 'failed' ? 'Search model download stopped' : 'Finishing setup: downloading the search model' }}</strong>
+      <span *ngIf="setup.total">{{ setupPct }}% · {{ (setup.done / 1e9).toFixed(2) }} of {{ (setup.total / 1e9).toFixed(2) }} GB</span>
+    </div>
+    <div class="setup-bar"><span [style.width.%]="setupPct"></span></div>
+    <p *ngIf="setup.state !== 'failed'">You can use UniDocVerse now. Until this finishes, search results aren't reranked, so answers can be less precise. It's checked against its checksum and resumes if interrupted.</p>
+    <p *ngIf="setup.state === 'failed'">Check the internet connection and restart UniDocVerse — the download resumes where it stopped. {{ setup.error }}</p>
+  </section>
+
   <!-- No answer engine yet (Lite edition, or Ollama stopped): ask the user to choose -->
   <section class="engine" *ngIf="engine && !engine.ready" role="alert">
     <div class="engine-h">
@@ -48,6 +59,15 @@
       </div>
     </div>
   </section>
+
+  <!-- Vision model missing: forms and charts are read as plain text only -->
+  <div class="vision-tip" *ngIf="engine?.ready && engine?.vision && !engine.vision.installed && !visionTipHidden" role="note">
+    <i class="ti ti-eye"></i>
+    <div>For accurate W-2s, 1099s, passports and charts, install the vision model: in Terminal run
+      <code>{{ engine.vision.pull }}</code> (about 10 GB; needs 16 GB of memory or more), then reprocess those documents.
+      <a routerLink="/help" fragment="recommended">Why?</a></div>
+    <button class="notice-x" (click)="hideVisionTip()">Got it</button>
+  </div>
 
   <!-- Today's brief -->
   <section class="brief" *ngIf="brief">

@@ -107,6 +107,13 @@
             <span class="tl-time">{{ fmtDate(e.created_at) }}</span>
           </div>
           <div class="tl-detail" *ngIf="e.detail">{{ e.detail }}</div>
+          <div class="tl-web" *ngIf="e.action === 'research.web_search' && e.extra">
+            <div>Sent to <b>{{ e.extra.search_server }}</b>: <code>{{ e.extra.query_sent || '(nothing — no general topic)' }}</code>
+              <span *ngIf="e.extra.removed_from_query"> · {{ e.extra.removed_from_query }} name/number(s) removed first</span></div>
+            <div *ngIf="e.extra.question">Question asked: {{ e.extra.question }}</div>
+            <div *ngIf="e.extra.error" class="tl-web-err">Search failed: {{ e.extra.error }}</div>
+            <ol *ngIf="e.extra.results?.length"><li *ngFor="let r of e.extra.results"><a [href]="r.url" target="_blank" rel="noopener">{{ r.title }}</a></li></ol>
+          </div>
           <div class="tl-doc" *ngIf="e.filename">📄 {{ e.filename }}</div>
         </div>
       </div>

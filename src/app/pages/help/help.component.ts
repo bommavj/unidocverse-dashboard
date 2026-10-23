@@ -38,10 +38,20 @@ const TOPICS: Topic[] = [
     'Visa and status documents (I-797, I-94, EAD, passports) are tracked by expiry. Expired and soon-to-expire items appear in the brief with the person and document named.'] },
   { id: 'legal', group: 'Modules', title: 'Legal matters', link: '/matters', flag: 'legal', body: [
     'Matters, deadlines in the next 14 days and matters idle for 30 days are tracked and appear in the brief.'] },
+  { id: 'recommended', group: 'Getting started', title: 'Recommended models (best accuracy)', link: '/integrations', body: [
+    'Answers: mistral:7b (in Terminal: ollama pull mistral:7b), or a cloud model added in Integrations. Needs 8 GB of memory or more.',
+    'Forms and charts: the vision model gemma4 (ollama pull gemma4, about 10 GB, needs 16 GB of memory or more). It reads W-2 and 1099 boxes, passports and chart values at upload, and every value is checked against the page.',
+    'Without the vision model, forms and charts are read as plain text only. Questions about a chart then say which values weren\'t read instead of guessing.',
+    'After installing a model, reprocess documents uploaded before (Documents → 🔄) so they are read again. Choose which model does each step in Integrations → Model roles.'] },
   { id: 'models', group: 'AI models', title: 'Local and cloud models', link: '/integrations', body: [
     'By default answers come from the model running on this computer. Admins can add a cloud provider (Anthropic, OpenAI, Gemini and others) with their own key in Integrations.',
     'With a cloud model active, the local model answers first; the cloud is used only when the local answer can\'t be backed by your documents.',
     'Data protection settings decide which document types may never be sent, mask identifiers before sending, require consent and cap monthly spend. Every cloud call is logged.'] },
+  { id: 'web', group: 'Connect', title: 'Web search', link: '/research', body: [
+    'An admin can let Research also search the web through the organisation\'s own SearxNG server (Integrations → Web search). Then press 🌐 Web under the question box.',
+    'Only the question\'s general topic is sent — names, ID numbers, amounts and document text are removed first, and the topic is written on this computer. Your documents never leave.',
+    'Web results appear in their own "From the web" section with numbered links, separate from the answer from your documents.',
+    'Every search is in the audit trail as research.web_search, with who asked, the exact words sent and the links that came back.'] },
   { id: 'integrations', group: 'Connect', title: 'Webhooks, QuickBooks, Salesforce and chat', link: '/integrations', body: [
     'Webhooks send signed events (document processed, approval decided, brief ready) to your systems.',
     'QuickBooks: connect once, then invoices become draft bills that post only after approval.',
@@ -50,6 +60,10 @@ const TOPICS: Topic[] = [
   { id: 'audit', group: 'Admin', title: 'Audit trail and retention', link: '/audit', body: [
     'Every change, deletion, sign-in and AI question is recorded and cannot be edited.',
     'Retention: choose how long to keep views and searches and how long to keep changes. Expired entries are archived to compressed files before removal. A legal hold pauses all cleanup.'] },
+  { id: 'pilot', group: 'Admin', title: 'Pilot report', link: '/pilot-report', body: [
+    'For organisations in the early-adopter program: at 30, 60 and 90 days, open Pilot report to see what this installation measured — documents processed, pages read, questions answered with a cited source, processing time and active users.',
+    'Add your own feedback (minutes per document before and after, ratings, a testimonial) and choose whether it may be published as a case study. Time saved is calculated from your numbers.',
+    'Save, then print to PDF or download JSON to share it. Nothing is sent automatically.'] },
   { id: 'modules', group: 'Admin', title: 'Turning modules on and off', link: '/settings', body: [
     'Settings → Features switches each industry module on or off. Menus, agents, workflows and the brief follow these switches, so people only see what applies to them.'] },
   { id: 'agents', group: 'Admin', title: 'Agent Queue', link: '/agent-builder', body: [

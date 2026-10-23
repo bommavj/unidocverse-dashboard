@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterModule, Router } from '@angular/router';
 import { FormsModule } from '@angular/forms';
@@ -16,7 +16,9 @@ import { FeatureFlagService } from '../../services/feature-flag.service';
   templateUrl: './dashboard.component.html',
   styleUrls: ['./dashboard.component.scss']
 })
-export class DashboardComponent implements OnInit {
+export class DashboardComponent implements OnInit, OnDestroy {
+  ngOnDestroy(): void { clearTimeout(this.setupTimer); }
+
   docs: any[] = [];
   selectedDoc: any = null;
 
@@ -81,7 +83,31 @@ export class DashboardComponent implements OnInit {
   immHigh     = 0;
   immExpired  = 0;
 
-  engine: any = null;          // { ollama: {reachable, models}, cloud, ready }
+  engine: any = null;
+  visionTipHidden = (() => { try { return localStorage.getItem('udv_vision_tip') === '1'; } catch { return false; } })();
+
+  hideVisionTip(): void {
+    this.visionTipHidden = true;
+    try { localStorage.setItem('udv_vision_tip', '1'); } catch { /* private mode */ }
+  }          // { ollama: {reachable, models}, cloud, ready }
+
+  // Starter edition: the search model downloads on first launch
+  setup: { state: string; done: number; total: number; error: string | null } | null = null;
+  private setupTimer: any = null;
+
+  loadSetup(): void {
+    this.http.get<any>('http://localhost:7979/api/setup/models').subscribe({
+      next: r => {
+        const s = r?.reranker;
+        this.setup = s && !['bundled', 'ready'].includes(s.state) ? s : null;
+        clearTimeout(this.setupTimer);
+        if (this.setup) this.setupTimer = setTimeout(() => this.loadSetup(), 3000);
+      }, error: () => this.setup = null });
+  }
+
+  get setupPct(): number {
+    return this.setup?.total ? Math.floor(100 * this.setup.done / this.setup.total) : 0;
+  }
 
   loadEngine(): void {
     this.http.get<any>('http://localhost:7979/api/llm-providers/engine-status').subscribe({
@@ -132,6 +158,7 @@ export class DashboardComponent implements OnInit {
 
   ngOnInit(): void {
     this.disclaimerVisible = localStorage.getItem(this.DISC_KEY) !== '1';
+    this.loadSetup();
     this.setGreetingAndDate();
     this.loadDocs();
     this.loadAlerts();

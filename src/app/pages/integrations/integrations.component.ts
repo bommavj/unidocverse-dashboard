@@ -452,6 +452,7 @@ curl -X POST "http://localhost:7979/mcp/messages/?session_id=<ID>" \\
   ngOnInit(): void {
     this.loadModels();
     this.loadProviders();
+    this.loadRoles();
     this.loadQuickBooks();
     this.loadSalesforce();
     this.loadHooks();
@@ -486,6 +487,7 @@ curl -X POST "http://localhost:7979/mcp/messages/?session_id=<ID>" \\
   }
 
   private readonly providersApi = 'http://localhost:7979/api/llm-providers';
+  private readonly webApi = 'http://localhost:7979/api/web-search';
   private readonly qbApi = 'http://localhost:7979/api/quickbooks';
   private readonly hooksApi = 'http://localhost:7979/api/webhooks';
 
@@ -745,9 +747,73 @@ curl -X POST "http://localhost:7979/mcp/messages/?session_id=<ID>" \\
     navigator.clipboard?.writeText(text).then(() => this.showToast('Copied'));
   }
 
+  // ── Web search (SearxNG) ───────────────────────────────────────────────────
+  webCfg: { enabled: boolean; searxng_url: string } | null = null;
+  webBusy = false;
+
+  loadWeb(): void {
+    this.http.get<any>(`${this.webApi}/settings`).subscribe({
+      next: (r) => { this.webCfg = { enabled: !!r.enabled, searxng_url: r.searxng_url || '' }; this.cdr.markForCheck(); },
+      error: () => {} });
+  }
+
+  testWeb(): void {
+    if (!this.webCfg) return;
+    this.webBusy = true;
+    this.http.post<any>(`${this.webApi}/test`, this.webCfg).subscribe({
+      next: (r) => { this.webBusy = false; this.showToast(`SearxNG answered with ${r.results} results`); this.cdr.markForCheck(); },
+      error: (e) => { this.webBusy = false; this.showToast(e?.error?.detail || 'SearxNG did not answer', true); this.cdr.markForCheck(); } });
+  }
+
+  saveWeb(): void {
+    if (!this.webCfg) return;
+    this.webBusy = true;
+    this.http.put<any>(`${this.webApi}/settings`, this.webCfg).subscribe({
+      next: (r) => { this.webBusy = false; this.webCfg = { enabled: r.enabled, searxng_url: r.searxng_url }; this.showToast(r.enabled ? 'Web search is on' : 'Web search is off'); this.cdr.markForCheck(); },
+      error: (e) => { this.webBusy = false; this.showToast(e?.error?.detail || 'Only admins can change this', true); this.cdr.markForCheck(); } });
+  }
+
+  // ── Model roles ────────────────────────────────────────────────────────────
+  roles: any[] = [];
+  vision: { model: string; installed: boolean; pull: string } | null = null;
+  roleLocalModels: string[] = [];
+  roleClouds: { provider: string; label: string; model: string }[] = [];
+
+  loadVision(): void {
+    this.http.get<any>(`${this.providersApi}/engine-status`).subscribe({
+      next: (e) => { this.vision = e?.vision || null; this.cdr.markForCheck(); }, error: () => {} });
+  }
+
+  loadRoles(): void {
+    this.loadVision();
+    this.http.get<any>(`${this.providersApi}/model-roles`).subscribe({
+      next: (r) => { this.roles = r.roles || []; this.roleLocalModels = r.local_models || []; this.roleClouds = r.cloud_providers || []; this.cdr.markForCheck(); },
+      error: () => { this.roles = []; this.cdr.markForCheck(); }
+    });
+  }
+
+  roleValue(r: any): string {
+    const c = r.current;
+    if (!c) return '';
+    return c.engine === 'cloud' ? `cloud|${c.provider}|${c.model}` : `local|${c.model}`;
+  }
+
+  setRole(r: any, value: string): void {
+    const done = (msg: string) => { this.showToast(msg); this.loadRoles(); };
+    const fail = (e: any) => { this.showToast(e?.error?.detail || 'Could not save', true); this.loadRoles(); };
+    if (!value) {
+      this.http.delete(`${this.providersApi}/model-roles/${r.role}`).subscribe({ next: () => done(`${r.label} uses the default model`), error: fail });
+      return;
+    }
+    const [engine, a, b] = value.split('|');
+    const body = engine === 'cloud' ? { engine, provider: a, model: b } : { engine, model: a };
+    this.http.put(`${this.providersApi}/model-roles/${r.role}`, body).subscribe({
+      next: () => done(`${r.label} now uses ${engine === 'cloud' ? b : a}`), error: fail });
+  }
+
   loadProviders(): void {
     this.http.get<{ providers: CloudProvider[]; active: string | null }>(this.providersApi).subscribe({
-      next: (res) => { this.providers = res.providers; this.activeProvider = res.active; this.loadPolicy(); this.cdr.markForCheck(); },
+      next: (res) => { this.providers = res.providers; this.activeProvider = res.active; this.loadPolicy(); this.loadWeb(); this.cdr.markForCheck(); },
       error: () => { this.providers = []; this.cdr.markForCheck(); }   // non-admins get 403: section stays hidden
     });
   }

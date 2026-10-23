@@ -5,12 +5,14 @@ import { FormsModule } from '@angular/forms';
 import { UdvSelectComponent, SelectOption } from '../../components/udv-select/udv-select.component';
 
 const ACTION_ICONS: Record<string, string> = {
+  'research.web_search': '🌐', 'settings.web_search': '🌐',
   upload: '⬆', view: '👁', download: '⬇', edit: '✏', delete: '🗑',
   approve: '✓', reject: '✗', comment: '💬', share: '🔗', export: '📤',
   clm_move: '→', workflow_run: '⚙', alert_triggered: '🔔', email_sent: '✉',
   tag_added: '🏷', tag_removed: '🏷', linked: '🔗', unlinked: '🔗',
 };
 const ACTION_COLOR: Record<string, string> = {
+  'research.web_search': '#0e9384', 'settings.web_search': '#0e9384',
   upload: '#6366f1', view: '#3b82f6', download: '#8b5cf6', edit: '#f59e0b',
   delete: '#ef4444', approve: '#10b981', reject: '#ef4444', comment: '#06b6d4',
   share: '#6366f1', export: '#8b5cf6', clm_move: '#f59e0b', workflow_run: '#3b82f6',
