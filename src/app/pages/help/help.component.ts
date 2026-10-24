@@ -68,6 +68,10 @@ const TOPICS: Topic[] = [
     'Settings → Features switches each industry module on or off. Menus, agents, workflows and the brief follow these switches, so people only see what applies to them.'] },
   { id: 'agents', group: 'Admin', title: 'Agent Queue', link: '/agent-builder', body: [
     'The Agent Queue is the record of every agent run — useful for admins checking what ran and why something failed. Day-to-day, use Today\'s brief instead.'] },
+  { id: 'share', group: 'Help', title: 'Share your experience', link: '/feedback', body: [
+    'Rate UniDocVerse and tell us what works and what should improve. It is optional and takes a minute.',
+    'Nothing is sent automatically: the form shows exactly what will be sent, and it goes to unidocverse.com only when you press Send. Usage statistics (counts only, no names, files or text) are included only if you tick the box.',
+    'Your comment appears on the website only if you allow it, anonymously — with the rating and industry, never your name or organisation. Offline? Save it as a file and email it to info@unidocverse.com.'] },
   { id: 'trouble', group: 'Help', title: 'Troubleshooting', link: '/report-issue', body: [
     'Can\'t sign in or uploads fail on the desktop app: make sure nothing else uses port 7979, then restart the app.',
     'An answer looks wrong: open the cited document and check the figure. Report it with Report issue so it can be fixed.',
@@ -82,7 +86,7 @@ const TOPICS: Topic[] = [
   <div class="help">
     <header class="ph">
       <h1>Help</h1>
-      <p>How UniDocVerse works and where to find things.</p>
+      <p>How UniDocVerse works and where to find things. <a class="share" routerLink="/feedback"><i class="ti ti-message-heart"></i>Share your experience</a></p>
       <div class="q">
         <i class="ti ti-search"></i>
         <input [ngModel]="q()" (ngModelChange)="q.set($event)" placeholder="Search help" aria-label="Search help" />
@@ -118,6 +122,8 @@ const TOPICS: Topic[] = [
     main { display: flex; flex-direction: column; gap: 22px; }
     section { scroll-margin-top: 16px; } section h2 { margin: 0 0 6px; font-size: 17px; }
     section p { margin: 0 0 8px; line-height: 1.6; color: #1d2939; max-width: 68ch; }
+    .share { margin-left: 10px; color: #1570ef; font-weight: 600; text-decoration: none; white-space: nowrap; }
+    .share i { margin-right: 4px; }
     .open { color: #1570ef; font-weight: 600; font-size: 13.5px; text-decoration: none; }
     .none { color: #667085; }
     @media (max-width: 760px) { .cols { grid-template-columns: 1fr; } .toc { position: static; } }
