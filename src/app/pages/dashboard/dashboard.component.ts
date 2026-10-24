@@ -95,14 +95,32 @@ export class DashboardComponent implements OnInit, OnDestroy {
   setup: { state: string; done: number; total: number; error: string | null } | null = null;
   private setupTimer: any = null;
 
+  answerPack: { state: string; done: number; total: number; error: string | null } | null = null;
+  answerModel = 'phi3:mini';
+
   loadSetup(): void {
     this.http.get<any>('http://localhost:7979/api/setup/models').subscribe({
       next: r => {
         const s = r?.reranker;
         this.setup = s && !['bundled', 'ready'].includes(s.state) ? s : null;
+        const before = this.answerPack?.state;
+        this.answerPack = r?.answer || null;
+        this.answerModel = r?.answer_model || this.answerModel;
+        if (before && before !== 'ready' && this.answerPack?.state === 'ready') this.loadEngine();   // switch to answering
+        const busy = (p: any) => p && !['bundled', 'ready', 'idle', 'failed'].includes(p.state);
         clearTimeout(this.setupTimer);
-        if (this.setup) this.setupTimer = setTimeout(() => this.loadSetup(), 3000);
+        if (this.setup || busy(this.answerPack)) this.setupTimer = setTimeout(() => this.loadSetup(), 3000);
       }, error: () => this.setup = null });
+  }
+
+  downloadAnswerModel(): void {
+    this.http.post<any>('http://localhost:7979/api/setup/models/answer', {}).subscribe({
+      next: s => { this.answerPack = s; this.loadSetup(); },
+      error: e => { this.answerPack = { state: 'failed', done: 0, total: 0, error: e?.error?.detail || 'Only an admin can start this download.' }; } });
+  }
+
+  pct(p: { done: number; total: number } | null): number {
+    return p?.total ? Math.floor(100 * p.done / p.total) : 0;
   }
 
   get setupPct(): number {

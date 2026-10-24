@@ -46,8 +46,18 @@
       </div>
     </div>
     <div class="engine-opts">
+      <div class="engine-opt" *ngIf="answerPack && answerPack.state !== 'bundled'">
+        <h3><i class="ti ti-download"></i>Built-in model (easiest)</h3>
+        <p>Downloads {{ answerModel }} (about 2 GB) into UniDocVerse. Runs on this Mac — documents never leave it. Needs 8 GB of memory or more.</p>
+        <button class="btn btn-pri" *ngIf="['idle','failed'].includes(answerPack.state)" (click)="downloadAnswerModel()"><i class="ti ti-download"></i>{{ answerPack.state === 'failed' ? 'Try again' : 'Download built-in model' }}</button>
+        <div *ngIf="!['idle','failed','ready'].includes(answerPack.state)">
+          <div class="setup-bar"><span [style.width.%]="pct(answerPack)"></span></div>
+          <p class="small">{{ answerPack.state === 'verifying' ? 'Checking the download…' : answerPack.state === 'unpacking' ? 'Installing…' : pct(answerPack) + '% downloaded' }}</p>
+        </div>
+        <p class="small" *ngIf="answerPack.state === 'failed'">The download stopped: {{ answerPack.error }}</p>
+      </div>
       <div class="engine-opt">
-        <h3><i class="ti ti-device-desktop"></i>On this Mac (private)</h3>
+        <h3><i class="ti ti-device-desktop"></i>Your own Ollama (private)</h3>
         <p *ngIf="!engine.ollama?.reachable">Install <a href="https://ollama.com/download" target="_blank" rel="noopener">Ollama</a>, then in Terminal run <code>ollama pull mistral:7b</code>. Documents never leave this computer.</p>
         <p *ngIf="engine.ollama?.reachable && !engine.ollama?.models?.length">Ollama is running but has no models. In Terminal run <code>ollama pull mistral:7b</code>.</p>
         <button class="btn btn-sec" (click)="loadEngine()"><i class="ti ti-refresh"></i>Check again</button>
