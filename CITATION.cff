@@ -1,0 +1,21 @@
+cff-version: 1.2.0
+message: "If you use this software, please cite it as below."
+title: "UniDocVerse Dashboard"
+abstract: "UniDocVerse web application: documents, research agent with citations, integrations, audit trail and pilot reports."
+type: software
+authors:
+  - family-names: Bomma
+    given-names: Vijay Kumar
+    alias: bommavj
+version: "0.1.7"
+date-released: "2026-10-23"
+license: Apache-2.0
+doi: "10.5281/zenodo.21880388"
+repository-code: "https://github.com/bommavj/unidocverse-dashboard"
+url: "https://unidocverse.com"
+keywords:
+  - document-ai
+  - retrieval-augmented-generation
+  - ocr
+  - local-llm
+  - privacy
