@@ -106,6 +106,7 @@ export class ResearchComponent implements OnInit, OnDestroy {
   selectAll = false;
 
   activeModel = 'phi3:mini';
+  private cloudModel = false;
   question = '';
   running = false;
   sessions: ResearchSession[] = [];
@@ -245,8 +246,13 @@ export class ResearchComponent implements OnInit, OnDestroy {
       }
     });
     this.http.get<{ selected_model: string }>(`${API}/api/models/get-model`).subscribe({
-      next: r => { this.activeModel = r.selected_model || 'phi3:mini'; this.cdr.markForCheck(); },
+      next: r => { if (!this.cloudModel) this.activeModel = r.selected_model || 'phi3:mini'; this.cdr.markForCheck(); },
       error: () => {}
+    });
+    // A cloud model, when one is active, answers the questions — show it rather than the local model
+    this.http.get<any>(`${API}/api/llm-providers/engine-status`).subscribe({
+      next: e => { if (e?.cloud) { this.cloudModel = true; this.activeModel = `${e.cloud.label} · ${e.cloud.model} (cloud — asks before sending)`; this.cdr.markForCheck(); } },
+      error: () => {},
     });
   }
 
