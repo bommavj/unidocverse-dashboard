@@ -2,6 +2,7 @@ import { ChangeDetectorRef, Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { HttpClient } from '@angular/common/http';
+import { ActivatedRoute } from '@angular/router';
 
 const API = 'http://localhost:7979/api/feedback';
 const SEND_TO = 'https://unidocverse.com/api/feedback';
@@ -113,9 +114,11 @@ export class FeedbackComponent implements OnInit {
   msg = '';
   error = false;
 
-  constructor(private http: HttpClient, private cdr: ChangeDetectorRef) {}
+  constructor(private http: HttpClient, private cdr: ChangeDetectorRef, private route: ActivatedRoute) {}
 
   ngOnInit(): void {
+    // Opened from Statistics → "Share with UniDocVerse": include the usage counts
+    if (this.route.snapshot.queryParamMap.get('usage') === '1') this.includeUsage = true;
     this.loadUsage(true);
   }
 

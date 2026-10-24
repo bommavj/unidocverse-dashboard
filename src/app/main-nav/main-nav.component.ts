@@ -73,6 +73,7 @@ export class MainNavComponent implements OnInit, OnDestroy {
       { label: 'Home', icon: 'home', link: '/dashboard' },
       { label: 'Documents', icon: 'files', link: '/documents-hub', badge: 'docs', also: ['/documents'] },
       { label: 'Insights', icon: 'bulb', link: '/insights' },
+      { label: 'Statistics', icon: 'chart-bar', link: '/statistics' },
       { label: 'Timeline', icon: 'timeline', link: '/timeline' },
       { label: 'Deadlines', icon: 'calendar-due', link: '/deadlines', also: ['/alerts'] },
       { label: 'Watch folders', icon: 'folder-search', link: '/watch-folders' },
