@@ -14,6 +14,13 @@
             <div class="ig-sec-desc" *ngIf="!activeProvider">Switch the active model used for document analysis and chat. Currently using <strong>{{ currentModel || '…' }}</strong>.</div>
             <div class="ig-sec-desc" *ngIf="activeProvider">Inactive while <strong>{{ activeProviderLabel }}</strong> answers questions. <strong>{{ currentModel }}</strong> still processes uploads.</div>
           </div>
+          <button class="ig-btn ig-btn--ghost ig-refresh" (click)="refreshModels()" [disabled]="refreshingModels"
+                  title="Installed a model with Ollama (e.g. ollama pull mistral:7b)? Refresh to see it here.">
+            <i class="ti ti-refresh" [class.ig-spin]="refreshingModels"></i>{{ refreshingModels ? 'Checking…' : 'Refresh models' }}
+          </button>
+        </div>
+        <div class="ig-field-note ig-models-empty" *ngIf="!loadingModels && !models.length">
+          No local models found. Install <a href="https://ollama.com/download" target="_blank" rel="noopener">Ollama</a>, run <code>ollama pull mistral:7b</code> in Terminal, then press <b>Refresh models</b>.
         </div>
 
         <div class="ig-model-grid">

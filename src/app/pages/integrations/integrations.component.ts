@@ -475,10 +475,30 @@ curl -X POST "http://localhost:7979/mcp/messages/?session_id=<ID>" \\
     this.stopWaPoll();
   }
 
-  private loadModels(): void {
+  refreshingModels = false;
+
+  /** Back from Terminal after `ollama pull …`: pick up new models quietly when the window regains focus. */
+  @HostListener('window:focus')
+  onWindowFocus(): void {
+    if (!this.refreshingModels) this.loadModels();
+  }
+
+  /** Ollama is asked fresh on every call, so a model pulled after this page opened appears here. */
+  refreshModels(): void {
+    const before = new Set(this.models);
+    this.refreshingModels = true;
+    this.loadModels((list) => {
+      this.refreshingModels = false;
+      const added = list.filter(m => !before.has(m));
+      this.showToast(added.length ? `Found ${added.join(', ')}` : list.length ? `${list.length} local model${list.length === 1 ? '' : 's'} — nothing new` : 'No local models found — is Ollama running?', !list.length);
+      this.loadRoles();
+    });
+  }
+
+  private loadModels(done?: (models: string[]) => void): void {
     this.http.get<{ installed_models: string[] }>('http://localhost:7979/api/models/list-models').subscribe({
-      next: (res) => { this.models = res.installed_models; this.loadingModels = false; this.cdr.markForCheck(); },
-      error: () => { this.loadingModels = false; this.cdr.markForCheck(); }
+      next: (res) => { this.models = res.installed_models; this.loadingModels = false; done?.(this.models); this.cdr.markForCheck(); },
+      error: () => { this.loadingModels = false; done?.([]); this.cdr.markForCheck(); }
     });
     this.http.get<{ selected_model: string }>('http://localhost:7979/api/models/get-model').subscribe({
       next: (res) => { this.currentModel = res.selected_model; this.cdr.markForCheck(); },

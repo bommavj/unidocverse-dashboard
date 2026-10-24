@@ -610,3 +610,9 @@
 .ig-web-url { display: flex; flex-direction: column; gap: 4px; font-size: 12px; color: #475467; flex: 1 1 260px; max-width: 380px;
   input { border: 1px solid #d0d5dd; border-radius: 8px; padding: 7px 10px; font: inherit; font-size: 13.5px; color: #1d2939; } }
 .ig-web-actions { display: flex; gap: 8px; }
+
+.ig-refresh { margin-left: auto; align-self: center; display: inline-flex; align-items: center; gap: 6px; white-space: nowrap; }
+.ig-spin { animation: ig-spin 0.9s linear infinite; }
+@keyframes ig-spin { to { transform: rotate(360deg); } }
+@media (prefers-reduced-motion: reduce) { .ig-spin { animation: none; } }
+.ig-models-empty { margin: -8px 0 14px; }
