@@ -92,6 +92,7 @@ export class MainNavComponent implements OnInit, OnDestroy {
         { label: 'AI reports', link: '/agency-reports', query: { type: 'insurance' } } ]},
       { label: 'Immigration', icon: 'world', flag: 'immigrationMode', items: [
         { label: 'Visa tracker', link: '/immigration', exact: true, also: ['/immigration-case'] },
+        { label: 'People & documents', link: '/immigration-people' },
         { label: 'Cases', link: '/immigration', query: { section: 'cases' } },
         { label: 'Clients', link: '/immigration', query: { section: 'crm' } },
         { label: 'Forms', link: '/immigration', query: { section: 'forms' } },

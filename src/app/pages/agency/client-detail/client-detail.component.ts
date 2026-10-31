@@ -4,11 +4,12 @@ import { FormsModule } from '@angular/forms';
 import { RouterModule, Router, ActivatedRoute } from '@angular/router';
 import { HttpClient } from '@angular/common/http';
 import { ToastService } from '../../../services/toast.service';
+import { ImmRelationshipsComponent } from '../../immigration/relationships/relationships.component';
 
 @Component({
   selector: 'app-client-detail',
   standalone: true,
-  imports: [CommonModule, FormsModule, RouterModule],
+  imports: [CommonModule, FormsModule, RouterModule, ImmRelationshipsComponent],
   templateUrl: './client-detail.component.html',
   styleUrls: ['./client-detail.component.scss']
 })

@@ -17,6 +17,7 @@ export const routes: Routes = [
   // ── Core pages ────────────────────────────────────────────────────────────
   { path: 'disclaimer',   canActivate: [authGuard], loadComponent: () => import('./pages/disclaimer/disclaimer.component').then(m => m.DisclaimerComponent) },
   { path: 'immigration-case', canActivate: [authGuard], loadComponent: () => import('./pages/immigration/case-page/case-page.component').then(m => m.ImmigrationCasePageComponent) },
+  { path: 'immigration-people', canActivate: [authGuard], loadComponent: () => import('./pages/immigration/people/people.component').then(m => m.ImmPeopleComponent) },
   { path: 'immigration',  canActivate: [authGuard], loadComponent: () => import('./pages/immigration/immigration.component').then(m => m.ImmigrationComponent) },
   { path: 'dashboard',     canActivate: [authGuard], loadComponent: () => import('./pages/dashboard/dashboard.component').then(m => m.DashboardComponent) },
   { path: 'documents',     canActivate: [authGuard], loadComponent: () => import('./pages/documents/documents.component').then(m => m.DocumentsComponent) },

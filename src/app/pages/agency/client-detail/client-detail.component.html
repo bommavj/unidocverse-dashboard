@@ -112,7 +112,7 @@
       <button [class.active]="activeTab==='notes'" (click)="activeTab='notes'; loadNotes()">
         Notes <span class="tab-ct" *ngIf="notes.length">{{ notes.length }}</span>
       </button>
-      <button *ngIf="client?.client_type === 'immigration' || immigration.length > 0" [class.active]="activeTab==='immigration'" (click)="activeTab='immigration'">
+      <button *ngIf="client?.client_type === 'immigration' || immigration.length > 0 || client?.source === 'document_ai'" [class.active]="activeTab==='immigration'" (click)="activeTab='immigration'">
         🛂 Immigration
         <span class="tab-ct tab-ct-red" *ngIf="immigrationSummary.critical > 0">{{ immigrationSummary.critical }} critical</span>
         <span class="tab-ct tab-ct-amber" *ngIf="immigrationSummary.critical === 0 && immigrationSummary.high > 0">{{ immigrationSummary.high }} expiring</span>
@@ -341,6 +341,7 @@
 
     <!-- ── IMMIGRATION ────────────────────────────────────────────────────── -->
     <div *ngIf="activeTab==='immigration'" class="tab-content">
+      <app-imm-relationships [clientId]="clientId"></app-imm-relationships>
 
       <!-- Summary bar -->
       <div class="imm-summary" *ngIf="immigration.length">
