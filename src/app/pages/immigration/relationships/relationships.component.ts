@@ -18,7 +18,7 @@ const FIELDS: Record<string, string> = {
 const CARD_W = 208, CARD_H = 84, GAP_X = 40, LANE_H = 136, PAD = 20, LABEL_H = 26;
 
 interface Pending { kind: 'fact' | 'edge' | 'check' | 'use' | 'family' | 'famlink'; id: string; title: string; field?: string; value?: string; decision?: string; relation?: string; }
-const RELATIONS = ['spouse', 'child', 'parent', 'fiance', 'relative'];
+const RELATIONS = ['spouse', 'child', 'parent', 'sibling', 'fiance', 'relative'];
 
 /**
  * A person's immigration documents as a graph: what each document proves, how they link, where they
@@ -83,15 +83,15 @@ const RELATIONS = ['spouse', 'child', 'parent', 'fiance', 'relative'];
       <div class="fam" *ngFor="let f of g.family">
         <div class="fam-main">
           <b>{{ f.name || 'Unnamed' }}</b>
-          <span class="pill">{{ rel(f.relation) }}</span>
+          <span class="pill">{{ rel(f.relation_view || f.relation) }}</span>
           <span class="muted small">{{ f.class || 'status unknown' }}{{ f.status_until ? ' · until ' + (f.status_until | date:'d MMM y') : '' }}</span>
           <span class="pill" [class.ok]="f.state==='confirmed'" [class.prop]="f.state==='proposed'">{{ f.state === 'proposed' ? 'suggested' : f.state }}</span>
         </div>
         <div class="muted small">{{ f.basis }}<span *ngIf="f.reason"> · “{{ f.reason }}”</span></div>
         <div class="actions">
           <ng-container *ngIf="f.state==='proposed'">
-            <select class="rel-sel" [(ngModel)]="f.relation" aria-label="Relation"><option *ngFor="let r of relations" [value]="r">{{ rel(r) }}</option></select>
-            <button class="btn sm" (click)="ask({kind:'family', id:f.id, decision:'confirm', relation:f.relation, title:'Confirm ' + (f.name || 'this person') + ' as ' + rel(f.relation)})">Confirm</button>
+            <select class="rel-sel" [(ngModel)]="f.relation_view" aria-label="Relation"><option *ngFor="let r of relations" [value]="r">{{ rel(r) }}</option></select>
+            <button class="btn sm" (click)="ask({kind:'family', id:f.id, decision:'confirm', relation:f.relation_view, title:'Confirm ' + (f.name || 'this person') + ' as ' + rel(f.relation_view)})">Confirm</button>
           </ng-container>
           <button class="btn sm ghost" (click)="ask({kind:'family', id:f.id, decision:'reject', title: f.state==='proposed' ? 'Not family' : 'Remove family link'})">{{ f.state==='proposed' ? 'Not family' : 'Remove link' }}</button>
         </div>
@@ -358,7 +358,7 @@ export class ImmRelationshipsComponent implements OnChanges {
               confirm_family: 'Confirmed a family link', reject_family: 'Removed a family link' } as any)[a] || a;
   }
 
-  rel(r: string) { return ({ spouse: 'Spouse', child: 'Child', parent: 'Parent', fiance: 'Fiancé(e)', relative: 'Relative' } as any)[r] || r; }
+  rel(r: string) { return ({ spouse: 'Spouse', child: 'Child', parent: 'Parent', sibling: 'Sibling', fiance: 'Fiancé(e)', relative: 'Relative' } as any)[r] || r; }
 
   startLink(): void {
     this.linking = true; this.linkTo = ''; this.linkRel = 'spouse';
