@@ -17,7 +17,8 @@ const FIELDS: Record<string, string> = {
 };
 const CARD_W = 208, CARD_H = 84, GAP_X = 40, LANE_H = 136, PAD = 20, LABEL_H = 26;
 
-interface Pending { kind: 'fact' | 'edge' | 'check' | 'use'; id: string; title: string; field?: string; value?: string; decision?: string; }
+interface Pending { kind: 'fact' | 'edge' | 'check' | 'use' | 'family' | 'famlink'; id: string; title: string; field?: string; value?: string; decision?: string; relation?: string; }
+const RELATIONS = ['spouse', 'child', 'parent', 'fiance', 'relative'];
 
 /**
  * A person's immigration documents as a graph: what each document proves, how they link, where they
@@ -32,6 +33,7 @@ interface Pending { kind: 'fact' | 'edge' | 'check' | 'use'; id: string; title: 
     <div class="rel-top">
       <div class="facts-strip">
         <div class="fs"><span>In status until</span><b>{{ statusUntil ? (statusUntil | date:'d MMM y') : '—' }}</b><small *ngIf="statusWhat">{{ statusWhat }}</small></div>
+        <div class="fs" *ngIf="g.class"><span>Current status</span><b>{{ g.class }}</b></div>
         <div class="fs"><span>Documents</span><b>{{ docCount }}</b></div>
         <div class="fs"><span>Open problems</span><b [class.red]="openBlockers" [class.amber]="!openBlockers && openWarnings">{{ openBlockers + openWarnings }}</b><small>{{ openBlockers }} blocking · {{ openWarnings }} warnings</small></div>
       </div>
@@ -64,6 +66,36 @@ interface Pending { kind: 'fact' | 'edge' | 'check' | 'use'; id: string; title: 
           </div>
         </div>
       </details>
+    </section>
+
+
+    <section class="panel">
+      <div class="row-h"><h3>Family</h3>
+        <button class="btn sm ghost" *ngIf="!linking" (click)="startLink()">Link a family member</button></div>
+      <div class="link-form" *ngIf="linking">
+        <label>Person <select [(ngModel)]="linkTo"><option value="">Choose…</option>
+          <option *ngFor="let p of linkable" [value]="p.person_key">{{ p.name || 'Unnamed' }}</option></select></label>
+        <label>Relation <select [(ngModel)]="linkRel"><option *ngFor="let r of relations" [value]="r">{{ rel(r) }}</option></select></label>
+        <button class="btn sm" [disabled]="!linkTo" (click)="ask({kind:'famlink', id:linkTo, relation:linkRel, title:'Link as ' + rel(linkRel)})">Continue</button>
+        <button class="btn sm ghost" (click)="linking=false">Cancel</button>
+      </div>
+      <p class="muted small" *ngIf="!g.family?.length && !linking">No family members linked. A dependent's status (H-4, L-2, F-2 …) lasts only as long as the principal's, so link them to check both together.</p>
+      <div class="fam" *ngFor="let f of g.family">
+        <div class="fam-main">
+          <b>{{ f.name || 'Unnamed' }}</b>
+          <span class="pill">{{ rel(f.relation) }}</span>
+          <span class="muted small">{{ f.class || 'status unknown' }}{{ f.status_until ? ' · until ' + (f.status_until | date:'d MMM y') : '' }}</span>
+          <span class="pill" [class.ok]="f.state==='confirmed'" [class.prop]="f.state==='proposed'">{{ f.state === 'proposed' ? 'suggested' : f.state }}</span>
+        </div>
+        <div class="muted small">{{ f.basis }}<span *ngIf="f.reason"> · “{{ f.reason }}”</span></div>
+        <div class="actions">
+          <ng-container *ngIf="f.state==='proposed'">
+            <select class="rel-sel" [(ngModel)]="f.relation" aria-label="Relation"><option *ngFor="let r of relations" [value]="r">{{ rel(r) }}</option></select>
+            <button class="btn sm" (click)="ask({kind:'family', id:f.id, decision:'confirm', relation:f.relation, title:'Confirm ' + (f.name || 'this person') + ' as ' + rel(f.relation)})">Confirm</button>
+          </ng-container>
+          <button class="btn sm ghost" (click)="ask({kind:'family', id:f.id, decision:'reject', title: f.state==='proposed' ? 'Not family' : 'Remove family link'})">{{ f.state==='proposed' ? 'Not family' : 'Remove link' }}</button>
+        </div>
+      </div>
     </section>
 
     <div class="reason-bar" *ngIf="pending" role="dialog" aria-label="Confirm change">
@@ -181,6 +213,12 @@ interface Pending { kind: 'fact' | 'edge' | 'check' | 'use'; id: string; title: 
     .link { padding: 8px 0; border-top: 1px solid #f0f2f5; display: flex; flex-direction: column; gap: 4px; }
     .pill { margin-left: 6px; font-size: 11px; font-weight: 600; padding: 1px 7px; border-radius: 999px; background: #f1f3f6; color: #3d4350; }
     .pill.ok { background: #e6f4ec; color: #1f6b45; } .pill.prop { background: #f1f3f6; color: #3d4350; } .pill.no { background: #fdecea; color: #a8251b; }
+    .row-h { display: flex; justify-content: space-between; align-items: center; gap: 10px; }
+    .link-form { display: flex; gap: 10px; align-items: flex-end; flex-wrap: wrap; margin: 6px 0 10px; }
+    .link-form label { display: flex; flex-direction: column; gap: 4px; font-size: 12.5px; color: #5b6270; }
+    .link-form select, .rel-sel { height: 30px; border: 1px solid #d5d9e0; border-radius: 7px; padding: 0 8px; font: inherit; font-size: 13px; background: #fff; color: #14171f; }
+    .fam { padding: 10px 0; border-top: 1px solid #f0f2f5; display: flex; flex-direction: column; gap: 5px; }
+    .fam-main { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
     .history summary { cursor: pointer; font-weight: 600; font-size: 13.5px; }
     .hrow { display: grid; grid-template-columns: 110px 120px 140px 1fr; gap: 10px; padding: 6px 0; border-top: 1px solid #f0f2f5; font-size: 12.5px; }
   `],
@@ -201,6 +239,11 @@ export class ImmRelationshipsComponent implements OnChanges {
   flag: Record<string, string> = {};
   width = 600; height = 200;
   statusUntil = ''; statusWhat = '';
+  relations = RELATIONS;
+  linking = false;
+  linkTo = '';
+  linkRel = 'spouse';
+  linkable: any[] = [];
 
   constructor(private http: HttpClient, private cdr: ChangeDetectorRef) {}
 
@@ -279,6 +322,9 @@ export class ImmRelationshipsComponent implements OnChanges {
     const live = st.filter((n: any) => n.valid_to >= new Date().toISOString().slice(0, 10));
     const governing = live.find((n: any) => n.label.includes('I-94')) || live[0];
     this.statusUntil = governing?.valid_to || ''; this.statusWhat = governing?.label || '';
+    if (this.g.limited_by && this.g.status_until && (!this.statusUntil || this.g.status_until < this.statusUntil)) {
+      this.statusUntil = this.g.status_until; this.statusWhat = `limited by ${this.g.limited_by}`;
+    }
   }
 
   laneTop(i: number) { return i * LANE_H; }
@@ -308,7 +354,19 @@ export class ImmRelationshipsComponent implements OnChanges {
   select(id: string) { this.sel = this.g.nodes.find((n: any) => n.id === id) || null; this.cdr.markForCheck(); }
   actionLabel(a: string) {
     return ({ correct_fact: 'Corrected a fact', confirm_link: 'Confirmed a link', reject_link: 'Removed a link', relink_link: 'Re-linked',
-              waive_check: 'Waived a check', reopen_check: 'Reopened a check' } as any)[a] || a;
+              waive_check: 'Waived a check', reopen_check: 'Reopened a check', link_family: 'Linked a family member',
+              confirm_family: 'Confirmed a family link', reject_family: 'Removed a family link' } as any)[a] || a;
+  }
+
+  rel(r: string) { return ({ spouse: 'Spouse', child: 'Child', parent: 'Parent', fiance: 'Fiancé(e)', relative: 'Relative' } as any)[r] || r; }
+
+  startLink(): void {
+    this.linking = true; this.linkTo = ''; this.linkRel = 'spouse';
+    const linked = new Set((this.g.family || []).map((f: any) => f.other));
+    this.http.get<any>(`${API}/people`).subscribe(r => {
+      this.linkable = (r.people || []).filter((p: any) => p.person_key !== this.g.person_key && !linked.has(p.person_key));
+      this.cdr.markForCheck();
+    });
   }
 
   ask(p: Pending): void { this.pending = { ...p }; this.reason = ''; this.error = ''; this.cdr.markForCheck(); }
@@ -319,9 +377,11 @@ export class ImmRelationshipsComponent implements OnChanges {
     const req = p.kind === 'fact' ? this.http.post(`${API}/nodes/${p.id}/facts`, { field: p.field, value: p.value, reason: this.reason })
       : p.kind === 'edge' ? this.http.post(`${API}/edges/${p.id}`, { decision: p.decision, reason: this.reason })
       : p.kind === 'use' ? this.http.post(`${API}/checks/${p.id}`, { decision: 'use_value', value: p.value, reason: this.reason })
+      : p.kind === 'family' ? this.http.post(`${API}/family/${p.id}`, { decision: p.decision, relation: p.relation, reason: this.reason, viewer: this.g.person_key })
+      : p.kind === 'famlink' ? this.http.post(`${API}/family`, { person_a: this.g.person_key, person_b: p.id, relation: p.relation, reason: this.reason })
       : this.http.post(`${API}/checks/${p.id}`, { decision: p.decision, reason: this.reason });
     req.subscribe({
-      next: g => { this.busy = false; this.pending = null; this.set(g); },
+      next: g => { this.busy = false; this.pending = null; this.linking = false; this.set(g); },
       error: e => { this.busy = false; this.error = e?.error?.detail || 'Could not save.'; this.cdr.markForCheck(); },
     });
   }
