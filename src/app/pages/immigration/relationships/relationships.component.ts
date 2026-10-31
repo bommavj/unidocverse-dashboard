@@ -32,7 +32,8 @@ const RELATIONS = ['spouse', 'child', 'parent', 'sibling', 'fiance', 'relative']
   <div class="rel" *ngIf="g">
     <div class="rel-top">
       <div class="facts-strip">
-        <div class="fs"><span>In status until</span><b>{{ statusUntil ? (statusUntil | date:'d MMM y') : '—' }}</b><small *ngIf="statusWhat">{{ statusWhat }}</small></div>
+        <div class="fs" *ngIf="g.permanent"><span>Status</span><b>Permanent resident</b><small>does not expire; the card renews</small></div>
+        <div class="fs" *ngIf="!g.permanent"><span>In status until</span><b>{{ statusUntil ? (statusUntil | date:'d MMM y') : '—' }}</b><small *ngIf="statusWhat">{{ statusWhat }}</small></div>
         <div class="fs" *ngIf="g.class"><span>Current status</span><b>{{ g.class }}</b></div>
         <div class="fs"><span>Documents</span><b>{{ docCount }}</b></div>
         <div class="fs"><span>Open problems</span><b [class.red]="openBlockers" [class.amber]="!openBlockers && openWarnings">{{ openBlockers + openWarnings }}</b><small>{{ openBlockers }} blocking · {{ openWarnings }} warnings</small></div>
