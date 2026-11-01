@@ -79,7 +79,6 @@ interface FolderState {
           <mat-icon class="page-icon">folder_open</mat-icon>
           <div>
             <h1>Watch Folders</h1>
-            <p class="subtitle">Auto-ingest files from local, NFS, or any mounted path — processed in batches of 5</p>
           </div>
         </div>
         <button mat-raised-button color="primary" (click)="showAddDialog = true">

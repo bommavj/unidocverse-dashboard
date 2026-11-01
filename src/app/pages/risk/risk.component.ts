@@ -389,8 +389,7 @@ const BASE = 'http://localhost:7979';
   template: `
     <div class="page-header">
       <div>
-        <h1 class="page-title">Risk Dashboard</h1>
-        <p class="page-subtitle">Document risk &amp; health scores sorted by highest risk</p>
+        <h1 class="page-title">Risk</h1>
       </div>
       <button class="btn-compute" (click)="computeAll()" [disabled]="computing">
         <span class="spinner" *ngIf="computing"></span>

@@ -21,8 +21,7 @@ interface PlannerTask {
   template: `
     <div class="planner-page">
       <header class="page-header">
-        <h1>📅 Daily Assistant & Planner</h1>
-        <p class="subtitle">Keep track of your day-to-day agenda and enterprise activities.</p>
+        <h1>Planner</h1>
       </header>
 
       <!-- AI Morning Briefing -->

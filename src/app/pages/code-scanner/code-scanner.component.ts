@@ -28,7 +28,6 @@ interface ScanResult {
         <div class="cs-header-left">
           <a class="cs-back" routerLink="/integrations">← Integrations</a>
           <h1 class="cs-title">Code Scanner</h1>
-          <p class="cs-sub">Scan QR codes and barcodes directly from your camera or upload an image.</p>
         </div>
         <div class="cs-header-badges">
           <span class="cs-badge cs-badge--qr">📷 QR Code</span>

@@ -36,8 +36,7 @@ interface User {
 
     <div class="settings-page" *ngIf="auth.isAdmin()">
       <div class="page-header">
-        <h1>⚙️ {{ 'Settings' | translate }}</h1>
-        <p class="subtitle">Manage users and agency settings</p>
+        <h1>{{ 'Settings' | translate }}</h1>
       </div>
 
       <div class="tabs">

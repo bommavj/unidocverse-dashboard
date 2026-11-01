@@ -637,8 +637,7 @@ const DOC_ROLES = [
     <!-- ===== Page Header ===== -->
     <div class="page-header">
       <div>
-        <h1 class="page-title">Insurance Claims</h1>
-        <p class="page-subtitle">Manage and track all insurance claims</p>
+        <h1 class="page-title">Claims</h1>
       </div>
       <button class="btn-primary" (click)="openNewClaim()">
         ＋ New Claim

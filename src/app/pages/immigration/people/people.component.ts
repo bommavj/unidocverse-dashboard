@@ -17,7 +17,6 @@ const API = 'http://localhost:7979/api/immigration/graph';
     <header>
       <div>
         <h1>People &amp; documents</h1>
-        <p>Every person named on your immigration documents, with the problems found between their documents. Blocking problems first.</p>
       </div>
       <label class="search"><span class="sr">Search people</span>
         <input type="search" [(ngModel)]="q" placeholder="Search name" /></label>

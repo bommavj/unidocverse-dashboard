@@ -110,8 +110,7 @@ interface Stats {
   <!-- Header -->
   <div style="padding:16px 24px;border-bottom:1px solid var(--bdr);display:flex;align-items:center;justify-content:space-between;flex-shrink:0;">
     <div>
-      <h1 style="margin:0;font-size:22px;font-weight:700;color:var(--t1);">Quote Pipeline</h1>
-      <p style="margin:4px 0 0;font-size:13px;color:var(--t3);">Manage insurance quotes from draft to bind</p>
+      <h1 style="margin:0;font-size:22px;font-weight:700;color:var(--t1);">Quotes</h1>
     </div>
     <button (click)="openNewQuoteModal()" style="background:#3b82f6;color:#fff;border:none;border-radius:8px;padding:10px 18px;font-size:14px;font-weight:600;cursor:pointer;display:flex;align-items:center;gap:6px;">
       <span style="font-size:18px;line-height:1;">+</span> New Quote

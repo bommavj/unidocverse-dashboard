@@ -47,7 +47,6 @@ interface Jurisdiction {
   <div class="jur-header">
     <div>
       <h1 class="jur-title">Jurisdiction Rules</h1>
-      <p class="jur-sub">Config-driven insurance requirements per state. Adding a state = one row, no code.</p>
     </div>
     <div class="jur-actions">
       <udv-select [(ngModel)]="selectedCountry" [options]="countryOptions" placeholder="Select country…" (valueChange)="load()" style="width:220px;"></udv-select>

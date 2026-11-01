@@ -54,7 +54,6 @@ interface ConnectionState {
           <div class="gmail-icon"><mat-icon>email</mat-icon></div>
           <div>
             <h1>Gmail Integration</h1>
-            <p class="subtitle">Auto-ingest emails and attachments — every email becomes a searchable document</p>
           </div>
         </div>
         <button mat-raised-button color="primary" (click)="showAddForm = !showAddForm">
