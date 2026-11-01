@@ -278,17 +278,17 @@ interface FolderState {
     .header-left { display: flex; align-items: center; gap: 1rem; }
     .page-icon { font-size: 40px; width: 40px; height: 40px; color: #4caf50; }
     .page-header h1 { margin: 0 0 0.25rem 0; font-size: 24px; font-weight: 600; }
-    .subtitle { margin: 0; color: #757575; font-size: 14px; }
+    .subtitle { margin: 0; color: var(--t3); font-size: 14px; }
     .summary-bar { display: flex; gap: 1rem; margin-bottom: 1.5rem; flex-wrap: wrap; }
-    .summary-chip { display: flex; align-items: center; gap: 0.4rem; padding: 0.4rem 0.8rem; background: #f5f5f5; border-radius: 20px; font-size: 13px; color: #555; }
+    .summary-chip { display: flex; align-items: center; gap: 0.4rem; padding: 0.4rem 0.8rem; background: var(--surf2); border-radius: 20px; font-size: 13px; color: #555; }
     .summary-chip mat-icon { font-size: 16px; width: 16px; height: 16px; }
     .summary-chip.active { background: #e8f5e9; color: #2e7d32; }
     .summary-chip.pending { background: #fff8e1; color: #f57f17; }
-    .summary-chip.batch-info { background: #e8f0fe; color: #1a73e8; }
-    .empty-state { text-align: center; padding: 5rem 2rem; color: #bdbdbd; }
-    .empty-state mat-icon { font-size: 72px; width: 72px; height: 72px; color: #e0e0e0; margin-bottom: 1rem; }
-    .empty-state h2 { color: #757575; margin-bottom: 0.5rem; }
-    .empty-state p { color: #9e9e9e; margin-bottom: 1.5rem; max-width: 480px; margin-inline: auto; }
+    .summary-chip.batch-info { background: var(--bluebg); color: var(--blue); }
+    .empty-state { text-align: center; padding: 5rem 2rem; color: var(--bdr2); }
+    .empty-state mat-icon { font-size: 72px; width: 72px; height: 72px; color: var(--bdr); margin-bottom: 1rem; }
+    .empty-state h2 { color: var(--t3); margin-bottom: 0.5rem; }
+    .empty-state p { color: var(--t3); margin-bottom: 1.5rem; max-width: 480px; margin-inline: auto; }
     .add-folder-card { margin-bottom: 1.5rem; border: 2px dashed #4caf50 !important; }
     .add-form { display: flex; flex-wrap: wrap; gap: 1rem; margin-top: 1rem; }
     .add-form .full-width { width: 100%; }
@@ -300,42 +300,42 @@ interface FolderState {
     .folder-icon-wrap.status-active  { background: #e8f5e9; color: #4caf50; }
     .folder-icon-wrap.status-paused  { background: #fff8e1; color: #ff9800; }
     .folder-icon-wrap.status-error   { background: #ffebee; color: #f44336; }
-    .folder-icon-wrap.status-idle    { background: #f5f5f5; color: #9e9e9e; }
+    .folder-icon-wrap.status-idle    { background: var(--surf2); color: var(--t3); }
     .folder-info { flex: 1; min-width: 0; }
-    .folder-label { font-weight: 600; font-size: 16px; color: #212121; }
-    .folder-path { font-size: 12px; color: #757575; font-family: monospace; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; margin: 2px 0; }
-    .folder-meta { font-size: 12px; color: #9e9e9e; display: flex; flex-wrap: wrap; gap: 6px; align-items: center; }
+    .folder-label { font-weight: 600; font-size: 16px; color: var(--t1); }
+    .folder-path { font-size: 12px; color: var(--t3); font-family: monospace; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; margin: 2px 0; }
+    .folder-meta { font-size: 12px; color: var(--t3); display: flex; flex-wrap: wrap; gap: 6px; align-items: center; }
     .target-tag { background: #e8f5e9; color: #2e7d32; padding: 1px 6px; border-radius: 10px; font-size: 11px; }
-    .batch-tag { background: #e8f0fe; color: #1a73e8; padding: 1px 6px; border-radius: 10px; font-size: 11px; }
+    .batch-tag { background: var(--bluebg); color: var(--blue); padding: 1px 6px; border-radius: 10px; font-size: 11px; }
     .folder-stats { display: flex; gap: 1.5rem; align-items: center; }
     .stat { text-align: center; }
-    .stat-value { display: block; font-size: 20px; font-weight: 700; color: #212121; }
+    .stat-value { display: block; font-size: 20px; font-weight: 700; color: var(--t1); }
     .stat-value.pending { color: #ff9800; }
-    .stat-label { font-size: 11px; color: #9e9e9e; text-transform: uppercase; }
+    .stat-label { font-size: 11px; color: var(--t3); text-transform: uppercase; }
     .folder-actions { display: flex; align-items: center; gap: 0.25rem; flex-shrink: 0; }
     .status-badge { padding: 0.2rem 0.6rem; border-radius: 12px; font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; }
     .badge-active  { background: #e8f5e9; color: #2e7d32; }
     .badge-paused  { background: #fff8e1; color: #e65100; }
     .badge-error   { background: #ffebee; color: #c62828; }
-    .badge-idle    { background: #f5f5f5; color: #757575; }
+    .badge-idle    { background: var(--surf2); color: var(--t3); }
     .batch-progress { padding: 0 1.25rem 1rem; }
     .progress-label { display: flex; justify-content: space-between; font-size: 13px; color: #555; margin-bottom: 0.4rem; }
     .progress-counts .ok  { color: #4caf50; margin-right: 0.5rem; }
     .progress-counts .err { color: #f44336; }
     .folder-error { display: flex; align-items: center; gap: 0.5rem; padding: 0.75rem 1.25rem; background: #ffebee; color: #c62828; font-size: 13px; }
     .reports-section { padding: 0 1.25rem 1.25rem; }
-    .reports-header { display: flex; align-items: center; gap: 0.5rem; font-weight: 600; font-size: 14px; color: #424242; padding: 1rem 0 0.75rem; }
-    .no-reports { color: #9e9e9e; font-size: 13px; padding: 0.5rem 0; }
-    .report-row { display: flex; justify-content: space-between; align-items: center; padding: 0.5rem 0; border-bottom: 1px solid #f5f5f5; font-size: 13px; }
+    .reports-header { display: flex; align-items: center; gap: 0.5rem; font-weight: 600; font-size: 14px; color: var(--t2); padding: 1rem 0 0.75rem; }
+    .no-reports { color: var(--t3); font-size: 13px; padding: 0.5rem 0; }
+    .report-row { display: flex; justify-content: space-between; align-items: center; padding: 0.5rem 0; border-bottom: 1px solid var(--surf2); font-size: 13px; }
     .report-meta { display: flex; flex-direction: column; gap: 2px; }
-    .report-id { font-family: monospace; font-size: 11px; color: #9e9e9e; }
+    .report-id { font-family: monospace; font-size: 11px; color: var(--t3); }
     .report-time { color: #555; }
     .report-counts { display: flex; align-items: center; gap: 0.75rem; }
-    .size-info { color: #9e9e9e; }
+    .size-info { color: var(--t3); }
     .ok-count { color: #4caf50; font-weight: 600; }
     .err-count { color: #f44336; font-weight: 600; }
-    .total-count { color: #757575; }
-    .formats-note { display: flex; align-items: center; gap: 0.5rem; margin-top: 1.5rem; padding: 0.75rem 1rem; background: #f5f5f5; border-radius: 8px; font-size: 13px; color: #757575; }
+    .total-count { color: var(--t3); }
+    .formats-note { display: flex; align-items: center; gap: 0.5rem; margin-top: 1.5rem; padding: 0.75rem 1rem; background: var(--surf2); border-radius: 8px; font-size: 13px; color: var(--t3); }
   `]
 })
 export class WatchFoldersComponent implements OnInit, OnDestroy {

@@ -99,14 +99,14 @@ import {
         cursor: pointer;
         padding: 8px;
         border-radius: 8px;
-        color: #6b7280;
+        color: var(--t3);
         display: flex;
         align-items: center;
         justify-content: center;
         transition: all 0.2s;
       }
-      .bell-btn:hover { background: #f3f4f6; color: #111827; }
-      .bell-btn.has-unread { color: #6366f1; }
+      .bell-btn:hover { background: var(--surf2); color: var(--t1); }
+      .bell-btn.has-unread { color: var(--blue); }
   
       /* Badge */
       .badge {
@@ -139,7 +139,7 @@ import {
         right: 0;
         width: 360px;
         background: white;
-        border: 1px solid #e5e7eb;
+        border: 1px solid var(--bdr);
         border-radius: 12px;
         box-shadow: 0 10px 40px rgba(0,0,0,0.15);
         z-index: 1000;
@@ -151,15 +151,15 @@ import {
         justify-content: space-between;
         align-items: center;
         padding: 14px 16px;
-        border-bottom: 1px solid #f3f4f6;
+        border-bottom: 1px solid var(--surf2);
       }
-      .dropdown-title { font-weight: 700; font-size: 15px; color: #111827; }
+      .dropdown-title { font-weight: 700; font-size: 15px; color: var(--t1); }
       .mark-all-btn {
         background: none;
         border: none;
         cursor: pointer;
         font-size: 12px;
-        color: #6366f1;
+        color: var(--blue);
         font-weight: 500;
       }
       .mark-all-btn:hover { text-decoration: underline; }
@@ -167,7 +167,7 @@ import {
       .dropdown-loading, .dropdown-empty {
         padding: 24px;
         text-align: center;
-        color: #6b7280;
+        color: var(--t3);
         font-size: 13px;
       }
       .dropdown-empty span { font-size: 24px; display: block; margin-bottom: 4px; }
@@ -182,35 +182,35 @@ import {
         align-items: flex-start;
         padding: 12px 16px;
         cursor: pointer;
-        border-bottom: 1px solid #f9fafb;
+        border-bottom: 1px solid var(--surf2);
         transition: background 0.15s;
         position: relative;
       }
-      .notification-item:hover { background: #f9fafb; }
-      .notification-item.unread { background: #fafafe; }
+      .notification-item:hover { background: var(--surf2); }
+      .notification-item.unread { background: var(--bluebg); }
   
       .notification-item.sev-expired  { border-left: 3px solid #ef4444; }
       .notification-item.sev-critical { border-left: 3px solid #f97316; }
       .notification-item.sev-urgent   { border-left: 3px solid #f59e0b; }
-      .notification-item.sev-warning  { border-left: 3px solid #6366f1; }
+      .notification-item.sev-warning  { border-left: 3px solid var(--blue); }
   
       .notif-icon { font-size: 18px; margin-top: 1px; }
       .notif-body { flex: 1; min-width: 0; }
       .notif-title {
         font-size: 13px;
         font-weight: 600;
-        color: #111827;
+        color: var(--t1);
         white-space: nowrap;
         overflow: hidden;
         text-overflow: ellipsis;
         margin-bottom: 2px;
       }
-      .notif-meta { font-size: 11px; color: #9ca3af; }
+      .notif-meta { font-size: 11px; color: var(--t3); }
   
       .unread-dot {
         width: 8px;
         height: 8px;
-        background: #6366f1;
+        background: var(--grad);
         border-radius: 50%;
         margin-top: 4px;
         flex-shrink: 0;
@@ -219,7 +219,7 @@ import {
       /* Footer */
       .dropdown-footer {
         padding: 10px 16px;
-        border-top: 1px solid #f3f4f6;
+        border-top: 1px solid var(--surf2);
         text-align: center;
       }
       .view-all-btn {
@@ -227,7 +227,7 @@ import {
         border: none;
         cursor: pointer;
         font-size: 13px;
-        color: #6366f1;
+        color: var(--blue);
         font-weight: 600;
       }
       .view-all-btn:hover { text-decoration: underline; }

@@ -318,7 +318,7 @@ import { HttpClient } from '@angular/common/http';
   overflow-y: auto !important;
   overflow-x: hidden;
   padding: 16px !important;
-  background: #fafafa;
+  background: var(--surf2);
 }
 
 .key-point-item {
@@ -351,7 +351,7 @@ import { HttpClient } from '@angular/common/http';
 }
 
 .point-text {
-  color: #424242 !important;
+  color: var(--t2) !important;
   line-height: 1.6 !important;
   font-size: 14px !important;
   word-wrap: break-word !important;
@@ -392,7 +392,7 @@ import { HttpClient } from '@angular/common/http';
 }
 
 .keypoints-scroll-container::-webkit-scrollbar-track {
-  background: #f1f1f1;
+  background: var(--surf2);
   border-radius: 4px;
 }
 
@@ -447,7 +447,7 @@ import { HttpClient } from '@angular/common/http';
 
   .insights-scroll-container::-webkit-scrollbar-track,
   .keypoints-scroll-container::-webkit-scrollbar-track {
-    background: #f1f1f1;
+    background: var(--surf2);
     border-radius: 4px;
   }
 
@@ -468,7 +468,7 @@ import { HttpClient } from '@angular/common/http';
       align-items: flex-start;
       padding: 24px;
       background: #fff;
-      border-bottom: 1px solid #e0e0e0;
+      border-bottom: 1px solid var(--bdr);
     }
   
     .header-content {
@@ -487,7 +487,7 @@ import { HttpClient } from '@angular/common/http';
     .title-section h2 {
       margin: 0;
       font-size: 24px;
-      color: #212121;
+      color: var(--t1);
     }
   
     .meta {
@@ -499,7 +499,7 @@ import { HttpClient } from '@angular/common/http';
     mat-dialog-content {
       padding: 0;
       max-height: 70vh;
-      background: #fafafa;
+      background: var(--surf2);
     }
   
     .tab-icon {
@@ -509,7 +509,7 @@ import { HttpClient } from '@angular/common/http';
   
     .tab-content {
       padding: 24px;
-      background: #fafafa;
+      background: var(--surf2);
       
       &.visualizations-tab {
         padding: 0;
@@ -535,17 +535,17 @@ import { HttpClient } from '@angular/common/http';
   
     .summary-text {
       line-height: 1.8;
-      color: #424242 !important;
+      color: var(--t2) !important;
       font-size: 15px;
       padding: 20px;
-      background: #f5f5f5;
+      background: var(--surf2);
       border-radius: 8px;
       border-left: 4px solid #4caf50;
     }
   
     .insight-text {
       line-height: 1.7;
-      color: #616161 !important;
+      color: var(--t2) !important;
       font-size: 14px;
     }
   
@@ -579,7 +579,7 @@ import { HttpClient } from '@angular/common/http';
     .confidence-bar-large {
       flex: 1;
       height: 12px;
-      background: #e0e0e0;
+      background: var(--bdr);
       border-radius: 6px;
       overflow: hidden;
     }
@@ -599,14 +599,14 @@ import { HttpClient } from '@angular/common/http';
   
     .reasoning-text {
       margin-top: 8px;
-      color: #757575 !important;
+      color: var(--t3) !important;
       line-height: 1.7;
     }
   
     .detail-row {
       padding: 16px 0;
-      border-bottom: 1px solid #f0f0f0;
-      color: #424242 !important;
+      border-bottom: 1px solid var(--surf2);
+      color: var(--t2) !important;
     }
   
     .detail-row:last-child {
@@ -614,7 +614,7 @@ import { HttpClient } from '@angular/common/http';
     }
   
     .detail-row strong {
-      color: #212121 !important;
+      color: var(--t1) !important;
       margin-right: 8px;
       font-weight: 600;
     }
@@ -629,11 +629,11 @@ import { HttpClient } from '@angular/common/http';
     .empty-message {
       text-align: center;
       padding: 60px 20px;
-      color: #bdbdbd;
+      color: var(--bdr2);
 
       h3 {
         margin: 16px 0 8px 0;
-        color: #757575;
+        color: var(--t3);
       }
 
       .debug-info {
@@ -649,7 +649,7 @@ import { HttpClient } from '@angular/common/http';
       width: 64px;
       height: 64px;
       margin-bottom: 16px;
-      color: #e0e0e0;
+      color: var(--bdr);
     }
   
     ::ng-deep .mat-mdc-dialog-container {
@@ -659,32 +659,32 @@ import { HttpClient } from '@angular/common/http';
   
     ::ng-deep .mat-mdc-card {
       background: #fff !important;
-      color: #212121 !important;
+      color: var(--t1) !important;
     }
   
     ::ng-deep .mat-mdc-card-title {
-      color: #212121 !important;
+      color: var(--t1) !important;
       font-weight: 500 !important;
     }
   
     ::ng-deep .mat-mdc-card-subtitle {
-      color: #757575 !important;
+      color: var(--t3) !important;
     }
   
     ::ng-deep .mat-mdc-card-content {
-      color: #424242 !important;
+      color: var(--t2) !important;
     }
   
     ::ng-deep .mat-mdc-tab-body-content {
-      background: #fafafa;
+      background: var(--surf2);
     }
   
     ::ng-deep .mat-mdc-list-item-title {
-      color: #424242 !important;
+      color: var(--t2) !important;
     }
   
     ::ng-deep .mat-mdc-tab {
-      color: #616161 !important;
+      color: var(--t2) !important;
     }
   
     ::ng-deep .mat-mdc-tab.mdc-tab--active {

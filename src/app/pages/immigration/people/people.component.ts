@@ -44,23 +44,23 @@ const API = 'http://localhost:7979/api/immigration/graph';
     </div>
   </div>`,
   styles: [`
-    .pp { padding: 24px 28px; display: flex; flex-direction: column; gap: 18px; color: #14171f; background: #f6f7f9; min-height: 100%; box-sizing: border-box; }
+    .pp { padding: 24px 28px; display: flex; flex-direction: column; gap: 18px; color: var(--t1); background: transparent; min-height: 100%; box-sizing: border-box; }
     header { display: flex; justify-content: space-between; align-items: flex-end; gap: 16px; flex-wrap: wrap; }
-    h1 { margin: 0; font-size: 22px; font-weight: 600; } header p { margin: 4px 0 0; color: #5b6270; font-size: 13.5px; max-width: 70ch; }
+    h1 { margin: 0; font-size: 22px; font-weight: 600; } header p { margin: 4px 0 0; color: var(--t2); font-size: 13.5px; max-width: 70ch; }
     h2 { margin: 0 0 12px; font-size: 18px; font-weight: 600; }
-    .search input { height: 34px; width: 260px; max-width: 100%; border: 1px solid #d5d9e0; border-radius: 7px; padding: 0 10px; font: inherit; font-size: 13.5px; background: #fff; }
+    .search input { height: 34px; width: 260px; max-width: 100%; border: 1px solid var(--bdr); border-radius: 7px; padding: 0 10px; font: inherit; font-size: 13.5px; background: #fff; }
     .sr { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); }
     .cols { display: flex; gap: 18px; align-items: flex-start; flex-wrap: wrap; }
-    .list { flex: 1 1 260px; max-width: 300px; background: #fff; border: 1px solid #e4e7ec; border-radius: 10px; padding: 6px; display: flex; flex-direction: column; }
+    .list { flex: 1 1 260px; max-width: 300px; background: #fff; border: 1px solid var(--bdr); border-radius: 10px; padding: 6px; display: flex; flex-direction: column; }
     .detail { flex: 999 1 560px; min-width: 0; }
     .person { display: flex; align-items: center; gap: 10px; padding: 9px 10px; border: 0; background: none; border-radius: 8px; text-align: left; font: inherit; cursor: pointer; color: inherit; }
-    .person:hover { background: #f1f3f6; } .person.on { background: #e8edfb; }
-    .person:focus-visible { outline: 2px solid #2348c8; outline-offset: 1px; }
-    .av { width: 30px; height: 30px; border-radius: 50%; background: #e8edfb; color: #1a3699; display: grid; place-items: center; font-size: 12px; font-weight: 600; flex: none; }
-    .who { display: flex; flex-direction: column; flex: 1; min-width: 0; } .who b { font-size: 13.5px; font-weight: 600; } .who small { font-size: 12px; color: #5b6270; }
+    .person:hover { background: var(--surf2); } .person.on { background: var(--bluebg); }
+    .person:focus-visible { outline: 2px solid var(--blue); outline-offset: 1px; }
+    .av { width: 32px; height: 32px; border-radius: 50%; background: var(--grad); color: #fff; box-shadow: var(--glow); display: grid; place-items: center; font-size: 12px; font-weight: 600; flex: none; }
+    .who { display: flex; flex-direction: column; flex: 1; min-width: 0; } .who b { font-size: 13.5px; font-weight: 600; } .who small { font-size: 12px; color: var(--t2); }
     .badge { min-width: 20px; height: 20px; border-radius: 10px; display: grid; place-items: center; font-size: 11.5px; font-weight: 700; padding: 0 6px; }
     .badge.red { background: #fdecea; color: #a8251b; } .badge.amber { background: #fdf1e3; color: #8a4b0f; }
-    .muted { color: #5b6270; font-size: 13px; padding: 8px; margin: 0; }
+    .muted { color: var(--t2); font-size: 13px; padding: 8px; margin: 0; }
   `],
 })
 export class ImmPeopleComponent implements OnInit {

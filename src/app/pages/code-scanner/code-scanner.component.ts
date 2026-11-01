@@ -174,13 +174,13 @@ interface ScanResult {
 
     /* Header */
     .cs-header { display: flex; align-items: flex-start; justify-content: space-between; margin-bottom: 28px; flex-wrap: wrap; gap: 12px; }
-    .cs-back { font-size: 13px; color: #6366f1; text-decoration: none; font-weight: 600;
+    .cs-back { font-size: 13px; color: var(--blue); text-decoration: none; font-weight: 600;
       &:hover { text-decoration: underline; } }
-    .cs-title { font-size: 26px; font-weight: 800; color: #111827; margin: 4px 0 6px; letter-spacing: -0.5px; }
-    .cs-sub { font-size: 13.5px; color: #6b7280; margin: 0; }
+    .cs-title { font-size: 26px; font-weight: 800; color: var(--t1); margin: 4px 0 6px; letter-spacing: -0.5px; }
+    .cs-sub { font-size: 13.5px; color: var(--t3); margin: 0; }
     .cs-header-badges { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
     .cs-badge { font-size: 11.5px; font-weight: 600; padding: 4px 12px; border-radius: 20px; }
-    .cs-badge--qr  { background: #eef2ff; color: #4f46e5; border: 1px solid #c7d2fe; }
+    .cs-badge--qr  { background: var(--bluebg); color: var(--blue); border: 1px solid var(--bluebdr); }
     .cs-badge--bar { background: #f0fdf4; color: #059669; border: 1px solid #a7f3d0; }
     .cs-badge--live { background: #fee2e2; color: #dc2626; border: 1px solid #fecaca; animation: pulse 1.5s infinite; }
     @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: .5; } }
@@ -192,11 +192,11 @@ interface ScanResult {
     .cs-left { display: flex; flex-direction: column; gap: 14px; }
     .cs-viewfinder {
       position: relative; width: 100%; aspect-ratio: 4/3;
-      background: #0f172a; border-radius: 20px; overflow: hidden;
-      border: 2px solid #334155;
+      background: var(--t1); border-radius: 20px; overflow: hidden;
+      border: 2px solid var(--t2);
       box-shadow: 0 8px 40px rgba(0,0,0,.3);
       transition: border-color .3s;
-      &.cs-viewfinder--active { border-color: #6366f1; box-shadow: 0 8px 40px rgba(99,102,241,.25); }
+      &.cs-viewfinder--active { border-color: var(--blue); box-shadow: 0 8px 40px rgba(10,132,255,.25); }
     }
     video {
       width: 100%; height: 100%; object-fit: cover;
@@ -212,7 +212,7 @@ interface ScanResult {
     }
     .cs-frame-corner {
       position: absolute; width: 28px; height: 28px;
-      border-color: #6366f1; border-style: solid;
+      border-color: var(--blue); border-style: solid;
     }
     .cs-frame-corner--tl { top: 20%; left: 20%; border-width: 3px 0 0 3px; border-radius: 4px 0 0 0; }
     .cs-frame-corner--tr { top: 20%; right: 20%; border-width: 3px 3px 0 0; border-radius: 0 4px 0 0; }
@@ -220,8 +220,8 @@ interface ScanResult {
     .cs-frame-corner--br { bottom: 20%; right: 20%; border-width: 0 3px 3px 0; border-radius: 0 0 4px 0; }
     .cs-scan-line {
       position: absolute; left: 20%; right: 20%;
-      height: 2px; background: linear-gradient(90deg, transparent, #6366f1, transparent);
-      box-shadow: 0 0 8px #6366f1;
+      height: 2px; background: linear-gradient(90deg, transparent, var(--blue), transparent);
+      box-shadow: 0 0 8px var(--blue);
     }
     .cs-scan-line--anim {
       animation: scanLine 2s ease-in-out infinite;
@@ -246,13 +246,13 @@ interface ScanResult {
       align-items: center; justify-content: center; gap: 10px;
     }
     .cs-placeholder-icon { font-size: 52px; opacity: .3; }
-    .cs-placeholder-text { font-size: 16px; font-weight: 600; color: #64748b; }
-    .cs-placeholder-sub  { font-size: 13px; color: #475569; }
+    .cs-placeholder-text { font-size: 16px; font-weight: 600; color: var(--t3); }
+    .cs-placeholder-sub  { font-size: 13px; color: var(--t2); }
 
     /* Detected banner */
     .cs-detected-banner {
       position: absolute; bottom: 0; left: 0; right: 0;
-      background: rgba(99,102,241,.9); backdrop-filter: blur(8px);
+      background: rgba(10,132,255,.9); backdrop-filter: blur(8px);
       color: #fff; font-size: 12.5px; font-weight: 600; padding: 10px 16px;
       text-align: center; animation: slideUp .2s ease;
     }
@@ -267,62 +267,62 @@ interface ScanResult {
       font-family: 'Poppins', system-ui, sans-serif;
       &:disabled { opacity: .5; cursor: not-allowed; }
     }
-    .cs-btn--start  { background: #4f46e5; color: #fff; box-shadow: 0 4px 14px rgba(79,70,229,.3);
-      &:hover:not(:disabled) { background: #3730a3; transform: translateY(-1px); } }
+    .cs-btn--start  { background: var(--grad); color: #fff; box-shadow: 0 4px 14px rgba(10,132,255,.3);
+      &:hover:not(:disabled) { background: var(--bluedark); transform: translateY(-1px); } }
     .cs-btn--stop   { background: #fee2e2; color: #dc2626; border: 1.5px solid #fecaca;
       &:hover { background: #fecaca; } }
-    .cs-btn--upload { background: #f8fafc; color: #475569; border: 1.5px solid #e2e8f0;
-      &:hover { background: #f1f5f9; border-color: #6366f1; color: #4f46e5; } }
+    .cs-btn--upload { background: var(--surf2); color: var(--t2); border: 1.5px solid var(--bdr);
+      &:hover { background: var(--surf2); border-color: var(--blue); color: var(--blue); } }
     .cs-btn--cam    { background: #f0fdf4; color: #059669; border: 1.5px solid #a7f3d0; padding: 9px 14px; }
     .cs-btn--torch  { background: #fefce8; color: #ca8a04; border: 1.5px solid #fde68a; padding: 9px 14px; }
 
     .cs-error { font-size: 13px; color: #dc2626; background: #fef2f2;
       border: 1px solid #fecaca; padding: 10px 14px; border-radius: 10px; }
-    .cs-info-box { font-size: 12.5px; color: #374151; background: #fffbeb;
+    .cs-info-box { font-size: 12.5px; color: var(--t2); background: #fffbeb;
       border: 1px solid #fde68a; border-left: 3px solid #f59e0b;
       padding: 12px 14px; border-radius: 8px; line-height: 1.6; }
 
     /* Formats */
     .cs-formats { }
-    .cs-formats-label { font-size: 11px; font-weight: 600; color: #94a3b8; text-transform: uppercase; letter-spacing: .5px; margin-bottom: 8px; }
+    .cs-formats-label { font-size: 11px; font-weight: 600; color: var(--t3); text-transform: uppercase; letter-spacing: .5px; margin-bottom: 8px; }
     .cs-format-tags { display: flex; flex-wrap: wrap; gap: 6px; }
-    .cs-format-tag { font-size: 11px; background: #f1f5f9; color: #475569; padding: 3px 9px; border-radius: 20px; font-family: 'DM Mono', monospace; border: 1px solid #e2e8f0; }
+    .cs-format-tag { font-size: 11px; background: var(--surf2); color: var(--t2); padding: 3px 9px; border-radius: 20px; font-family: 'DM Mono', monospace; border: 1px solid var(--bdr); }
 
     /* Results panel */
     .cs-right { display: flex; flex-direction: column; gap: 12px; }
     .cs-results-header { display: flex; align-items: center; justify-content: space-between; }
-    .cs-results-title { font-size: 15px; font-weight: 700; color: #111827; }
-    .cs-clear-btn { font-size: 12px; color: #6b7280; background: #f3f4f6; border: none; padding: 4px 12px; border-radius: 8px; cursor: pointer; font-weight: 600; transition: all .15s;
+    .cs-results-title { font-size: 15px; font-weight: 700; color: var(--t1); }
+    .cs-clear-btn { font-size: 12px; color: var(--t3); background: var(--surf2); border: none; padding: 4px 12px; border-radius: 8px; cursor: pointer; font-weight: 600; transition: all .15s;
       &:hover { background: #fee2e2; color: #dc2626; } }
 
     .cs-empty { display: flex; flex-direction: column; align-items: center; justify-content: center;
       padding: 60px 20px; text-align: center; }
     .cs-empty-icon { font-size: 44px; margin-bottom: 12px; opacity: .4; }
-    .cs-empty-text { font-size: 15px; font-weight: 600; color: #9ca3af; margin-bottom: 6px; }
-    .cs-empty-sub  { font-size: 13px; color: #cbd5e1; }
+    .cs-empty-text { font-size: 15px; font-weight: 600; color: var(--t3); margin-bottom: 6px; }
+    .cs-empty-sub  { font-size: 13px; color: var(--bdr2); }
 
     .cs-result-list { display: flex; flex-direction: column; gap: 10px; max-height: 620px; overflow-y: auto; padding-right: 4px; }
     .cs-result-card {
-      background: #fff; border: 1.5px solid #e5e7eb; border-radius: 14px;
+      background: #fff; border: 1.5px solid var(--bdr); border-radius: 14px;
       padding: 14px 16px; transition: all .2s;
-      &:hover { border-color: #c7d2fe; box-shadow: 0 2px 12px rgba(99,102,241,.08); }
-      &.cs-result-card--url  { border-left: 3px solid #6366f1; }
+      &:hover { border-color: var(--bluebdr); box-shadow: 0 2px 12px rgba(10,132,255,.08); }
+      &.cs-result-card--url  { border-left: 3px solid var(--blue); }
       &.cs-result-card--new  { animation: cardIn .3s ease; }
     }
     @keyframes cardIn { from { transform: translateY(-6px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
     .cs-result-top { display: flex; align-items: center; gap: 8px; margin-bottom: 8px; }
     .cs-result-type-icon { font-size: 16px; }
-    .cs-result-format { font-size: 10.5px; font-weight: 700; background: #eef2ff; color: #4f46e5;
+    .cs-result-format { font-size: 10.5px; font-weight: 700; background: var(--bluebg); color: var(--blue);
       padding: 2px 8px; border-radius: 20px; text-transform: uppercase; letter-spacing: .3px; }
-    .cs-result-time  { font-size: 11px; color: #94a3b8; margin-left: auto; font-family: 'DM Mono', monospace; }
-    .cs-result-value { font-size: 13px; color: #1e293b; word-break: break-all; line-height: 1.5;
+    .cs-result-time  { font-size: 11px; color: var(--t3); margin-left: auto; font-family: 'DM Mono', monospace; }
+    .cs-result-value { font-size: 13px; color: var(--t1); word-break: break-all; line-height: 1.5;
       margin-bottom: 10px; max-height: 64px; overflow: hidden; }
     .cs-result-actions { display: flex; gap: 7px; flex-wrap: wrap; }
     .cs-action-btn {
       font-size: 11.5px; font-weight: 600; padding: 4px 11px; border-radius: 7px;
-      background: #f8fafc; color: #475569; border: 1px solid #e2e8f0;
+      background: var(--surf2); color: var(--t2); border: 1px solid var(--bdr);
       cursor: pointer; transition: all .14s; text-decoration: none; display: inline-flex; align-items: center; gap: 4px;
-      &:hover { background: #eef2ff; color: #4f46e5; border-color: #c7d2fe; }
+      &:hover { background: var(--bluebg); color: var(--blue); border-color: var(--bluebdr); }
       &.cs-action-btn--link { background: #f0fdf4; color: #059669; border-color: #a7f3d0;
         &:hover { background: #dcfce7; } }
     }

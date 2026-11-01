@@ -1,18 +1,18 @@
 // ════════════════════════════════════════════════════════════════
 // DESIGN TOKENS
 // ════════════════════════════════════════════════════════════════
-$bg-base      : #0a0a14;
-$bg-panel     : #0f0f1e;
-$bg-card      : #13132a;
-$bg-card-2    : #17173a;
-$border       : rgba(99, 102, 241, 0.18);
+$bg-base      : var(--t1);
+$bg-panel     : var(--t1);
+$bg-card      : var(--t1);
+$bg-card-2    : var(--bluedark);
+$border       : rgba(10,132,255, 0.18);
 $border-light : rgba(255, 255, 255, 0.07);
-$text-primary : #f0f0ff;
-$text-muted   : #7c7caa;
-$text-sub     : #4a4a70;
-$accent       : #6366f1;
-$accent-2     : #818cf8;
-$accent-glow  : rgba(99, 102, 241, 0.35);
+$text-primary : var(--bluebg);
+$text-muted   : var(--t3);
+$text-sub     : var(--t2);
+$accent       : var(--blue);
+$accent-2     : var(--blue);
+$accent-glow  : rgba(10,132,255, 0.35);
 $green        : #10b981;
 $amber        : #f59e0b;
 $red          : #ef4444;
@@ -61,7 +61,7 @@ $red          : #ef4444;
 
   .aa-loading-text {
     color: $text-muted;
-    font-family: 'Inter', sans-serif;
+    font-family: var(--font);
     font-size: 14px;
     letter-spacing: 0.4px;
     animation: pulse 1.8s ease-in-out infinite;
@@ -107,7 +107,7 @@ $red          : #ef4444;
 .aa-shell {
   min-height: var(--content-h);
   background: $bg-base;
-  font-family: 'Inter', sans-serif;
+  font-family: var(--font);
   color: $text-primary;
   transition: margin-right 0.35s cubic-bezier(0.4, 0, 0.2, 1);
 
@@ -186,7 +186,7 @@ $red          : #ef4444;
   padding: 5px 13px; border-radius: 7px;
   background: transparent; border: none; cursor: pointer;
   color: $text-muted; font-size: 12px; font-weight: 500;
-  font-family: 'Inter', sans-serif; transition: all 0.2s ease;
+  font-family: var(--font); transition: all 0.2s ease;
 
   mat-icon { font-size: 14px; width: 14px; height: 14px; }
 
@@ -204,18 +204,18 @@ $red          : #ef4444;
   display: flex; align-items: center; gap: 6px;
   padding: 7px 14px; border-radius: 8px; border: none;
   cursor: pointer; font-size: 12px; font-weight: 600;
-  font-family: 'Inter', sans-serif; transition: all 0.2s ease;
+  font-family: var(--font); transition: all 0.2s ease;
   white-space: nowrap;
 
   mat-icon { font-size: 16px; width: 16px; height: 16px; }
 }
 
 .aa-ai-btn {
-  background: linear-gradient(135deg, #4f46e5, #7c3aed);
+  background: linear-gradient(135deg, var(--g1) 0%, var(--g2) 55%, var(--g3) 100%);
   color: white;
-  box-shadow: 0 2px 12px rgba(79, 70, 229, 0.45);
+  box-shadow: 0 2px 12px rgba(10,132,255, 0.45);
 
-  &:hover { box-shadow: 0 4px 20px rgba(79, 70, 229, 0.7); transform: translateY(-1px); }
+  &:hover { box-shadow: 0 4px 20px rgba(10,132,255, 0.7); transform: translateY(-1px); }
   &.aa-ai-active { background: linear-gradient(135deg, $red, #b91c1c); box-shadow: 0 2px 12px rgba($red, 0.45); }
 
   @media (max-width: 1100px) { span { display: none; } padding: 8px; border-radius: 8px; }
@@ -241,7 +241,7 @@ $red          : #ef4444;
 
 // Material menu override
 ::ng-deep .aa-menu.mat-mdc-menu-panel {
-  background: #1a1a35 !important;
+  background: var(--bluedark) !important;
   border: 1px solid $border !important;
   border-radius: 12px !important;
   box-shadow: 0 8px 32px rgba(0,0,0,0.5) !important;
@@ -250,7 +250,7 @@ $red          : #ef4444;
     color: $text-muted !important;
     font-size: 13px !important;
     min-height: 38px !important;
-    font-family: 'Inter', sans-serif !important;
+    font-family: var(--font) !important;
 
     mat-icon { font-size: 16px; width: 16px; height: 16px; margin-right: 10px; }
     &:hover { background: rgba($accent, 0.12) !important; color: $text-primary !important; }
@@ -263,7 +263,7 @@ $red          : #ef4444;
   background: linear-gradient(135deg, $accent, #7c3aed);
   color: white; border: none; border-radius: 8px;
   padding: 10px 20px; font-size: 13px; font-weight: 600;
-  font-family: 'Inter', sans-serif; cursor: pointer;
+  font-family: var(--font); cursor: pointer;
   box-shadow: 0 2px 12px $accent-glow; transition: all 0.2s ease;
 
   &:hover { transform: translateY(-2px); box-shadow: 0 6px 20px $accent-glow; }
@@ -666,7 +666,7 @@ $red          : #ef4444;
   top: 0; right: 0;
   width: 42%; max-width: 560px; min-width: 320px;
   height: 100vh;
-  background: #0c0c20;
+  background: var(--t1);
   border-left: 1px solid rgba($accent, 0.2);
   display: flex; flex-direction: column;
   transform: translateX(100%);
@@ -705,7 +705,7 @@ $red          : #ef4444;
   .aa-qa-status-dot {
     position: absolute; bottom: -2px; right: -2px;
     width: 10px; height: 10px; border-radius: 50%;
-    background: $green; border: 2px solid #0c0c20;
+    background: $green; border: 2px solid var(--t1);
     animation: pulse-dot 2s infinite;
   }
 }
@@ -765,7 +765,7 @@ $red          : #ef4444;
     .aa-qa-bubble {
       background: $bg-card;
       border: 1px solid $border;
-      color: #c4c4e8;
+      color: var(--bluebdr);
       border-radius: 4px 18px 18px 18px;
     }
   }
@@ -823,13 +823,13 @@ $red          : #ef4444;
   color: $accent-2;
   padding: 5px 12px; border-radius: 20px;
   font-size: 12px; font-weight: 500;
-  font-family: 'Inter', sans-serif;
+  font-family: var(--font);
   cursor: pointer; transition: all 0.15s ease; white-space: nowrap;
 
   &:hover {
     background: rgba($accent, 0.2);
     border-color: rgba($accent, 0.5);
-    color: #c7d2fe;
+    color: var(--bluebdr);
     transform: translateY(-1px);
     box-shadow: 0 2px 8px rgba($accent, 0.2);
   }
@@ -860,7 +860,7 @@ $red          : #ef4444;
   flex: 1; background: transparent; border: none; outline: none;
   color: $text-primary; font-size: 13.5px; line-height: 1.55;
   resize: none; min-height: 22px; max-height: 120px;
-  font-family: 'Inter', sans-serif;
+  font-family: var(--font);
 
   &::placeholder { color: $text-sub; }
   &:disabled { opacity: 0.5; cursor: not-allowed; }
@@ -877,7 +877,7 @@ $red          : #ef4444;
   mat-icon { font-size: 18px !important; width: 18px !important; height: 18px !important; }
 
   &:hover:not(:disabled) {
-    background: linear-gradient(135deg, #4338ca, #6d28d9);
+    background: linear-gradient(135deg, var(--bluedark), #6d28d9);
     transform: scale(1.08);
     box-shadow: 0 4px 14px rgba($accent, 0.6);
   }

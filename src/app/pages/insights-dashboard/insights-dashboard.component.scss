@@ -24,13 +24,13 @@
   .page-title {
     font-size: 20px;
     font-weight: 700;
-    color: var(--t1, #1e293b);
+    color: var(--t1, var(--t1));
     margin: 0 0 2px;
   }
   
   .page-sub {
     font-size: 13px;
-    color: var(--t3, #64748b);
+    color: var(--t3, var(--t3));
     margin: 0;
   }
   
@@ -39,7 +39,7 @@
     align-items: center;
     gap: 6px;
     padding: 9px 20px;
-    background: #4f46e5;
+    background: var(--grad);
     color: #fff;
     border: none;
     border-radius: 8px;
@@ -50,7 +50,7 @@
     white-space: nowrap;
     flex-shrink: 0;
   
-    &:hover:not(:disabled) { background: #4338ca; }
+    &:hover:not(:disabled) { background: var(--bluedark); }
     &:disabled { opacity: 0.6; cursor: default; }
   }
   
@@ -62,7 +62,7 @@
     gap: 10px;
     padding: 60px;
     justify-content: center;
-    color: #64748b;
+    color: var(--t3);
     font-size: 14px;
   }
   
@@ -71,14 +71,14 @@
     align-items: center;
     gap: 8px;
     padding: 12px 0;
-    color: #64748b;
+    color: var(--t3);
     font-size: 13px;
   }
   
   .spinner {
     width: 20px; height: 20px;
-    border: 2px solid #c7d2fe;
-    border-top-color: #4f46e5;
+    border: 2px solid var(--bluebdr);
+    border-top-color: var(--blue);
     border-radius: 50%;
     animation: spin 0.7s linear infinite;
     flex-shrink: 0;
@@ -103,7 +103,7 @@
   
   .stat-card {
     background: #fff;
-    border: 1px solid #e2e8f0;
+    border: 1px solid var(--bdr);
     border-radius: 12px;
     padding: 18px 20px;
     box-shadow: 0 1px 4px rgba(0,0,0,0.05);
@@ -122,7 +122,7 @@
     font-weight: 700;
     text-transform: uppercase;
     letter-spacing: 0.08em;
-    color: #64748b;
+    color: var(--t3);
     margin-bottom: 8px;
   }
   
@@ -134,14 +134,14 @@
   
     &.critical { color: #ef4444; }
     &.warning  { color: #f59e0b; }
-    &.info     { color: #3b82f6; }
+    &.info     { color: var(--blue); }
   }
   
-  .stat-hint { font-size: 12px; color: #64748b; margin-bottom: 10px; }
+  .stat-hint { font-size: 12px; color: var(--t3); margin-bottom: 10px; }
   
   .stat-bar {
     height: 5px;
-    background: #f1f5f9;
+    background: var(--surf2);
     border-radius: 3px;
     overflow: hidden;
     width: 100%;
@@ -153,7 +153,7 @@
     transition: width 0.6s ease;
     &.critical { background: #ef4444; }
     &.warning  { background: #f59e0b; }
-    &.info     { background: #3b82f6; }
+    &.info     { background: var(--grad); }
   }
   
   .risk-score-wrap { display: flex; flex-direction: column; align-items: center; gap: 8px; width: 100%; }
@@ -172,8 +172,8 @@
     display: flex; flex-direction: column; align-items: center; justify-content: center;
   }
   
-  .risk-num   { font-size: 22px; font-weight: 800; color: #1e293b; line-height: 1; }
-  .risk-denom { font-size: 10px; color: #94a3b8; }
+  .risk-num   { font-size: 22px; font-weight: 800; color: var(--t1); line-height: 1; }
+  .risk-denom { font-size: 10px; color: var(--t3); }
   
   .risk-badge {
     font-size: 11px;
@@ -199,36 +199,36 @@
     min-width: 200px;
     padding: 8px 14px;
     background: #fff;
-    border: 1px solid #e2e8f0;
+    border: 1px solid var(--bdr);
     border-radius: 8px;
-    color: #1e293b;
+    color: var(--t1);
     font-size: 13px;
     outline: none;
     box-shadow: 0 1px 3px rgba(0,0,0,0.04);
   
-    &:focus { border-color: #4f46e5; box-shadow: 0 0 0 3px #eef2ff; }
-    &::placeholder { color: #94a3b8; }
+    &:focus { border-color: var(--blue); box-shadow: 0 0 0 3px var(--bluebg); }
+    &::placeholder { color: var(--t3); }
   }
   
   .filter-select {
     padding: 8px 12px;
     background: #fff;
-    border: 1px solid #e2e8f0;
+    border: 1px solid var(--bdr);
     border-radius: 8px;
-    color: #1e293b;
+    color: var(--t1);
     font-size: 13px;
     cursor: pointer;
     outline: none;
   
-    &:focus { border-color: #4f46e5; }
+    &:focus { border-color: var(--blue); }
   }
   
   .clear-btn {
     padding: 8px 14px;
     background: transparent;
-    border: 1px solid #e2e8f0;
+    border: 1px solid var(--bdr);
     border-radius: 8px;
-    color: #64748b;
+    color: var(--t3);
     font-size: 12px;
     cursor: pointer;
     transition: all 0.15s;
@@ -245,11 +245,11 @@
   
   .tag-chip {
     padding: 4px 11px;
-    background: #f8fafc;
-    border: 1px solid #e2e8f0;
+    background: var(--surf2);
+    border: 1px solid var(--bdr);
     border-radius: 20px;
     font-size: 11px;
-    color: #475569;
+    color: var(--t2);
     cursor: pointer;
     transition: all 0.15s;
     display: flex;
@@ -257,7 +257,7 @@
     gap: 5px;
     text-transform: capitalize;
   
-    &:hover { border-color: #4f46e5; color: #4f46e5; background: #eef2ff; }
+    &:hover { border-color: var(--blue); color: var(--blue); background: var(--bluebg); }
     &.active { font-weight: 600; }
     &.sm { cursor: default; font-size: 10px; padding: 2px 8px; }
   }
@@ -268,7 +268,7 @@
   
   .list-summary {
     font-size: 12px;
-    color: #94a3b8;
+    color: var(--t3);
     margin-bottom: 10px;
     font-weight: 500;
   }
@@ -279,7 +279,7 @@
   
   .doc-group {
     background: #fff;
-    border: 1px solid #e2e8f0;
+    border: 1px solid var(--bdr);
     border-radius: 12px;
     overflow: hidden;
     box-shadow: 0 1px 4px rgba(0,0,0,0.05);
@@ -290,7 +290,7 @@
     // Left severity stripe
     &[data-severity="critical"] { border-left: 4px solid #ef4444; }
     &[data-severity="warning"]  { border-left: 4px solid #f59e0b; }
-    &[data-severity="info"]     { border-left: 4px solid #3b82f6; }
+    &[data-severity="info"]     { border-left: 4px solid var(--blue); }
     &[data-severity="positive"] { border-left: 4px solid #22c55e; }
   }
   
@@ -304,7 +304,7 @@
     gap: 12px;
     user-select: none;
   
-    &:hover { background: #f8fafc; }
+    &:hover { background: var(--surf2); }
   }
   
   .group-left {
@@ -322,7 +322,7 @@
   .group-filename {
     font-size: 14px;
     font-weight: 600;
-    color: #1e293b;
+    color: var(--t1);
     margin-bottom: 4px;
     white-space: nowrap;
     overflow: hidden;
@@ -338,9 +338,9 @@
   
   .domain-badge {
     font-size: 11px;
-    color: #4f46e5;
-    background: #eef2ff;
-    border: 1px solid #c7d2fe;
+    color: var(--blue);
+    background: var(--bluebg);
+    border: 1px solid var(--bluebdr);
     padding: 2px 8px;
     border-radius: 4px;
     font-weight: 500;
@@ -349,9 +349,9 @@
   
   .doc-type-badge {
     font-size: 11px;
-    color: #64748b;
-    background: #f1f5f9;
-    border: 1px solid #e2e8f0;
+    color: var(--t3);
+    background: var(--surf2);
+    border: 1px solid var(--bdr);
     padding: 2px 8px;
     border-radius: 4px;
     text-transform: capitalize;
@@ -377,9 +377,9 @@
   .insight-count-badge {
     font-size: 11px;
     font-weight: 600;
-    color: #64748b;
-    background: #f1f5f9;
-    border: 1px solid #e2e8f0;
+    color: var(--t3);
+    background: var(--surf2);
+    border: 1px solid var(--bdr);
     padding: 3px 10px;
     border-radius: 20px;
   }
@@ -394,7 +394,7 @@
   
     &[data-severity="critical"] { background: #fef2f2; color: #ef4444; border: 1px solid #fecaca; }
     &[data-severity="warning"]  { background: #fffbeb; color: #d97706; border: 1px solid #fde68a; }
-    &[data-severity="info"]     { background: #eff6ff; color: #3b82f6; border: 1px solid #bfdbfe; }
+    &[data-severity="info"]     { background: var(--bluebg); color: var(--blue); border: 1px solid var(--bluebdr); }
     &[data-severity="positive"] { background: #f0fdf4; color: #16a34a; border: 1px solid #bbf7d0; }
   
     &.sm { font-size: 10px; padding: 2px 8px; }
@@ -403,29 +403,29 @@
   .open-doc-btn {
     padding: 7px 14px;
     background: transparent;
-    border: 1px solid #4f46e5;
+    border: 1px solid var(--blue);
     border-radius: 7px;
-    color: #4f46e5;
+    color: var(--blue);
     font-size: 12px;
     font-weight: 600;
     cursor: pointer;
     transition: all 0.15s;
   
-    &:hover { background: #4f46e5; color: #fff; }
+    &:hover { background: var(--grad); color: #fff; }
     &.sm { padding: 4px 10px; font-size: 11px; }
   }
   
   .expand-arrow {
     font-size: 10px;
-    color: #94a3b8;
+    color: var(--t3);
     &.sm { font-size: 9px; }
   }
   
   // ── Group Body — insight rows ─────────────────────────────────────────────────
   
   .group-body {
-    border-top: 1px solid #f1f5f9;
-    background: #fafbfc;
+    border-top: 1px solid var(--surf2);
+    background: var(--bluebg);
     animation: slideDown 0.15s ease;
   }
   
@@ -435,17 +435,17 @@
   }
   
   .insight-row {
-    border-bottom: 1px solid #f1f5f9;
+    border-bottom: 1px solid var(--surf2);
     cursor: pointer;
     transition: background 0.12s;
   
-    &:hover { background: #f8fafc; }
+    &:hover { background: var(--surf2); }
     &.last { border-bottom: none; }
   
     // Subtle left accent per severity
     &[data-severity="critical"] { border-left: 3px solid #fecaca; }
     &[data-severity="warning"]  { border-left: 3px solid #fde68a; }
-    &[data-severity="info"]     { border-left: 3px solid #bfdbfe; }
+    &[data-severity="info"]     { border-left: 3px solid var(--bluebdr); }
     &[data-severity="positive"] { border-left: 3px solid #bbf7d0; }
   }
   
@@ -464,7 +464,7 @@
   
     &[data-severity="critical"] { background: #ef4444; }
     &[data-severity="warning"]  { background: #f59e0b; }
-    &[data-severity="info"]     { background: #3b82f6; }
+    &[data-severity="info"]     { background: var(--grad); }
     &[data-severity="positive"] { background: #22c55e; }
   }
   
@@ -480,15 +480,15 @@
   .row-title {
     font-size: 13px;
     font-weight: 500;
-    color: #1e293b;
+    color: var(--t1);
   }
   
   .due-date  { font-size: 11px; color: #f59e0b; font-weight: 500; }
   
   .value-inline {
     font-size: 11px;
-    color: #64748b;
-    strong { color: #1e293b; }
+    color: var(--t3);
+    strong { color: var(--t1); }
   }
   
   // ── Row expanded detail ───────────────────────────────────────────────────────
@@ -513,13 +513,13 @@
     font-weight: 700;
     text-transform: uppercase;
     letter-spacing: 0.08em;
-    color: #94a3b8;
+    color: var(--t3);
     margin-bottom: 4px;
   }
   
   .detail-text {
     font-size: 12px;
-    color: #334155;
+    color: var(--t2);
     line-height: 1.6;
   }
   
@@ -536,7 +536,7 @@
   
     p {
       font-size: 14px;
-      color: #475569;
+      color: var(--t2);
       margin: 0 0 6px;
       font-weight: 500;
     }
@@ -544,6 +544,6 @@
   
   .empty-sub {
     font-size: 12px !important;
-    color: #94a3b8 !important;
+    color: var(--t3) !important;
     font-weight: 400 !important;
   }

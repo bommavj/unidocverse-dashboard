@@ -6,7 +6,8 @@
   align-items: center;
   gap: 16px;
   padding: 0 20px;
-  background: var(--surf);
+  background: rgba(255,255,255,.78);
+  -webkit-backdrop-filter: saturate(180%) blur(20px); backdrop-filter: saturate(180%) blur(20px);
   border-bottom: 1px solid var(--bdr);
   font-family: var(--font);
 }
@@ -20,11 +21,12 @@
   gap: 8px;
   height: 38px;
   padding: 0 10px;
-  border: 1px solid var(--bdr2);
-  border-radius: 6px;
-  background: var(--surf2);
+  border: 1px solid transparent;
+  border-radius: 10px;
+  background: rgba(0,0,0,.05);
   color: var(--t3);
-  &:focus-within { border-color: var(--blue); background: var(--surf); box-shadow: 0 0 0 3px var(--bluebg); }
+  transition: background .15s, box-shadow .15s;
+  &:focus-within { border-color: var(--blue); background: #fff; box-shadow: 0 0 0 4px rgba(0,113,227,.15); }
   i { font-size: 17px; }
   input { flex: 1; min-width: 0; border: none; outline: none; background: transparent; font: inherit; font-size: 14px; color: var(--t1); }
   input::placeholder { color: var(--t3); }
@@ -32,14 +34,14 @@
 }
 .tb-clear {
   display: inline-flex; align-items: center; justify-content: center; width: 24px; height: 24px; flex-shrink: 0;
-  border: none; border-radius: 50%; background: var(--bdr2, #e5e7eb); color: var(--t2, #374151); cursor: pointer; padding: 0;
+  border: none; border-radius: 50%; background: var(--bdr2, var(--bdr)); color: var(--t2, var(--t2)); cursor: pointer; padding: 0;
   i { font-size: 14px; }
-  &:hover { background: var(--blue, #2563eb); color: #fff; }
-  &:focus-visible { outline: 2px solid var(--blue, #2563eb); outline-offset: 1px; }
+  &:hover { background: var(--blue, var(--blue)); color: #fff; }
+  &:focus-visible { outline: 2px solid var(--blue, var(--blue)); outline-offset: 1px; }
 }
 .tb-jumps {
   position: absolute; top: 44px; left: 0; right: 0;
-  background: var(--surf); border: 1px solid var(--bdr); border-radius: 8px; box-shadow: var(--sh2); padding: 6px;
+  background: var(--surf); border: 1px solid var(--bdr); border-radius: 12px; box-shadow: var(--sh2); padding: 6px;
   button {
     width: 100%; display: flex; gap: 8px; align-items: center; padding: 8px 10px; border: none; background: none;
     border-radius: 6px; font: inherit; font-size: 14px; color: var(--t1); cursor: pointer; text-align: left;
@@ -54,11 +56,11 @@
 
 .tb-ai, .tb-primary {
   display: inline-flex; align-items: center; gap: 6px; height: 36px; padding: 0 14px;
-  border-radius: 6px; font: inherit; font-size: 14px; font-weight: 600; cursor: pointer; text-decoration: none; white-space: nowrap;
+  border-radius: 980px; font: inherit; font-size: 14px; font-weight: 500; cursor: pointer; text-decoration: none; white-space: nowrap;
   i { font-size: 17px; }
 }
 .tb-ai { background: var(--surf); color: var(--blue); border: 1px solid var(--bluebdr); &:hover { background: var(--bluebg); } }
-.tb-primary { background: var(--blue); color: #fff; border: 1px solid var(--blue); &:hover { background: var(--bluedark); } }
+.tb-primary { background: var(--grad); color: #fff; border: none; box-shadow: var(--glow); &:hover { filter: brightness(1.06); } }
 
 .tb-ic {
   position: relative; width: 36px; height: 36px; border-radius: 6px; border: 1px solid transparent; background: none;
@@ -83,7 +85,7 @@
 
 .tb-menu {
   position: absolute; right: 0; top: 44px; min-width: 220px;
-  background: var(--surf); border: 1px solid var(--bdr); border-radius: 8px; box-shadow: var(--sh2); padding: 6px; z-index: 60;
+  background: var(--surf); border: 1px solid var(--bdr); border-radius: 12px; box-shadow: var(--sh2); padding: 6px; z-index: 60;
   a, button {
     width: 100%; display: flex; align-items: center; gap: 10px; padding: 8px 10px; border: none; background: none; border-radius: 6px;
     font: inherit; font-size: 14px; color: var(--t1); text-decoration: none; cursor: pointer; text-align: left;

@@ -69,7 +69,7 @@ const DOC_ROLES = [
   styles: [`
     :host {
       display: block;
-      font-family: 'Inter', sans-serif;
+      font-family: var(--font);
       background: var(--surf);
       min-height: var(--content-h);
       color: var(--t1);
@@ -96,7 +96,7 @@ const DOC_ROLES = [
     }
 
     .btn-primary {
-      background: #3b82f6;
+      background: var(--grad);
       color: #fff;
       border: none;
       border-radius: 8px;
@@ -109,7 +109,7 @@ const DOC_ROLES = [
       gap: 6px;
       transition: background 0.15s;
     }
-    .btn-primary:hover { background: #2563eb; }
+    .btn-primary:hover { background: var(--grad); }
 
     /* Stats Row */
     .stats-row {
@@ -167,8 +167,8 @@ const DOC_ROLES = [
       white-space: nowrap;
       transition: all 0.15s;
     }
-    .stage-tab:hover { border-color: var(--t2); color: #cbd5e1; }
-    .stage-tab.active { background: #3b82f6; border-color: #3b82f6; color: #fff; }
+    .stage-tab:hover { border-color: var(--t2); color: var(--bdr2); }
+    .stage-tab.active { background: var(--grad); border-color: var(--blue); color: #fff; }
 
     /* Main content */
     .main-content {
@@ -201,8 +201,8 @@ const DOC_ROLES = [
       cursor: pointer;
       transition: border-color 0.15s, background 0.15s;
     }
-    .claim-card:hover { border-color: var(--t2); background: #243047; }
-    .claim-card.selected { border-color: #3b82f6; background: #1a2d4a; }
+    .claim-card:hover { border-color: var(--t2); background: var(--bluedark); }
+    .claim-card.selected { border-color: var(--blue); background: var(--bluedark); }
 
     .claim-card-top {
       display: flex;
@@ -214,7 +214,7 @@ const DOC_ROLES = [
     .claim-number {
       font-size: 13px;
       font-weight: 700;
-      color: #93c5fd;
+      color: var(--bluebdr);
     }
 
     .claim-title-text {
@@ -306,14 +306,14 @@ const DOC_ROLES = [
     .stage-select {
       background: var(--surf);
       border: 1px solid var(--bdr);
-      color: #cbd5e1;
+      color: var(--bdr2);
       border-radius: 6px;
       padding: 5px 10px;
       font-size: 12px;
       cursor: pointer;
     }
 
-    .stage-select:focus { outline: none; border-color: #3b82f6; }
+    .stage-select:focus { outline: none; border-color: var(--blue); }
 
     .detail-body {
       flex: 1;
@@ -363,7 +363,7 @@ const DOC_ROLES = [
       transition: all 0.15s;
     }
     .detail-tab:hover { color: var(--t2); }
-    .detail-tab.active { color: #3b82f6; border-bottom-color: #3b82f6; }
+    .detail-tab.active { color: var(--blue); border-bottom-color: var(--blue); }
 
     /* Timeline */
     .timeline {
@@ -394,7 +394,7 @@ const DOC_ROLES = [
       height: 30px;
       border-radius: 50%;
       background: var(--surf2);
-      border: 2px solid #3b82f6;
+      border: 2px solid var(--blue);
       display: flex;
       align-items: center;
       justify-content: center;
@@ -410,7 +410,7 @@ const DOC_ROLES = [
 
     .timeline-content .tl-desc {
       font-size: 13px;
-      color: #cbd5e1;
+      color: var(--bdr2);
       margin-top: 2px;
     }
 
@@ -444,14 +444,14 @@ const DOC_ROLES = [
 
     .doc-item-name {
       font-size: 12px;
-      color: #cbd5e1;
+      color: var(--bdr2);
       flex: 1;
     }
 
     .btn-sm {
-      background: #1e3a5f;
-      color: #93c5fd;
-      border: 1px solid #1d4ed8;
+      background: var(--bluedark);
+      color: var(--bluebdr);
+      border: 1px solid var(--bluedark);
       border-radius: 6px;
       padding: 6px 12px;
       font-size: 11px;
@@ -459,7 +459,7 @@ const DOC_ROLES = [
       cursor: pointer;
       transition: background 0.15s;
     }
-    .btn-sm:hover { background: #1d4ed8; color: #fff; }
+    .btn-sm:hover { background: var(--bluedark); color: #fff; }
 
     /* Modals */
     .modal-overlay {
@@ -521,8 +521,8 @@ const DOC_ROLES = [
       box-sizing: border-box;
       transition: border-color 0.15s;
     }
-    .form-control:focus { outline: none; border-color: #3b82f6; }
-    .form-control::placeholder { color: #334155; }
+    .form-control:focus { outline: none; border-color: var(--blue); }
+    .form-control::placeholder { color: var(--t2); }
 
     textarea.form-control { resize: vertical; min-height: 70px; }
 
@@ -563,16 +563,15 @@ const DOC_ROLES = [
       padding: 10px 12px;
       background: var(--surf);
       border: 1px solid var(--bdr);
-      border-radius: 8px;
+      border-radius: 14px;
       cursor: pointer;
-      transition: border-color 0.15s;
-    }
+      transition: border-color 0.15s; box-shadow: var(--sh1); }
     .doc-picker-item:hover { border-color: var(--t2); }
-    .doc-picker-item.selected { border-color: #3b82f6; background: #1a2d4a; }
+    .doc-picker-item.selected { border-color: var(--blue); background: var(--bluedark); }
 
     .doc-picker-name {
       font-size: 13px;
-      color: #cbd5e1;
+      color: var(--bdr2);
       flex: 1;
     }
 
@@ -581,7 +580,7 @@ const DOC_ROLES = [
       width: 16px;
       height: 16px;
       border: 2px solid var(--bdr);
-      border-top-color: #3b82f6;
+      border-top-color: var(--blue);
       border-radius: 50%;
       animation: spin 0.7s linear infinite;
     }
@@ -606,7 +605,7 @@ const DOC_ROLES = [
       align-items: center;
       justify-content: center;
       height: 100%;
-      color: #334155;
+      color: var(--t2);
       font-size: 13px;
       text-align: center;
       gap: 8px;

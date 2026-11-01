@@ -124,12 +124,12 @@ interface WorkspaceDoc {
     .notes-container {
       display: flex;
       height: var(--content-h);
-      background: var(--bg-surface, #f8fafc);
+      background: var(--bg-surface, var(--surf2));
       font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
     }
     .notes-sidebar {
       width: 300px;
-      border-right: 1px solid var(--border-color, #e2e8f0);
+      border-right: 1px solid var(--border-color, var(--bdr));
       background: white;
       display: flex;
       flex-direction: column;
@@ -140,17 +140,17 @@ interface WorkspaceDoc {
       display: flex;
       justify-content: space-between;
       align-items: center;
-      border-bottom: 1px solid #f1f5f9;
+      border-bottom: 1px solid var(--surf2);
     }
     .sidebar-header h3 {
       margin: 0;
       font-size: 16px;
       font-weight: 700;
-      color: #0f172a;
+      color: var(--t1);
     }
     .btn-new {
       padding: 6px 12px;
-      background: #6366f1;
+      background: var(--grad);
       color: white;
       border: none;
       border-radius: 6px;
@@ -159,20 +159,20 @@ interface WorkspaceDoc {
       cursor: pointer;
       transition: background 0.2s;
     }
-    .btn-new:hover { background: #4f46e5; }
+    .btn-new:hover { background: var(--grad); }
     .search-bar {
       padding: 12px 16px;
-      border-bottom: 1px solid #f1f5f9;
+      border-bottom: 1px solid var(--surf2);
     }
     .search-bar input {
       width: 100%;
       padding: 8px 12px;
-      border: 1.5px solid #e2e8f0;
+      border: 1.5px solid var(--bdr);
       border-radius: 8px;
       font-size: 13px;
       outline: none;
     }
-    .search-bar input:focus { border-color: #6366f1; }
+    .search-bar input:focus { border-color: var(--blue); }
     .notes-list {
       flex: 1;
       overflow-y: auto;
@@ -185,12 +185,12 @@ interface WorkspaceDoc {
       margin-bottom: 6px;
       transition: all 0.2s;
     }
-    .note-item:hover { background: #f8fafc; }
-    .note-item.active { background: #eff6ff; }
+    .note-item:hover { background: var(--surf2); }
+    .note-item.active { background: var(--bluebg); }
     .note-item-title {
       font-size: 14px;
       font-weight: 600;
-      color: #1e293b;
+      color: var(--t1);
       margin-bottom: 4px;
       white-space: nowrap;
       overflow: hidden;
@@ -198,7 +198,7 @@ interface WorkspaceDoc {
     }
     .note-item-desc {
       font-size: 12px;
-      color: #64748b;
+      color: var(--t3);
       line-height: 1.4;
       margin-bottom: 6px;
       display: -webkit-box;
@@ -210,11 +210,11 @@ interface WorkspaceDoc {
       display: flex;
       justify-content: space-between;
       font-size: 11px;
-      color: #94a3b8;
+      color: var(--t3);
     }
     .note-linked {
-      background: #eef2ff;
-      color: #4f46e5;
+      background: var(--bluebg);
+      color: var(--blue);
       padding: 1px 6px;
       border-radius: 4px;
       font-weight: 600;
@@ -222,7 +222,7 @@ interface WorkspaceDoc {
     .empty-state {
       padding: 24px;
       text-align: center;
-      color: #94a3b8;
+      color: var(--t3);
       font-size: 13px;
     }
 
@@ -243,7 +243,7 @@ interface WorkspaceDoc {
     .editor-title-input {
       font-size: 24px;
       font-weight: 700;
-      color: #0f172a;
+      color: var(--t1);
       border: none;
       outline: none;
       flex: 1;
@@ -282,19 +282,19 @@ interface WorkspaceDoc {
       align-items: center;
       gap: 12px;
       padding: 12px;
-      background: #f8fafc;
+      background: var(--surf2);
       border-radius: 8px;
       margin-bottom: 20px;
       font-size: 13px;
     }
     .link-document-bar label {
       font-weight: 600;
-      color: #475569;
+      color: var(--t2);
     }
     .link-document-bar select {
       padding: 4px 8px;
       border-radius: 6px;
-      border: 1px solid #cbd5e1;
+      border: 1px solid var(--bdr2);
       outline: none;
       max-width: 300px;
     }
@@ -319,7 +319,7 @@ interface WorkspaceDoc {
       resize: none;
       font-size: 15px;
       line-height: 1.6;
-      color: #334155;
+      color: var(--t2);
     }
 
     /* AI Assist Panel */
@@ -392,12 +392,12 @@ interface WorkspaceDoc {
       margin: 0 0 8px;
       font-size: 20px;
       font-weight: 700;
-      color: #0f172a;
+      color: var(--t1);
     }
     .no-selection-pane p {
       margin: 0;
       font-size: 14px;
-      color: #64748b;
+      color: var(--t3);
       max-width: 360px;
       line-height: 1.5;
     }

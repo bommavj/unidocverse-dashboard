@@ -142,7 +142,7 @@ import { MatExpansionModule } from '@angular/material/expansion';
             font-size: 20px;
             width: 20px;
             height: 20px;
-            color: #1976d2;
+            color: var(--blue);
           }
         }
       }
@@ -179,7 +179,7 @@ import { MatExpansionModule } from '@angular/material/expansion';
       gap: 0.5rem;
       
       .insight-chip {
-        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        background: linear-gradient(135deg, var(--g1) 0%, var(--g2) 55%, var(--g3) 100%);
         color: white;
         font-size: 0.8rem;
       }
@@ -195,7 +195,7 @@ import { MatExpansionModule } from '@angular/material/expansion';
       }
       
       .stat-item {
-        background: #f5f5f5;
+        background: var(--surf2);
         padding: 0.75rem;
         border-radius: 6px;
         display: flex;
@@ -262,8 +262,8 @@ import { MatExpansionModule } from '@angular/material/expansion';
         
         mat-chip {
           font-size: 0.75rem;
-          background: #e3f2fd;
-          color: #1976d2;
+          background: var(--bluebg);
+          color: var(--blue);
         }
       }
     }

@@ -44,27 +44,27 @@ import { RouterModule } from '@angular/router';
     </section>
   `,
   styles: [`
-    .dd { background:#fff; border:1px solid #e2e8f0; border-radius:12px; padding:20px 24px; margin-bottom:16px; }
+    .dd { background:#fff; border:1px solid var(--bdr); border-radius: 14px; padding:20px 24px; margin-bottom:16px; box-shadow: var(--sh1); }
     .dd-head { display:flex; justify-content:space-between; align-items:center; margin-bottom:12px; gap:12px; }
-    .dd-head h3 { font-size:16px; font-weight:700; color:#0f172a; margin:0; }
-    .dd-count { color:#94a3b8; font-size:13px; font-weight:600; }
-    .dd-upload { background:#4f46e5; color:#fff; border-radius:6px; padding:6px 12px; font-size:12px; font-weight:600; text-decoration:none; white-space:nowrap; }
-    .dd-upload:hover { background:#4338ca; }
-    .dd-upload:focus-visible { outline:2px solid #a5b4fc; outline-offset:2px; }
-    .dd-empty { color:#64748b; font-size:13px; padding:8px 0; }
-    .dd-types { display:block; color:#94a3b8; font-size:12px; margin-top:4px; }
+    .dd-head h3 { font-size:16px; font-weight:700; color:var(--t1); margin:0; }
+    .dd-count { color:var(--t3); font-size:13px; font-weight:600; }
+    .dd-upload { background:var(--grad); color:#fff; border-radius:6px; padding:6px 12px; font-size:12px; font-weight:600; text-decoration:none; white-space:nowrap; }
+    .dd-upload:hover { background:var(--bluedark); }
+    .dd-upload:focus-visible { outline:2px solid var(--bluebdr); outline-offset:2px; }
+    .dd-empty { color:var(--t3); font-size:13px; padding:8px 0; }
+    .dd-types { display:block; color:var(--t3); font-size:12px; margin-top:4px; }
     .dd-wrap { overflow-x:auto; }
     table { width:100%; border-collapse:collapse; font-size:12.5px; }
-    th { text-align:left; font-size:11px; text-transform:uppercase; letter-spacing:.04em; color:#64748b; padding:8px; border-bottom:1px solid #e2e8f0; }
-    td { padding:10px 8px; border-bottom:1px solid #f1f5f9; vertical-align:top; color:#334155; }
-    .dd-file { font-weight:600; color:#0f172a; }
+    th { text-align:left; font-size:11px; text-transform:uppercase; letter-spacing:.04em; color:var(--t3); padding:8px; border-bottom:1px solid var(--bdr); }
+    td { padding:10px 8px; border-bottom:1px solid var(--surf2); vertical-align:top; color:var(--t2); }
+    .dd-file { font-weight:600; color:var(--t1); }
     .dd-fact { white-space:nowrap; }
-    .dd-muted { color:#94a3b8; }
+    .dd-muted { color:var(--t3); }
     .dd-date { white-space:nowrap; font-variant-numeric:tabular-nums; }
-    :host-context(html.dark-mode) .dd { background:#0f172a; border-color:#1e293b; }
-    :host-context(html.dark-mode) .dd-head h3, :host-context(html.dark-mode) .dd-file { color:#f1f5f9; }
-    :host-context(html.dark-mode) td { color:#cbd5e1; border-color:#1e293b; }
-    :host-context(html.dark-mode) th { border-color:#1e293b; }
+    :host-context(html.dark-mode) .dd { background:var(--t1); border-color:var(--t1); }
+    :host-context(html.dark-mode) .dd-head h3, :host-context(html.dark-mode) .dd-file { color:var(--surf2); }
+    :host-context(html.dark-mode) td { color:var(--bdr2); border-color:var(--t1); }
+    :host-context(html.dark-mode) th { border-color:var(--t1); }
   `],
 })
 export class DomainDocumentsComponent implements OnChanges {

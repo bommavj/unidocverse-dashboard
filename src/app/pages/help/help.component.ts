@@ -112,20 +112,20 @@ const TOPICS: Topic[] = [
   </div>`,
   styles: [`
     .help { padding: 24px; max-width: 1100px; margin: 0 auto; }
-    .ph h1 { margin: 0; font-size: 22px; } .ph p { margin: 4px 0 14px; color: #475467; }
-    .q { display: flex; align-items: center; gap: 8px; border: 1px solid #d0d5dd; border-radius: 8px; padding: 6px 10px; max-width: 420px; background: #fff;
-      input { border: 0; outline: 0; flex: 1; font: inherit; } button { border: 0; background: none; cursor: pointer; color: #667085; } }
+    .ph h1 { margin: 0; font-size: 22px; } .ph p { margin: 4px 0 14px; color: var(--t2); }
+    .q { display: flex; align-items: center; gap: 8px; border: 1px solid var(--bdr2); border-radius: 8px; padding: 6px 10px; max-width: 420px; background: #fff;
+      input { border: 0; outline: 0; flex: 1; font: inherit; } button { border: 0; background: none; cursor: pointer; color: var(--t3); } }
     .cols { display: grid; grid-template-columns: 220px 1fr; gap: 32px; margin-top: 20px; }
     .toc { position: sticky; top: 16px; align-self: start; display: flex; flex-direction: column; gap: 4px;
-      h4 { margin: 12px 0 2px; font-size: 11px; text-transform: uppercase; letter-spacing: .05em; color: #667085; }
-      a { color: #344054; text-decoration: none; font-size: 13.5px; padding: 2px 0; } a:hover { color: #1570ef; } }
+      h4 { margin: 12px 0 2px; font-size: 11px; text-transform: uppercase; letter-spacing: .05em; color: var(--t3); }
+      a { color: var(--t2); text-decoration: none; font-size: 13.5px; padding: 2px 0; } a:hover { color: var(--blue); } }
     main { display: flex; flex-direction: column; gap: 22px; }
     section { scroll-margin-top: 16px; } section h2 { margin: 0 0 6px; font-size: 17px; }
-    section p { margin: 0 0 8px; line-height: 1.6; color: #1d2939; max-width: 68ch; }
-    .share { margin-left: 10px; color: #1570ef; font-weight: 600; text-decoration: none; white-space: nowrap; }
+    section p { margin: 0 0 8px; line-height: 1.6; color: var(--bluedark); max-width: 68ch; }
+    .share { margin-left: 10px; color: var(--blue); font-weight: 600; text-decoration: none; white-space: nowrap; }
     .share i { margin-right: 4px; }
-    .open { color: #1570ef; font-weight: 600; font-size: 13.5px; text-decoration: none; }
-    .none { color: #667085; }
+    .open { color: var(--blue); font-weight: 600; font-size: 13.5px; text-decoration: none; }
+    .none { color: var(--t3); }
     @media (max-width: 760px) { .cols { grid-template-columns: 1fr; } .toc { position: static; } }
   `],
 })

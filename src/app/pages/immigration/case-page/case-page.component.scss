@@ -1,10 +1,10 @@
-:host { display: block; background: var(--surf2); min-height: 100%; font-family: var(--font); color: var(--t1); }
+:host { display: block; background: transparent; min-height: 100%; font-family: var(--font); color: var(--t1); }
 
 .cp { max-width: 1400px; margin: 0 auto; padding: 20px 28px 48px; display: flex; flex-direction: column; gap: 16px; }
 .cp.state { align-items: center; justify-content: center; min-height: 50vh; gap: 12px; i { font-size: 32px; color: var(--t3); } }
 
 // Header
-.hd { background: var(--surf); border: 1px solid var(--bdr); border-radius: 10px; padding: 16px 20px 14px; }
+.hd { background: var(--surf); border: 1px solid var(--bdr); border-radius: 14px; padding: 16px 20px 14px; box-shadow: var(--sh1); }
 .crumbs { display: flex; gap: 8px; font-size: 13px; color: var(--t3); a { color: var(--t2); text-decoration: none; &:hover { color: var(--blue); text-decoration: underline; } } }
 .hd-main { display: flex; justify-content: space-between; align-items: flex-start; gap: 16px; margin-top: 10px; flex-wrap: wrap; }
 .who { display: flex; gap: 14px; align-items: center; min-width: 0;

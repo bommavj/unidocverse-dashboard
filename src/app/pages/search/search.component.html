@@ -12,12 +12,12 @@
     </div>
   </div>
 
-  <div *ngIf="loading" style="text-align:center;padding:48px;color:#94a3b8;font-size:14px">
-    <div style="display:inline-block;width:20px;height:20px;border:2px solid #c7d2fe;border-top-color:#4f46e5;border-radius:50%;animation:spin .7s linear infinite;margin-right:8px;vertical-align:middle"></div>
+  <div *ngIf="loading" style="text-align:center;padding:48px;color:var(--t3);font-size:14px">
+    <div style="display:inline-block;width:20px;height:20px;border:2px solid var(--bluebdr);border-top-color:var(--blue);border-radius:50%;animation:spin .7s linear infinite;margin-right:8px;vertical-align:middle"></div>
     Searching…
   </div>
 
-  <div *ngIf="!loading && query && results.length === 0" style="text-align:center;padding:48px;color:#94a3b8">
+  <div *ngIf="!loading && query && results.length === 0" style="text-align:center;padding:48px;color:var(--t3)">
     <div style="font-size:40px;margin-bottom:12px">🔍</div>
     <p>No results found for "<strong>{{ query }}</strong>"</p>
     <p style="font-size:12px;margin-top:8px">Try different keywords or check your document library</p>

@@ -227,19 +227,19 @@ interface ConnectionState {
     .gmail-icon { width: 48px; height: 48px; border-radius: 12px; background: linear-gradient(135deg, #ea4335 0%, #fbbc05 100%); display: flex; align-items: center; justify-content: center; color: #fff; }
     .gmail-icon mat-icon { font-size: 28px; width: 28px; height: 28px; }
     .page-header h1 { margin: 0 0 .25rem; font-size: 24px; font-weight: 600; }
-    .subtitle { margin: 0; color: #757575; font-size: 14px; }
-    .how-it-works { background: #f8f9fa; border-radius: 12px; padding: 2rem; margin-bottom: 1.5rem; }
+    .subtitle { margin: 0; color: var(--t3); font-size: 14px; }
+    .how-it-works { background: var(--surf2); border-radius: 12px; padding: 2rem; margin-bottom: 1.5rem; }
     .how-row { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1.5rem; margin-bottom: 1.5rem; }
     .how-step { display: flex; gap: 1rem; align-items: flex-start; }
-    .step-num { width: 28px; height: 28px; border-radius: 50%; background: #1a73e8; color: #fff; display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 13px; flex-shrink: 0; }
-    .how-step strong { display: block; font-size: 14px; color: #212121; margin-bottom: .25rem; }
-    .how-step p { margin: 0; font-size: 13px; color: #757575; }
-    .how-step a { color: #1a73e8; }
-    .how-cta { display: flex; gap: 1rem; align-items: center; padding-top: 1.25rem; border-top: 1px solid #e0e0e0; }
+    .step-num { width: 28px; height: 28px; border-radius: 50%; background: var(--grad); color: #fff; display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 13px; flex-shrink: 0; }
+    .how-step strong { display: block; font-size: 14px; color: var(--t1); margin-bottom: .25rem; }
+    .how-step p { margin: 0; font-size: 13px; color: var(--t3); }
+    .how-step a { color: var(--blue); }
+    .how-cta { display: flex; gap: 1rem; align-items: center; padding-top: 1.25rem; border-top: 1px solid var(--bdr); }
     .add-card { margin-bottom: 1.5rem; }
     .form-avatar { background: linear-gradient(135deg, #ea4335, #fbbc05); border-radius: 8px; display: flex; align-items: center; justify-content: center; color: #fff; }
-    .app-password-tip { display: flex; align-items: flex-start; gap: .5rem; background: #e8f0fe; border-radius: 8px; padding: .75rem 1rem; font-size: 13px; color: #1a73e8; margin: 1rem 0; }
-    .app-password-tip a { color: #1a73e8; font-weight: 600; }
+    .app-password-tip { display: flex; align-items: flex-start; gap: .5rem; background: var(--bluebg); border-radius: 8px; padding: .75rem 1rem; font-size: 13px; color: var(--blue); margin: 1rem 0; }
+    .app-password-tip a { color: var(--blue); font-weight: 600; }
     .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-top: .5rem; }
     .form-grid mat-form-field { width: 100%; }
     .connections-list { display: flex; flex-direction: column; gap: 1rem; }
@@ -249,24 +249,24 @@ interface ConnectionState {
     .conn-icon.status-active  { background: #e8f5e9; color: #4caf50; }
     .conn-icon.status-paused  { background: #fff8e1; color: #ff9800; }
     .conn-icon.status-error   { background: #ffebee; color: #f44336; }
-    .conn-icon.status-idle    { background: #f5f5f5; color: #9e9e9e; }
+    .conn-icon.status-idle    { background: var(--surf2); color: var(--t3); }
     .conn-info { flex: 1; min-width: 0; }
-    .conn-label { font-weight: 600; font-size: 16px; color: #212121; }
-    .conn-email { font-size: 13px; color: #1a73e8; margin: 2px 0; }
-    .conn-meta { display: flex; flex-wrap: wrap; gap: .5rem; font-size: 12px; color: #757575; margin-top: 3px; }
+    .conn-label { font-weight: 600; font-size: 16px; color: var(--t1); }
+    .conn-email { font-size: 13px; color: var(--blue); margin: 2px 0; }
+    .conn-meta { display: flex; flex-wrap: wrap; gap: .5rem; font-size: 12px; color: var(--t3); margin-top: 3px; }
     .filter-tag { background: #e8f5e9; color: #2e7d32; padding: 1px 6px; border-radius: 10px; font-size: 11px; }
     .last-event { font-size: 12px; color: #4caf50; margin-top: 3px; }
     .conn-stat { text-align: center; }
-    .stat-value { display: block; font-size: 22px; font-weight: 700; color: #212121; }
-    .stat-label { font-size: 11px; color: #9e9e9e; text-transform: uppercase; }
+    .stat-value { display: block; font-size: 22px; font-weight: 700; color: var(--t1); }
+    .stat-label { font-size: 11px; color: var(--t3); text-transform: uppercase; }
     .conn-actions { display: flex; align-items: center; gap: .5rem; flex-shrink: 0; }
     .status-badge { padding: .2rem .6rem; border-radius: 12px; font-size: 11px; font-weight: 600; text-transform: uppercase; }
     .badge-active { background: #e8f5e9; color: #2e7d32; }
     .badge-paused { background: #fff8e1; color: #e65100; }
     .badge-error  { background: #ffebee; color: #c62828; }
-    .badge-idle   { background: #f5f5f5; color: #757575; }
+    .badge-idle   { background: var(--surf2); color: var(--t3); }
     .conn-error { display: flex; align-items: center; gap: .5rem; padding: .75rem 1.25rem; background: #ffebee; color: #c62828; font-size: 13px; }
-    .footer-note { display: flex; align-items: center; gap: .5rem; margin-top: 1.5rem; padding: .75rem 1rem; background: #f5f5f5; border-radius: 8px; font-size: 13px; color: #757575; }
+    .footer-note { display: flex; align-items: center; gap: .5rem; margin-top: 1.5rem; padding: .75rem 1rem; background: var(--surf2); border-radius: 8px; font-size: 13px; color: var(--t3); }
   `]
 })
 export class GmailIntegrationComponent implements OnInit, OnDestroy {

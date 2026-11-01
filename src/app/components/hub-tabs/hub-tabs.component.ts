@@ -21,7 +21,7 @@ export interface HubTab { key: string; label: string; icon?: string; badge?: num
   styles: [`
 .hub-bar {
   display: flex; align-items: center; gap: 0;
-  border-bottom: 1.5px solid #e2e8f4;
+  border-bottom: 1.5px solid var(--bdr);
   padding: 0 24px;
   background: rgba(255,255,255,.95);
   backdrop-filter: blur(12px);
@@ -30,13 +30,13 @@ export interface HubTab { key: string; label: string; icon?: string; badge?: num
 .hub-tab {
   display: flex; align-items: center; gap: 7px;
   padding: 13px 18px; font-size: 13px; font-weight: 600;
-  color: #94a3b8; font-family: var(--font, 'Plus Jakarta Sans', sans-serif);
+  color: var(--t3); font-family: var(--font);
   background: none; border: none; cursor: pointer;
   border-bottom: 2.5px solid transparent; margin-bottom: -1.5px;
   transition: color .15s, border-color .15s; white-space: nowrap;
 }
-.hub-tab:hover { color: #475569; }
-.hub-tab.active { color: #6366f1; border-bottom-color: #6366f1; }
+.hub-tab:hover { color: var(--t2); }
+.hub-tab.active { color: var(--blue); border-bottom-color: var(--blue); }
 .ht-icon { font-size: 14px; line-height: 1; }
 .ht-badge {
   font-size: 10px; font-weight: 800; background: #ef4444; color: #fff;

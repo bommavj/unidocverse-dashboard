@@ -337,31 +337,31 @@ interface Jurisdiction {
   styles: [`
 :host { display:block; height:100%; overflow:hidden; }
 
-.jur-page { display:flex; flex-direction:column; height:100%; background:#f8fafc; overflow:hidden; }
+.jur-page { display:flex; flex-direction:column; height:100%; background:transparent; overflow:hidden; }
 
 .jur-header { display:flex; align-items:flex-start; justify-content:space-between; padding:20px 24px 0; gap:16px; }
-.jur-title  { font-size:20px; font-weight:700; color:#1e293b; margin:0; }
-.jur-sub    { font-size:12px; color:#64748b; margin:4px 0 0; }
+.jur-title  { font-size:20px; font-weight:700; color:var(--t1); margin:0; }
+.jur-sub    { font-size:12px; color:var(--t3); margin:4px 0 0; }
 .jur-actions { display:flex; gap:10px; align-items:center; flex-shrink:0; }
-.jur-select  { padding:6px 10px; border:1px solid #e2e8f0; border-radius:8px; font-size:13px; background:#fff; cursor:pointer; }
-.btn-seed    { padding:7px 14px; background:#6366f1; color:#fff; border:none; border-radius:8px; font-size:13px; font-weight:600; cursor:pointer; white-space:nowrap; }
+.jur-select  { padding:6px 10px; border:1px solid var(--bdr); border-radius:8px; font-size:13px; background:#fff; cursor:pointer; }
+.btn-seed    { padding:7px 14px; background:var(--grad); color:#fff; border:none; border-radius:8px; font-size:13px; font-weight:600; cursor:pointer; white-space:nowrap; }
 .btn-seed:disabled { opacity:.6; cursor:not-allowed; }
 
 .jur-stats   { display:flex; gap:12px; padding:12px 24px; }
-.stat-chip   { background:#fff; border:1px solid #e2e8f0; border-radius:10px; padding:10px 16px; display:flex; flex-direction:column; align-items:center; min-width:80px; }
-.stat-n      { font-size:22px; font-weight:700; color:#6366f1; }
-.stat-l      { font-size:11px; color:#64748b; margin-top:2px; white-space:nowrap; }
+.stat-chip   { background:#fff; border:1px solid var(--bdr); border-radius:10px; padding:10px 16px; display:flex; flex-direction:column; align-items:center; min-width:80px; }
+.stat-n      { font-size:22px; font-weight:700; color:var(--blue); }
+.stat-l      { font-size:11px; color:var(--t3); margin-top:2px; white-space:nowrap; }
 
 /* Validator */
-.validator-panel { margin:0 24px 12px; background:#fff; border:1px solid #e2e8f0; border-radius:12px; overflow:hidden; }
-.val-header  { display:flex; justify-content:space-between; padding:12px 16px; cursor:pointer; font-size:13px; font-weight:600; color:#374151; background:#f8fafc; }
-.val-header:hover { background:#f1f5f9; }
-.val-toggle  { color:#94a3b8; }
-.val-body    { padding:16px; border-top:1px solid #e2e8f0; }
+.validator-panel { margin:0 24px 12px; background:#fff; border:1px solid var(--bdr); border-radius:12px; overflow:hidden; }
+.val-header  { display:flex; justify-content:space-between; padding:12px 16px; cursor:pointer; font-size:13px; font-weight:600; color:var(--t2); background:var(--surf2); }
+.val-header:hover { background:var(--surf2); }
+.val-toggle  { color:var(--t3); }
+.val-body    { padding:16px; border-top:1px solid var(--bdr); }
 .val-grid    { display:grid; grid-template-columns:repeat(auto-fill,minmax(160px,1fr)); gap:10px; align-items:end; }
 .val-field   { display:flex; flex-direction:column; gap:4px; }
-.val-field label { font-size:11px; color:#64748b; font-weight:500; }
-.val-input   { padding:7px 10px; border:1px solid #e2e8f0; border-radius:8px; font-size:13px; width:100%; box-sizing:border-box; }
+.val-field label { font-size:11px; color:var(--t3); font-weight:500; }
+.val-input   { padding:7px 10px; border:1px solid var(--bdr); border-radius:8px; font-size:13px; width:100%; box-sizing:border-box; }
 .val-run     { justify-content:flex-end; }
 .btn-validate { padding:8px 18px; background:#10b981; color:#fff; border:none; border-radius:8px; font-size:13px; font-weight:600; cursor:pointer; width:100%; }
 .btn-validate:disabled { opacity:.6; cursor:not-allowed; }
@@ -373,89 +373,89 @@ interface Jurisdiction {
 .violation   { display:flex; gap:10px; align-items:baseline; margin-bottom:4px; }
 .viol-field  { font-size:12px; font-weight:600; color:#7f1d1d; white-space:nowrap; }
 .viol-msg    { font-size:12px; color:#991b1b; }
-.val-mins    { margin-top:8px; font-size:11px; color:#64748b; }
+.val-mins    { margin-top:8px; font-size:11px; color:var(--t3); }
 .val-mins-label { font-weight:600; margin-right:6px; }
 
 /* Main layout */
 .jur-content { display:flex; flex:1; overflow:hidden; margin:0 24px 24px; gap:16px; }
 
 /* State list */
-.jur-list  { width:260px; flex-shrink:0; background:#fff; border:1px solid #e2e8f0; border-radius:12px; display:flex; flex-direction:column; overflow:hidden; }
-.jur-search { padding:10px; border-bottom:1px solid #f1f5f9; }
-.jur-search-input { width:100%; padding:7px 10px; border:1px solid #e2e8f0; border-radius:8px; font-size:13px; box-sizing:border-box; }
+.jur-list  { width:260px; flex-shrink:0; background:#fff; border:1px solid var(--bdr); border-radius:12px; display:flex; flex-direction:column; overflow:hidden; }
+.jur-search { padding:10px; border-bottom:1px solid var(--surf2); }
+.jur-search-input { width:100%; padding:7px 10px; border:1px solid var(--bdr); border-radius:8px; font-size:13px; box-sizing:border-box; }
 .jur-list-items { flex:1; overflow-y:auto; }
-.jur-item    { display:flex; align-items:center; justify-content:space-between; padding:10px 12px; cursor:pointer; border-bottom:1px solid #f8fafc; transition:background .1s; }
-.jur-item:hover { background:#f8fafc; }
+.jur-item    { display:flex; align-items:center; justify-content:space-between; padding:10px 12px; cursor:pointer; border-bottom:1px solid var(--surf2); transition:background .1s; }
+.jur-item:hover { background:var(--surf2); }
 .jur-item.active { background:#ede9fe; }
 .jur-item-main { display:flex; gap:8px; align-items:center; min-width:0; }
-.jur-state-code { font-size:12px; font-weight:700; color:#6366f1; width:28px; flex-shrink:0; }
-.jur-state-name { font-size:13px; color:#374151; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+.jur-state-code { font-size:12px; font-weight:700; color:var(--blue); width:28px; flex-shrink:0; }
+.jur-state-name { font-size:13px; color:var(--t2); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
 .jur-item-badges { display:flex; gap:3px; flex-shrink:0; }
-.jur-empty  { padding:40px 16px; text-align:center; color:#94a3b8; font-size:13px; }
-.jur-loading { padding:20px; text-align:center; color:#94a3b8; font-size:13px; }
+.jur-empty  { padding:40px 16px; text-align:center; color:var(--t3); font-size:13px; }
+.jur-loading { padding:20px; text-align:center; color:var(--t3); font-size:13px; }
 
 /* Badges */
 .badge-nf,  .badge-pip, .badge-sr22, .badge-fr44 {
   font-size:9px; font-weight:700; padding:1px 4px; border-radius:3px; white-space:nowrap;
 }
-.badge-nf   { background:#dbeafe; color:#1d4ed8; }
+.badge-nf   { background:var(--bluebg); color:var(--bluedark); }
 .badge-pip  { background:#fef3c7; color:#92400e; }
 .badge-sr22 { background:#d1fae5; color:#065f46; }
 .badge-fr44 { background:#ede9fe; color:#5b21b6; }
 .badge-nf.lg, .badge-pip.lg, .badge-sr22.lg, .badge-fr44.lg { font-size:11px; padding:3px 8px; border-radius:5px; }
 
 /* Detail panel */
-.jur-detail { flex:1; background:#fff; border:1px solid #e2e8f0; border-radius:12px; display:flex; flex-direction:column; overflow:hidden; min-width:0; }
-.det-header { padding:16px 20px 0; border-bottom:1px solid #e2e8f0; }
-.det-title  { font-size:18px; font-weight:700; color:#1e293b; margin:0 0 6px; }
+.jur-detail { flex:1; background:#fff; border:1px solid var(--bdr); border-radius:12px; display:flex; flex-direction:column; overflow:hidden; min-width:0; }
+.det-header { padding:16px 20px 0; border-bottom:1px solid var(--bdr); }
+.det-title  { font-size:18px; font-weight:700; color:var(--t1); margin:0 0 6px; }
 .det-badges { display:flex; gap:6px; margin-bottom:12px; }
-.det-tabs   { display:flex; gap:0; border-top:1px solid #f1f5f9; }
-.det-tabs button { padding:9px 16px; border:none; background:none; font-size:13px; font-weight:500; color:#64748b; cursor:pointer; border-bottom:2px solid transparent; margin-bottom:-1px; }
-.det-tabs button.on { color:#6366f1; border-bottom-color:#6366f1; font-weight:600; }
-.det-tabs button:hover:not(.on) { color:#374151; }
+.det-tabs   { display:flex; gap:0; border-top:1px solid var(--surf2); }
+.det-tabs button { padding:9px 16px; border:none; background:none; font-size:13px; font-weight:500; color:var(--t3); cursor:pointer; border-bottom:2px solid transparent; margin-bottom:-1px; }
+.det-tabs button.on { color:var(--blue); border-bottom-color:var(--blue); font-weight:600; }
+.det-tabs button:hover:not(.on) { color:var(--t2); }
 
 .det-body { flex:1; overflow-y:auto; padding:16px 20px; }
 
 /* Info grid */
 .info-grid { display:grid; grid-template-columns:1fr 1fr; gap:16px; }
-.info-card { background:#f8fafc; border-radius:10px; padding:14px; }
+.info-card { background:var(--surf2); border-radius:10px; padding:14px; }
 .info-card--wide { grid-column:1/-1; }
-.info-label { font-size:11px; font-weight:700; color:#64748b; text-transform:uppercase; letter-spacing:.5px; margin-bottom:10px; }
+.info-label { font-size:11px; font-weight:700; color:var(--t3); text-transform:uppercase; letter-spacing:.5px; margin-bottom:10px; }
 .info-rows  { display:flex; flex-direction:column; gap:6px; }
-.info-row   { display:flex; justify-content:space-between; font-size:13px; color:#374151; }
-.info-row strong { color:#1e293b; }
-.info-note  { font-size:13px; color:#374151; line-height:1.6; margin:0; }
-.info-empty { font-size:13px; color:#94a3b8; }
+.info-row   { display:flex; justify-content:space-between; font-size:13px; color:var(--t2); }
+.info-row strong { color:var(--t1); }
+.info-note  { font-size:13px; color:var(--t2); line-height:1.6; margin:0; }
+.info-empty { font-size:13px; color:var(--t3); }
 
 /* Products */
 .prod-list  { display:flex; flex-direction:column; gap:10px; }
-.prod-item  { background:#f8fafc; border-radius:10px; padding:12px; }
+.prod-item  { background:var(--surf2); border-radius:10px; padding:12px; }
 .prod-top   { display:flex; align-items:center; gap:10px; margin-bottom:4px; }
-.prod-lob   { font-size:13px; font-weight:700; color:#1e293b; flex:1; }
+.prod-lob   { font-size:13px; font-weight:700; color:var(--t1); flex:1; }
 .prod-avail { font-size:12px; font-weight:600; }
 .prod-avail.yes { color:#10b981; }
 .prod-avail.no  { color:#ef4444; }
 .prod-req   { font-size:11px; background:#fef3c7; color:#92400e; padding:2px 7px; border-radius:4px; }
-.prod-covs  { font-size:12px; color:#64748b; }
-.prod-notes { font-size:12px; color:#6366f1; margin-top:4px; }
-.prod-empty { color:#94a3b8; font-size:13px; padding:20px 0; text-align:center; }
+.prod-covs  { font-size:12px; color:var(--t3); }
+.prod-notes { font-size:12px; color:var(--blue); margin-top:4px; }
+.prod-empty { color:var(--t3); font-size:13px; padding:20px 0; text-align:center; }
 
 /* Forms */
 .form-list  { display:flex; flex-direction:column; gap:12px; }
-.form-item  { background:#f8fafc; border-radius:10px; padding:12px; }
+.form-item  { background:var(--surf2); border-radius:10px; padding:12px; }
 .form-top   { display:flex; align-items:center; gap:10px; margin-bottom:6px; }
-.form-code  { font-size:13px; font-weight:700; color:#6366f1; min-width:50px; }
-.form-name  { font-size:13px; font-weight:600; color:#1e293b; flex:1; }
-.form-trigger { font-size:11px; background:#e0e7ff; color:#3730a3; padding:2px 7px; border-radius:4px; white-space:nowrap; }
-.form-meta  { display:flex; gap:16px; font-size:12px; color:#64748b; margin-bottom:4px; }
-.form-meta strong { color:#374151; }
-.form-inst  { font-size:12px; color:#374151; line-height:1.5; padding:8px; background:#fff; border-radius:6px; border:1px solid #e2e8f0; }
-.form-empty { color:#94a3b8; font-size:13px; padding:20px 0; text-align:center; }
+.form-code  { font-size:13px; font-weight:700; color:var(--blue); min-width:50px; }
+.form-name  { font-size:13px; font-weight:600; color:var(--t1); flex:1; }
+.form-trigger { font-size:11px; background:var(--bluebg); color:var(--bluedark); padding:2px 7px; border-radius:4px; white-space:nowrap; }
+.form-meta  { display:flex; gap:16px; font-size:12px; color:var(--t3); margin-bottom:4px; }
+.form-meta strong { color:var(--t2); }
+.form-inst  { font-size:12px; color:var(--t2); line-height:1.5; padding:8px; background:#fff; border-radius:6px; border:1px solid var(--bdr); }
+.form-empty { color:var(--t3); font-size:13px; padding:20px 0; text-align:center; }
 
 /* Empty detail */
 .jur-empty-detail { align-items:center; justify-content:center; }
 .empty-icon { font-size:48px; margin-bottom:12px; }
-.empty-msg  { font-size:14px; color:#94a3b8; }
+.empty-msg  { font-size:14px; color:var(--t3); }
   `],
 })
 export class JurisdictionComponent implements OnInit {

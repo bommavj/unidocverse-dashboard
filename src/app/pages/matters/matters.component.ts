@@ -250,7 +250,7 @@ const ROLE_OPTIONS = ['primary', 'supporting', 'evidence', 'correspondence', 'fi
       height: 100%;
       background: var(--surf);
       color: var(--t1);
-      font-family: 'Inter', sans-serif;
+      font-family: var(--font);
       position: relative;
       overflow: hidden;
     }
@@ -275,7 +275,7 @@ const ROLE_OPTIONS = ['primary', 'supporting', 'evidence', 'correspondence', 'fi
 
     /* BUTTONS */
     .btn-primary {
-      background: #6366f1;
+      background: var(--grad);
       color: #fff;
       border: none;
       border-radius: 8px;
@@ -285,8 +285,8 @@ const ROLE_OPTIONS = ['primary', 'supporting', 'evidence', 'correspondence', 'fi
       cursor: pointer;
       transition: background 0.15s;
     }
-    .btn-primary:hover { background: #4f46e5; }
-    .btn-primary:disabled { background: #475569; cursor: not-allowed; }
+    .btn-primary:hover { background: var(--grad); }
+    .btn-primary:disabled { background: var(--t2); cursor: not-allowed; }
     .btn-ghost {
       background: transparent;
       color: var(--t2);
@@ -297,7 +297,7 @@ const ROLE_OPTIONS = ['primary', 'supporting', 'evidence', 'correspondence', 'fi
       cursor: pointer;
       transition: all 0.15s;
     }
-    .btn-ghost:hover { border-color: #6366f1; color: var(--t1); }
+    .btn-ghost:hover { border-color: var(--blue); color: var(--t1); }
     .btn-sm {
       background: var(--surf3);
       color: var(--t1);
@@ -310,7 +310,7 @@ const ROLE_OPTIONS = ['primary', 'supporting', 'evidence', 'correspondence', 'fi
       white-space: nowrap;
       transition: background 0.15s;
     }
-    .btn-sm:hover { background: #475569; }
+    .btn-sm:hover { background: var(--t2); }
     .btn-icon {
       background: transparent;
       border: none;
@@ -385,14 +385,14 @@ const ROLE_OPTIONS = ['primary', 'supporting', 'evidence', 'correspondence', 'fi
     /* MATTER CARD */
     .matter-card {
       background: var(--surf);
-      border-radius: 8px;
+      border-radius: 14px;
       padding: 12px;
       cursor: pointer;
       border: 1px solid var(--bdr);
       transition: border-color 0.15s, box-shadow 0.15s;
     }
-    .matter-card:hover { border-color: #6366f1; box-shadow: 0 0 0 1px #6366f133; }
-    .matter-card.selected { border-color: #6366f1; box-shadow: 0 0 0 2px #6366f155; }
+    .matter-card:hover { border-color: var(--blue); box-shadow: 0 0 0 1px #6366f133; }
+    .matter-card.selected { border-color: var(--blue); box-shadow: 0 0 0 2px #6366f155; }
     .card-top {
       display: flex;
       align-items: center;
@@ -426,7 +426,7 @@ const ROLE_OPTIONS = ['primary', 'supporting', 'evidence', 'correspondence', 'fi
       width: 400px;
       flex-shrink: 0;
       background: var(--surf2);
-      border-left: 1px solid #334155;
+      border-left: 1px solid var(--t2);
       display: flex;
       flex-direction: column;
       overflow: hidden;
@@ -454,7 +454,7 @@ const ROLE_OPTIONS = ['primary', 'supporting', 'evidence', 'correspondence', 'fi
       outline: none;
       transition: border-color 0.15s;
     }
-    .panel-title-input:focus { border-bottom-color: #6366f1; }
+    .panel-title-input:focus { border-bottom-color: var(--blue); }
     .panel-badges { display: flex; gap: 6px; flex-wrap: wrap; }
     .type-badge {
       font-size: 11px;
@@ -519,7 +519,7 @@ const ROLE_OPTIONS = ['primary', 'supporting', 'evidence', 'correspondence', 'fi
       transition: border-color 0.15s;
       font-family: inherit;
     }
-    .field-input:focus { border-color: #6366f1; }
+    .field-input:focus { border-color: var(--blue); }
     textarea.field-input { resize: vertical; }
     select.field-input { cursor: pointer; }
 
@@ -563,13 +563,12 @@ const ROLE_OPTIONS = ['primary', 'supporting', 'evidence', 'correspondence', 'fi
     .doc-picker {
       background: var(--surf);
       border: 1px solid var(--bdr);
-      border-radius: 8px;
+      border-radius: 14px;
       padding: 10px;
       margin-bottom: 12px;
       display: flex;
       flex-direction: column;
-      gap: 8px;
-    }
+      gap: 8px; box-shadow: var(--sh1); }
     .picker-list {
       max-height: 140px;
       overflow-y: auto;
@@ -579,7 +578,7 @@ const ROLE_OPTIONS = ['primary', 'supporting', 'evidence', 'correspondence', 'fi
       padding: 6px 8px;
       border-radius: 5px;
       cursor: pointer;
-      color: #cbd5e1;
+      color: var(--bdr2);
       transition: background 0.1s;
     }
     .picker-item:hover { background: var(--surf2); }
@@ -599,7 +598,7 @@ const ROLE_OPTIONS = ['primary', 'supporting', 'evidence', 'correspondence', 'fi
       align-items: center;
       justify-content: space-between;
       font-size: 12px;
-      color: #cbd5e1;
+      color: var(--bdr2);
       padding: 5px 6px;
       border-radius: 5px;
       transition: background 0.1s;
@@ -627,15 +626,15 @@ const ROLE_OPTIONS = ['primary', 'supporting', 'evidence', 'correspondence', 'fi
       resize: vertical;
       transition: border-color 0.15s;
     }
-    .note-textarea:focus { border-color: #6366f1; }
+    .note-textarea:focus { border-color: var(--blue); }
     .note-list { display: flex; flex-direction: column; gap: 6px; }
     .note-item {
       background: var(--surf);
       border-radius: 6px;
       padding: 8px 10px;
-      border-left: 2px solid #6366f1;
+      border-left: 2px solid var(--blue);
     }
-    .note-text { font-size: 13px; color: #cbd5e1; line-height: 1.5; }
+    .note-text { font-size: 13px; color: var(--bdr2); line-height: 1.5; }
     .note-meta { font-size: 10px; color: var(--t2); margin-top: 3px; }
 
     /* MODAL */
@@ -697,7 +696,7 @@ const ROLE_OPTIONS = ['primary', 'supporting', 'evidence', 'correspondence', 'fi
       width: 36px;
       height: 36px;
       border: 3px solid var(--bdr);
-      border-top-color: #6366f1;
+      border-top-color: var(--blue);
       border-radius: 50%;
       animation: spin 0.7s linear infinite;
     }
@@ -707,7 +706,7 @@ const ROLE_OPTIONS = ['primary', 'supporting', 'evidence', 'correspondence', 'fi
     ::-webkit-scrollbar { width: 6px; height: 6px; }
     ::-webkit-scrollbar-track { background: transparent; }
     ::-webkit-scrollbar-thumb { background: var(--surf3); border-radius: 3px; }
-    ::-webkit-scrollbar-thumb:hover { background: #475569; }
+    ::-webkit-scrollbar-thumb:hover { background: var(--t2); }
   `]
 })
 export class MattersComponent implements OnInit {

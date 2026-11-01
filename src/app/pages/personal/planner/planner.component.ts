@@ -141,7 +141,7 @@ interface PlannerTask {
       max-width: 1200px;
       margin: 0 auto;
       font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-      background: var(--bg-surface, #f8fafc);
+      background: var(--bg-surface, var(--surf2));
       min-height: var(--content-h);
     }
     .page-header {
@@ -150,23 +150,23 @@ interface PlannerTask {
     .page-header h1 {
       font-size: 24px;
       font-weight: 700;
-      color: #0f172a;
+      color: var(--t1);
       margin: 0 0 4px;
     }
     .subtitle {
       font-size: 14px;
-      color: #64748b;
+      color: var(--t3);
       margin: 0;
     }
 
     /* Briefing Card */
     .briefing-card {
-      background: linear-gradient(135deg, #eef2ff, #f5f3ff);
-      border: 1px solid #e0e7ff;
+      background: linear-gradient(135deg, var(--bluebg), #f5f3ff);
+      border: 1px solid var(--bluebg);
       border-radius: 12px;
       padding: 20px;
       margin-bottom: 24px;
-      box-shadow: 0 4px 12px rgba(99, 102, 241, 0.05);
+      box-shadow: 0 4px 12px rgba(10,132,255, 0.05);
       transition: all 0.3s;
     }
     .brief-header {
@@ -177,27 +177,27 @@ interface PlannerTask {
     }
     .sparkle {
       font-size: 18px;
-      color: #6366f1;
+      color: var(--blue);
       font-weight: bold;
     }
     .brief-header h3 {
       margin: 0;
       font-size: 15px;
       font-weight: 700;
-      color: #4f46e5;
+      color: var(--blue);
       text-transform: uppercase;
       letter-spacing: 0.5px;
     }
     .brief-content {
       margin: 0;
       font-size: 14px;
-      color: #374151;
+      color: var(--t2);
       line-height: 1.6;
       white-space: pre-line;
     }
     .brief-loader {
       font-size: 13px;
-      color: #6366f1;
+      color: var(--blue);
       font-style: italic;
     }
 
@@ -213,15 +213,15 @@ interface PlannerTask {
 
     .card {
       background: white;
-      border: 1px solid #e2e8f0;
-      border-radius: 12px;
+      border: 1px solid var(--bdr);
+      border-radius: 14px;
       padding: 24px;
-      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.02);
+      box-shadow: var(--sh1);
     }
     .card-title {
       font-size: 16px;
       font-weight: 700;
-      color: #0f172a;
+      color: var(--t1);
       margin: 0;
     }
     .card-header {
@@ -232,7 +232,7 @@ interface PlannerTask {
     }
     .btn-clear {
       font-size: 12px;
-      color: #6366f1;
+      color: var(--blue);
       background: none;
       border: none;
       font-weight: 600;
@@ -253,17 +253,17 @@ interface PlannerTask {
     }
     .task-add-bar input, .task-add-bar select {
       padding: 8px 12px;
-      border: 1.5px solid #e2e8f0;
+      border: 1.5px solid var(--bdr);
       border-radius: 8px;
       font-size: 13px;
       outline: none;
     }
     .task-add-bar input:focus, .task-add-bar select:focus {
-      border-color: #6366f1;
+      border-color: var(--blue);
     }
     .btn-add {
       padding: 8px 16px;
-      background: #6366f1;
+      background: var(--grad);
       color: white;
       border: none;
       border-radius: 8px;
@@ -271,7 +271,7 @@ interface PlannerTask {
       font-weight: 600;
       cursor: pointer;
     }
-    .btn-add:hover { background: #4f46e5; }
+    .btn-add:hover { background: var(--grad); }
 
     /* Task Rows */
     .tasks-list {
@@ -284,19 +284,19 @@ interface PlannerTask {
       align-items: center;
       gap: 12px;
       padding: 12px;
-      border: 1px solid #f1f5f9;
+      border: 1px solid var(--surf2);
       border-radius: 8px;
-      background: #f8fafc;
+      background: var(--surf2);
       transition: all 0.2s;
     }
-    .task-row:hover { background: #f1f5f9; }
+    .task-row:hover { background: var(--surf2); }
     .task-row.completed {
       opacity: 0.65;
-      background: #f1f5f9;
+      background: var(--surf2);
     }
     .task-row.completed .task-title {
       text-decoration: line-through;
-      color: #94a3b8;
+      color: var(--t3);
     }
 
     /* Checkbox Styles */
@@ -322,16 +322,16 @@ interface PlannerTask {
       height: 18px;
       width: 18px;
       background-color: white;
-      border: 1.5px solid #cbd5e1;
+      border: 1.5px solid var(--bdr2);
       border-radius: 4px;
       transition: all 0.2s;
     }
     .checkbox-container:hover input ~ .checkmark {
-      border-color: #6366f1;
+      border-color: var(--blue);
     }
     .checkbox-container input:checked ~ .checkmark {
-      background-color: #6366f1;
-      border-color: #6366f1;
+      background-color: var(--blue);
+      border-color: var(--blue);
     }
     .checkmark:after {
       content: "";
@@ -358,11 +358,11 @@ interface PlannerTask {
     .task-title {
       font-size: 14px;
       font-weight: 500;
-      color: #334155;
+      color: var(--t2);
     }
     .task-meta {
       font-size: 11px;
-      color: #94a3b8;
+      color: var(--t3);
       margin-top: 2px;
     }
     .priority-badge {
@@ -373,13 +373,13 @@ interface PlannerTask {
       border-radius: 4px;
       letter-spacing: 0.3px;
     }
-    .priority-badge.low { background: #e2e8f0; color: #475569; }
+    .priority-badge.low { background: var(--bdr); color: var(--t2); }
     .priority-badge.medium { background: #fef3c7; color: #d97706; }
     .priority-badge.high { background: #fee2e2; color: #dc2626; }
     .btn-delete-task {
       background: none;
       border: none;
-      color: #94a3b8;
+      color: var(--t3);
       cursor: pointer;
       font-size: 14px;
       padding: 4px;
@@ -388,7 +388,7 @@ interface PlannerTask {
     .empty-tasks {
       padding: 32px;
       text-align: center;
-      color: #94a3b8;
+      color: var(--t3);
       font-size: 13px;
     }
 
@@ -409,32 +409,32 @@ interface PlannerTask {
     .event-time {
       font-size: 12px;
       font-weight: 700;
-      color: #6366f1;
+      color: var(--blue);
       width: 70px;
       flex-shrink: 0;
       padding-top: 2px;
     }
     .event-body {
       flex: 1;
-      background: #f8fafc;
+      background: var(--surf2);
       padding: 12px;
       border-radius: 8px;
-      border-left: 3px solid #cbd5e1;
+      border-left: 3px solid var(--bdr2);
     }
     .timeline-event.important .event-body {
-      background: #eef2ff;
-      border-left-color: #6366f1;
+      background: var(--bluebg);
+      border-left-color: var(--blue);
     }
     .event-body h4 {
       margin: 0 0 4px;
       font-size: 13px;
       font-weight: 700;
-      color: #1e293b;
+      color: var(--t1);
     }
     .event-body p {
       margin: 0;
       font-size: 12px;
-      color: #64748b;
+      color: var(--t3);
       line-height: 1.4;
     }
   `]

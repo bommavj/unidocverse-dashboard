@@ -74,22 +74,22 @@
 .bg-slate-50 { background: var(--surf2); }
 .bg-slate-100 { background: var(--surf3); }
 .bg-indigo-50 { background: var(--bluebg); }
-.bg-red-50 { background: var(--rosebg); }
+.bg-red-50 { background: linear-gradient(100deg, rgba(255,55,95,.10), rgba(255,159,10,.07) 70%, #fff); }
 .bg-emerald-50 { background: var(--greenbg); }
 .bg-emerald-100 { background: var(--greenbg); }
-.bg-amber-50 { background: var(--amberbg); }
+.bg-amber-50 { background: linear-gradient(100deg, rgba(255,159,10,.12), #fff 80%); }
 .bg-amber-100 { background: var(--amberbg); }
 .bg-red-100 { background: var(--rosebg); }
 
 .dark\:bg-slate-900 { background-color: var(--surf) !important; }
 .dark\:bg-slate-950 { background-color: var(--surf2) !important; }
-.dark\:bg-indigo-955 { background-color: rgba(79, 70, 229, 0.15) !important; }
+.dark\:bg-indigo-955 { background-color: rgba(10,132,255, 0.15) !important; }
 .dark\:bg-red-955 { background-color: rgba(225, 29, 72, 0.15) !important; }
 .dark\:bg-emerald-955 { background-color: rgba(5, 150, 105, 0.15) !important; }
 .dark\:bg-amber-955 { background-color: rgba(217, 119, 6, 0.15) !important; }
 
 /* Handle specific slate slash combinations */
-.dark\:bg-indigo-950\/40 { background-color: rgba(79, 70, 229, 0.15) !important; }
+.dark\:bg-indigo-950\/40 { background-color: rgba(10,132,255, 0.15) !important; }
 .dark\:bg-red-950\/40 { background-color: rgba(225, 29, 72, 0.15) !important; }
 .dark\:bg-emerald-950\/30 { background-color: rgba(5, 150, 105, 0.15) !important; }
 .dark\:bg-amber-950\/30 { background-color: rgba(217, 119, 6, 0.15) !important; }
@@ -99,16 +99,16 @@
 .border-b-2 { border-bottom-width: 2px; }
 .border-transparent { border-color: transparent; }
 .border-slate-200 { border-color: var(--bdr); }
-.border-red-200 { border-color: var(--rose); }
+.border-red-200 { border-color: rgba(255,55,95,.28); }
 .border-emerald-200 { border-color: var(--green); }
 .border-amber-200 { border-color: var(--amber); }
 
 .dark\:border-slate-800 { border-color: var(--bdr) !important; }
 
 .rounded { border-radius: 4px; }
-.rounded-md { border-radius: 8px; }
-.rounded-lg { border-radius: 12px; }
-.rounded-xl { border-radius: var(--r); }
+.rounded-md { border-radius: 10px; }
+.rounded-lg { border-radius: 14px; }
+.rounded-xl { border-radius: 18px; }
 .rounded-full { border-radius: 9999px; }
 
 .shadow-sm { box-shadow: var(--sh1); }

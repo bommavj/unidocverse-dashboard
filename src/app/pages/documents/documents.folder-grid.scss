@@ -11,22 +11,22 @@
     display: flex; flex-direction: column; align-items: center;
     gap: 8px; padding: 16px 14px;
     background: #fff;
-    border: 1.5px solid #e5e7eb;
+    border: 1.5px solid var(--bdr);
     border-radius: 14px;
     cursor: pointer; min-width: 100px;
     transition: all 0.18s;
     user-select: none;
   
     &:hover {
-      border-color: #c7d2fe;
-      box-shadow: 0 4px 12px rgba(99,102,241,.08);
+      border-color: var(--bluebdr);
+      box-shadow: 0 4px 12px rgba(10,132,255,.08);
       transform: translateY(-2px);
     }
   
     &.active {
-      border-color: #6366f1;
-      background: #eef2ff;
-      box-shadow: 0 0 0 3px rgba(99,102,241,.12);
+      border-color: var(--blue);
+      background: var(--bluebg);
+      box-shadow: 0 0 0 3px rgba(10,132,255,.12);
     }
   }
   
@@ -37,7 +37,7 @@
   }
   
   .folder-card-name {
-    font-size: 12px; font-weight: 600; color: #374151;
+    font-size: 12px; font-weight: 600; color: var(--t2);
     text-align: center; white-space: nowrap;
     overflow: hidden; text-overflow: ellipsis;
     max-width: 90px;
@@ -45,8 +45,8 @@
   
   .folder-card-count {
     font-size: 11px; font-weight: 700;
-    color: #6366f1;
-    background: #eef2ff;
+    color: var(--blue);
+    background: var(--bluebg);
     padding: 1px 8px; border-radius: 10px;
     min-width: 20px; text-align: center;
   }
@@ -59,14 +59,14 @@
   
   .folder-card--new-input {
     padding: 10px 12px; min-width: 140px;
-    border-style: dashed; border-color: #6366f1;
+    border-style: dashed; border-color: var(--blue);
     gap: 6px;
   }
   
   .folder-new-input {
-    width: 100%; border: 1px solid #c7d2fe; border-radius: 6px;
+    width: 100%; border: 1px solid var(--bluebdr); border-radius: 6px;
     padding: 4px 8px; font-size: 12px; outline: none;
-    &:focus { border-color: #6366f1; }
+    &:focus { border-color: var(--blue); }
   }
   
   .folder-new-actions {

@@ -64,7 +64,7 @@
       <div class="tb-menu tb-menu--user" *ngIf="menu === 'user'" (click)="$event.stopPropagation()">
         <div class="tb-who">
           <b>{{ auth.currentUser()?.full_name || 'User' }}</b>
-          <span>{{ auth.currentUser()?.role | titlecase }} · {{ 'Trial' | translate }}</span>
+          <span>{{ auth.currentUser()?.role | titlecase }}</span>
         </div>
         <div class="tb-menu-sep"></div>
         <a *ngIf="auth.isAdmin()" routerLink="/settings" (click)="menu=''"><i class="ti ti-settings"></i>{{ 'Settings' | translate }}</a>

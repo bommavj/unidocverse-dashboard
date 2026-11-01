@@ -1,15 +1,19 @@
 <div class="calendar-page">
 
     <!-- ── Urgent banner ───────────────────────────────────────────────────── -->
-    <div class="urgent-banner" *ngIf="upcomingUrgent.length > 0">
-      <span class="urgent-icon">🚨</span>
-      <span class="urgent-label">Urgent:</span>
-      <span *ngFor="let e of upcomingUrgent; let last = last" class="urgent-item"
-            (click)="openEvent(e)">
-        {{ e.title }} ({{ e.date }}){{ last ? '' : ' · ' }}
-      </span>
+    <div class="urgent-banner" *ngIf="upcomingUrgent.length > 0" role="alert">
+      <span class="urgent-icon"><i class="ti ti-alert-triangle"></i></span>
+      <div class="urgent-body">
+        <span class="urgent-label">Needs attention</span>
+        <div class="urgent-items">
+          <button type="button" *ngFor="let e of upcomingUrgent" class="urgent-item" (click)="openEvent(e)">
+            <span class="urgent-t">{{ e.title }}</span>
+            <span class="urgent-d">{{ e.date }}</span>
+          </button>
+        </div>
+      </div>
     </div>
-  
+
     <!-- ── Header ──────────────────────────────────────────────────────────── -->
     <div class="cal-header">
       <div class="cal-header-left">
@@ -71,18 +75,18 @@
       <div class="cal-detail">
   
         <!-- Quick Schedule Form -->
-        <div class="cal-quick-schedule" *ngIf="selectedDate" style="background: #f8fafc; padding: 16px; border-radius: 12px; border: 1.5px dashed #e2e8f0; margin-bottom: 16px;">
-          <h4 style="margin: 0 0 10px; font-size: 12px; font-weight: 700; color: #4f46e5; text-transform: uppercase; letter-spacing: 0.5px;">⚡ Quick Schedule for {{ selectedDate }}</h4>
+        <div class="cal-quick-schedule" *ngIf="selectedDate" style="background: var(--surf2); padding: 16px; border-radius: 12px; border: 1.5px dashed var(--bdr); margin-bottom: 16px;">
+          <h4 style="margin: 0 0 10px; font-size: 12px; font-weight: 700; color: var(--blue); text-transform: uppercase; letter-spacing: 0.5px;">⚡ Quick Schedule for {{ selectedDate }}</h4>
           <div style="display: flex; flex-direction: column; gap: 8px;">
             <input 
-              style="padding: 8px; border: 1.5px solid #e2e8f0; border-radius: 6px; font-size: 13px; outline: none;" 
+              style="padding: 8px; border: 1.5px solid var(--bdr); border-radius: 6px; font-size: 13px; outline: none;" 
               [(ngModel)]="quickEventTitle" 
               (keyup.enter)="addQuickEvent()"
               placeholder="e.g. Audit W-2 Tax filing forms" 
             />
             <div style="display: flex; gap: 6px;">
               <select 
-                style="flex: 1; padding: 6px; border: 1.5px solid #e2e8f0; border-radius: 6px; font-size: 12px;" 
+                style="flex: 1; padding: 6px; border: 1.5px solid var(--bdr); border-radius: 6px; font-size: 12px;" 
                 [(ngModel)]="quickEventPriority"
               >
                 <option value="low">🟢 Low Priority</option>
@@ -90,7 +94,7 @@
                 <option value="high">🔴 High Priority</option>
               </select>
               <button 
-                style="padding: 6px 14px; background: #6366f1; color: white; border: none; border-radius: 6px; font-size: 12px; font-weight: 600; cursor: pointer;" 
+                style="padding: 6px 14px; background: var(--grad); color: white; border: none; border-radius: 6px; font-size: 12px; font-weight: 600; cursor: pointer;" 
                 (click)="addQuickEvent()"
                 [disabled]="scheduling"
               >

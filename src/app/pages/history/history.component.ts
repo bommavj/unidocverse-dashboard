@@ -258,7 +258,7 @@ interface QATurn {
   width: 100%; box-sizing: border-box; padding: 8px 32px 8px 12px;
   border: 1px solid var(--bdr); border-radius: 8px; font-size: 13px;
   background: var(--surf); color: var(--t1); outline: none;
-  &:focus { border-color: #6366f1; }
+  &:focus { border-color: var(--blue); }
 }
 .hist-search-clear {
   position: absolute; right: 10px; top: 50%; transform: translateY(-50%);
@@ -282,7 +282,7 @@ interface QATurn {
 }
 .dots span {
   display: inline-block; width: 6px; height: 6px; border-radius: 50%;
-  background: #6366f1; margin: 0 2px;
+  background: var(--grad); margin: 0 2px;
   animation: dot-pulse 1.2s ease-in-out infinite;
   &:nth-child(2) { animation-delay: .2s; }
   &:nth-child(3) { animation-delay: .4s; }
@@ -301,8 +301,8 @@ interface QATurn {
 .hist-item {
   padding: 10px 12px; border-radius: 8px; cursor: pointer; margin-bottom: 4px;
   border: 1px solid transparent; transition: background .1s;
-  &:hover { background: rgba(99,102,241,.05); }
-  &.active { background: rgba(99,102,241,.1); border-color: rgba(99,102,241,.2); }
+  &:hover { background: rgba(10,132,255,.05); }
+  &.active { background: rgba(10,132,255,.1); border-color: rgba(10,132,255,.2); }
 }
 .hist-item-header {
   display: flex; align-items: flex-start; gap: 6px; margin-bottom: 4px;
@@ -316,7 +316,7 @@ interface QATurn {
 .hist-preview { font-size: 11px; color: var(--t3); margin-bottom: 4px; line-height: 1.4; }
 .hist-doc-type { display: flex; flex-wrap: wrap; gap: 4px; }
 .hist-src-chip {
-  font-size: 9px; background: #eff6ff; color: #2563eb; border-radius: 10px;
+  font-size: 9px; background: var(--bluebg); color: var(--blue); border-radius: 10px;
   padding: 1px 6px; white-space: nowrap;
 }
 
@@ -325,8 +325,8 @@ interface QATurn {
 .hist-occ {
   padding: 6px 10px 6px 20px; cursor: pointer; border-radius: 6px;
   transition: background .1s;
-  &:hover { background: rgba(99,102,241,.05); }
-  &.active { background: rgba(99,102,241,.1); }
+  &:hover { background: rgba(10,132,255,.05); }
+  &.active { background: rgba(10,132,255,.1); }
 }
 .hist-occ-q { font-size: 11px; color: var(--t2); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .hist-occ-ts { font-size: 10px; color: var(--t3); margin-top: 2px; }
@@ -374,7 +374,7 @@ interface QATurn {
   background: none; border: 1px solid var(--bdr); border-radius: 20px;
   padding: 6px 18px; font-size: 12px; color: var(--t3); cursor: pointer;
   transition: background .12s;
-  &:hover { background: rgba(99,102,241,.06); color: var(--t2); border-color: rgba(99,102,241,.3); }
+  &:hover { background: rgba(10,132,255,.06); color: var(--t2); border-color: rgba(10,132,255,.3); }
 }
 .hist-loading-more {
   display: flex; align-items: center; justify-content: center; gap: 8px;
@@ -387,11 +387,11 @@ interface QATurn {
 .hist-thread-empty { text-align: center; color: var(--t3); padding: 40px; font-size: 13px; }
 
 .spinner {
-  width: 18px; height: 18px; border: 2px solid var(--bdr); border-top-color: #6366f1;
+  width: 18px; height: 18px; border: 2px solid var(--bdr); border-top-color: var(--blue);
   border-radius: 50%; animation: spin .7s linear infinite;
 }
 .spinner-sm {
-  width: 14px; height: 14px; border: 2px solid var(--bdr); border-top-color: #6366f1;
+  width: 14px; height: 14px; border: 2px solid var(--bdr); border-top-color: var(--blue);
   border-radius: 50%; animation: spin .7s linear infinite;
 }
 @keyframes spin { to { transform: rotate(360deg); } }
@@ -400,20 +400,20 @@ interface QATurn {
 .qa-card {
   border-radius: 12px; overflow: hidden; border: 1px solid var(--bdr);
   background: var(--surf); transition: border-color .15s;
-  &.hl-card { border-color: #6366f1; box-shadow: 0 0 0 3px rgba(99,102,241,.1); }
+  &.hl-card { border-color: var(--blue); box-shadow: 0 0 0 3px rgba(10,132,255,.1); }
 }
 
 .qa-question-row {
   display: flex; align-items: flex-start; justify-content: space-between; gap: 10px;
-  background: #eef2ff; border-bottom: 1px solid #c7d2fe; padding: 12px 16px;
+  background: var(--bluebg); border-bottom: 1px solid var(--bluebdr); padding: 12px 16px;
 }
 .qa-q-bubble {
-  flex: 1; font-size: 13px; font-weight: 600; color: #312e81; line-height: 1.5;
+  flex: 1; font-size: 13px; font-weight: 600; color: var(--blue); line-height: 1.5;
 }
 .qa-q-actions {
   display: flex; align-items: center; gap: 6px; flex-shrink: 0;
 }
-.qa-ts { font-size: 10px; color: #6366f1; opacity: .7; white-space: nowrap; }
+.qa-ts { font-size: 10px; color: var(--blue); opacity: .7; white-space: nowrap; }
 .qa-del-btn {
   opacity: 0; background: none; border: none; cursor: pointer;
   font-size: 13px; padding: 2px 5px; border-radius: 5px;
@@ -425,7 +425,7 @@ interface QATurn {
 .qa-answer-label {
   font-size: 11px; font-weight: 700; color: var(--t3); text-transform: uppercase;
   letter-spacing: .5px; padding: 8px 16px; border-bottom: 1px solid var(--bdr);
-  background: rgba(99,102,241,.03);
+  background: rgba(10,132,255,.03);
 }
 .qa-answer-body {
   padding: 14px 16px; font-size: 13px; line-height: 1.7; color: var(--t1);

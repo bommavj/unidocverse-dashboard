@@ -40,7 +40,7 @@ export interface SelectOption {
     .trigger:hover { border-color: var(--bdr2); }
     .trigger.open, .trigger:focus {
       border-color: var(--blue);
-      box-shadow: 0 0 0 3px rgba(79,70,229,.12);
+      box-shadow: 0 0 0 3px rgba(10,132,255,.12);
     }
     .trigger-label {
       flex: 1; text-align: left; overflow: hidden;

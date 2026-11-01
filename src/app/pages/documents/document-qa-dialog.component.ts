@@ -193,7 +193,7 @@ interface ConversationExchange {
       flex-direction: column;
       height: 650px;
       width: 750px;
-      background: #fafafa;
+      background: var(--surf2);
     }
 
     .dialog-header {
@@ -292,10 +292,10 @@ interface ConversationExchange {
     }
 
     .ai-message {
-      .message-icon { color: #2196f3; }
+      .message-icon { color: var(--blue); }
       .message-content {
-        background: #f5f5f5;
-        border-left: 3px solid #2196f3;
+        background: var(--surf2);
+        border-left: 3px solid var(--blue);
       }
     }
 
@@ -308,7 +308,7 @@ interface ConversationExchange {
     .message-content p {
       margin: 0 0 8px 0;
       line-height: 1.6;
-      color: #212121;
+      color: var(--t1);
       white-space: pre-wrap;
     }
 
@@ -319,7 +319,7 @@ interface ConversationExchange {
     .cursor {
       display: inline-block;
       animation: blink 0.7s infinite;
-      color: #2196f3;
+      color: var(--blue);
       font-weight: bold;
     }
 
@@ -337,7 +337,7 @@ interface ConversationExchange {
 
     .timestamp {
       font-size: 11px;
-      color: #9e9e9e;
+      color: var(--t3);
     }
 
     .copy-btn {
@@ -414,14 +414,14 @@ interface ConversationExchange {
     }
 
     .loading-text {
-      color: #757575;
+      color: var(--t3);
       font-style: italic;
     }
 
     .input-container {
       padding: 16px 24px;
       background: #fff;
-      border-top: 1px solid #e0e0e0;
+      border-top: 1px solid var(--bdr);
     }
 
     .question-field {
@@ -437,7 +437,7 @@ interface ConversationExchange {
     }
 
     ::ng-deep .question-field .mat-mdc-text-field-wrapper {
-      background: #fafafa;
+      background: var(--surf2);
     }
 
     ::ng-deep .question-field textarea {

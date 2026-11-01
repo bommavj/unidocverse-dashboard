@@ -10,7 +10,7 @@
     <div class="tb-sp"></div>
 
     <div class="tb-search">
-      <span style="color:#94a3b8;font-size:14px">🔍</span>
+      <span style="color:var(--t3);font-size:14px">🔍</span>
       <input [(ngModel)]="searchQ" (ngModelChange)="applyFilter()"
              placeholder="Search name, email, phone…">
       <button class="tb-clear" *ngIf="searchQ" (click)="searchQ=''; applyFilter()">✕</button>
@@ -103,7 +103,7 @@
     <!-- Add client form -->
     <div class="add-card" *ngIf="showAddForm">
       <div class="add-card-header">
-        <span style="font-size:16px;font-weight:700;color:#0f172a">New Client</span>
+        <span style="font-size:16px;font-weight:700;color:var(--t1)">New Client</span>
         <button class="tb-btn tb-sec" style="height:30px" (click)="showAddForm=false">✕ Cancel</button>
       </div>
       <div class="type-toggle">
@@ -135,7 +135,7 @@
         </div>
       </div>
       <div class="color-row">
-        <label style="font-size:12px;color:#64748b;margin-right:10px">Avatar colour</label>
+        <label style="font-size:12px;color:var(--t3);margin-right:10px">Avatar colour</label>
         <button *ngFor="let col of AVATAR_COLORS" class="color-dot"
                 [style.background]="col"
                 [class.selected]="newClient.avatar_color === col"

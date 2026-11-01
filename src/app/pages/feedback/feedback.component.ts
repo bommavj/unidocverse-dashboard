@@ -71,29 +71,29 @@ const INDUSTRIES = ['Tax agency / government', 'Accounting / CPA', 'Legal', 'Imm
     </section>
   </div>`,
   styles: [`
-    .fb { padding: 24px; max-width: 760px; margin: 0 auto; display: flex; flex-direction: column; gap: 16px; color: #1d2939; }
-    header h1 { margin: 0; font-size: 22px; } header p { margin: 6px 0 0; color: #475467; line-height: 1.55; }
-    .card { background: #fff; border: 1px solid #eaecf0; border-radius: 12px; padding: 20px 22px; display: flex; flex-direction: column; gap: 14px; }
-    .field { display: flex; flex-direction: column; gap: 6px; font-size: 13px; color: #344054; }
-    .lbl { font-size: 13px; color: #344054; }
+    .fb { padding: 24px; max-width: 760px; margin: 0 auto; display: flex; flex-direction: column; gap: 16px; color: var(--bluedark); }
+    header h1 { margin: 0; font-size: 22px; } header p { margin: 6px 0 0; color: var(--t2); line-height: 1.55; }
+    .card { background: #fff; border: 1px solid var(--bdr); border-radius: 14px; padding: 20px 22px; display: flex; flex-direction: column; gap: 14px; box-shadow: var(--sh1); }
+    .field { display: flex; flex-direction: column; gap: 6px; font-size: 13px; color: var(--t2); }
+    .lbl { font-size: 13px; color: var(--t2); }
     .row { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 14px; }
-    input, select, textarea { border: 1px solid #d0d5dd; border-radius: 8px; padding: 8px 10px; font: inherit; font-size: 14px; color: #1d2939; background: #fff; }
+    input, select, textarea { border: 1px solid var(--bdr2); border-radius: 8px; padding: 8px 10px; font: inherit; font-size: 14px; color: var(--bluedark); background: #fff; }
     textarea { resize: vertical; }
     .stars { display: flex; gap: 4px; }
-    .stars button { font-size: 28px; line-height: 1; border: 0; background: none; color: #d0d5dd; cursor: pointer; padding: 2px; }
+    .stars button { font-size: 28px; line-height: 1; border: 0; background: none; color: var(--bdr2); cursor: pointer; padding: 2px; }
     .stars button.on { color: #f59e0b; }
-    .check { display: flex; gap: 10px; align-items: flex-start; font-size: 13.5px; color: #344054; line-height: 1.5; }
+    .check { display: flex; gap: 10px; align-items: flex-start; font-size: 13.5px; color: var(--t2); line-height: 1.5; }
     .check input { margin-top: 3px; }
-    .preview { border: 1px solid #eaecf0; border-radius: 10px; padding: 10px 14px; background: #f9fafb; }
+    .preview { border: 1px solid var(--bdr); border-radius: 10px; padding: 10px 14px; background: var(--surf2); }
     .preview summary { cursor: pointer; font-weight: 600; font-size: 13px; }
     .preview pre { font-size: 12px; white-space: pre-wrap; word-break: break-word; margin: 10px 0 6px; }
-    .muted { color: #667085; font-size: 12.5px; margin: 0; }
+    .muted { color: var(--t3); font-size: 12.5px; margin: 0; }
     .actions { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; }
-    .btn { border: 1px solid #1570ef; background: #1570ef; color: #fff; border-radius: 8px; padding: 8px 16px; font-weight: 600; cursor: pointer; }
-    .btn.ghost { background: #fff; color: #1570ef; } .btn:disabled { opacity: .5; cursor: default; }
-    .btn:focus-visible, .stars button:focus-visible, input:focus-visible, select:focus-visible, textarea:focus-visible { outline: 2px solid #84adff; outline-offset: 2px; }
+    .btn { border: 1px solid var(--blue); background: var(--grad); color: #fff; border-radius: 8px; padding: 8px 16px; font-weight: 600; cursor: pointer; }
+    .btn.ghost { background: #fff; color: var(--blue); } .btn:disabled { opacity: .5; cursor: default; }
+    .btn:focus-visible, .stars button:focus-visible, input:focus-visible, select:focus-visible, textarea:focus-visible { outline: 2px solid var(--bluebdr); outline-offset: 2px; }
     .msg { font-size: 13px; color: #067647; } .msg.err { color: #b42318; }
-    .thanks h2 { margin: 0; font-size: 18px; } .thanks p { margin: 0; color: #475467; }
+    .thanks h2 { margin: 0; font-size: 18px; } .thanks p { margin: 0; color: var(--t2); }
   `],
 })
 export class FeedbackComponent implements OnInit {

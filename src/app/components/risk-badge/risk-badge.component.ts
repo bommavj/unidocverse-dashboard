@@ -28,7 +28,7 @@ import { CommonModule } from '@angular/common';
       &.amber  { background: #fef3c7; color: #92400e; }
       &.red    { background: #fee2e2; color: #991b1b; }
       &.darkred{ background: #fecaca; color: #7f1d1d; }
-      &.empty  { background: #f3f4f6; color: #9ca3af; }
+      &.empty  { background: var(--surf2); color: var(--t3); }
     }
 
     .risk-dot {
@@ -58,7 +58,7 @@ import { CommonModule } from '@angular/common';
 
     .health-ring .track {
       fill: none;
-      stroke: #e5e7eb;
+      stroke: var(--bdr);
       stroke-width: 3;
     }
 
@@ -72,7 +72,7 @@ import { CommonModule } from '@angular/common';
     .health-label {
       font-size: 10px;
       font-weight: 600;
-      color: #6b7280;
+      color: var(--t3);
       white-space: nowrap;
     }
   `],

@@ -21,7 +21,7 @@
   overflow-y: auto;
   background: transparent;
   scrollbar-width: thin;
-  scrollbar-color: rgba(79,70,229,.2) transparent;
+  scrollbar-color: rgba(10,132,255,.2) transparent;
   &::-webkit-scrollbar { width: 4px; }
-  &::-webkit-scrollbar-thumb { background: rgba(79,70,229,.2); border-radius: 2px; }
+  &::-webkit-scrollbar-thumb { background: rgba(10,132,255,.2); border-radius: 2px; }
 }

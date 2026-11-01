@@ -1,13 +1,13 @@
 :host {
-  --sb:      #1a2035;
+  --sb:      var(--bluedark);
   --sb-h:    rgba(255,255,255,.07);
-  --sb-on:   #2d4270;
+  --sb-on:   var(--blue);
   --sb-txt:  rgba(255,255,255,.55);
   --sb-dim:  rgba(255,255,255,.28);
   --sb-lbl:  rgba(255,255,255,.18);
   --sb-bdr:  rgba(255,255,255,.07);
-  --blue:    #3d5afe;
-  --bluedark:#2541d4;
+  --blue:    var(--blue);
+  --bluedark:var(--blue);
   --green:   #43a047;
   --mono:    'DM Mono', monospace;
   --font:    'Poppins', system-ui, sans-serif;
@@ -138,7 +138,7 @@
 
 /* Custom folder management */
 .sf-del {
-  font-size: 10px; color: #94a3b8; padding: 2px 4px; border-radius: 4px;
+  font-size: 10px; color: var(--t3); padding: 2px 4px; border-radius: 4px;
   opacity: 0; transition: opacity .12s; cursor: pointer;
   &:hover { color: #e11d48; background: #ffe4e6; }
 }
@@ -146,23 +146,23 @@
 
 .sf-new-wrap {
   display: flex; align-items: center; gap: 4px;
-  padding: 6px 8px; background: rgba(79,70,229,.06);
+  padding: 6px 8px; background: rgba(10,132,255,.06);
   border-radius: 8px; margin: 4px 0;
 }
 .sf-new-input {
-  flex: 1; border: 1.5px solid #c7d2fe; border-radius: 7px;
+  flex: 1; border: 1.5px solid var(--bluebdr); border-radius: 7px;
   padding: 5px 10px; font-size: 12px; font-family: var(--font);
-  outline: none; background: #fff; color: #0f172a;
-  &:focus { border-color: #4f46e5; }
+  outline: none; background: #fff; color: var(--t1);
+  &:focus { border-color: var(--blue); }
 }
 .sf-new-ok {
   width: 26px; height: 26px; border-radius: 6px; border: none;
-  background: #4f46e5; color: #fff; cursor: pointer; font-size: 13px;
-  &:hover { background: #3730a3; }
+  background: var(--grad); color: #fff; cursor: pointer; font-size: 13px;
+  &:hover { background: var(--bluedark); }
 }
 .sf-new-cancel {
   width: 26px; height: 26px; border-radius: 6px; border: none;
-  background: #f1f5f9; color: #94a3b8; cursor: pointer; font-size: 12px;
+  background: var(--surf2); color: var(--t3); cursor: pointer; font-size: 12px;
   &:hover { background: #ffe4e6; color: #e11d48; }
 }
 
@@ -178,16 +178,16 @@
 
 /* Ask AI button */
 .sb-ask-ai {
-  background: linear-gradient(135deg, rgba(79,70,229,.12), rgba(124,58,237,.12));
-  border: 1px solid rgba(79,70,229,.25);
+  background: linear-gradient(135deg, rgba(10,132,255,.12), rgba(124,58,237,.12));
+  border: 1px solid rgba(10,132,255,.25);
   border-radius: 10px;
-  color: #4f46e5 !important;
+  color: var(--blue) !important;
   font-weight: 700 !important;
   cursor: pointer;
   margin-top: 4px;
   &:hover {
-    background: linear-gradient(135deg, rgba(79,70,229,.2), rgba(124,58,237,.2));
-    border-color: rgba(79,70,229,.4);
+    background: linear-gradient(135deg, rgba(10,132,255,.2), rgba(124,58,237,.2));
+    border-color: rgba(10,132,255,.4);
     transform: translateX(2px);
   }
 }
@@ -205,7 +205,7 @@
   &-bar { height: 3px; background: rgba(255,255,255,.08); border-radius: 2px; overflow: hidden; }
   &-fill {
     height: 100%;
-    background: linear-gradient(90deg, #3d5afe, #8c9eff);
+    background: linear-gradient(90deg, var(--blue), var(--bluebdr));
     border-radius: 2px;
   }
 }
@@ -219,7 +219,7 @@
 }
 .sb-av {
   width: 30px; height: 30px; border-radius: 50%;
-  background: linear-gradient(135deg, #3d5afe, #2541d4);
+  background: linear-gradient(135deg, var(--blue), var(--blue));
   display: flex; align-items: center; justify-content: center;
   font-size: 11px; font-weight: 700; color: #fff; flex-shrink: 0;
   box-shadow: 0 2px 8px rgba(61,93,254,.4);
@@ -237,7 +237,7 @@
 .sb-logout-btn {
   background: rgba(255,255,255,0.06);
   border: 1px solid rgba(255,255,255,0.18);
-  color: #9ca3af;
+  color: var(--t3);
   font-size: 10px;
   padding: 5px 9px;
   border-radius: 6px;

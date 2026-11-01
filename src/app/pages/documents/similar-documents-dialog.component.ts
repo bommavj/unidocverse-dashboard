@@ -104,7 +104,7 @@ import { SearchResult } from '../../lib/api';
       justify-content: space-between;
       align-items: center;
       padding: 24px;
-      background: linear-gradient(135deg, #2196f3 0%, #42a5f5 100%);
+      background: linear-gradient(135deg, var(--blue) 0%, var(--blue) 100%);
       color: white;
     }
 
@@ -139,7 +139,7 @@ import { SearchResult } from '../../lib/api';
 
     .content-container {
       padding: 24px;
-      background: #fafafa;
+      background: var(--surf2);
     }
 
     .loading-state {
@@ -148,13 +148,13 @@ import { SearchResult } from '../../lib/api';
       
       p {
         margin-top: 24px;
-        color: #757575;
+        color: var(--t3);
       }
     }
 
     .results-header {
       margin: 0 0 16px 0;
-      color: #424242;
+      color: var(--t2);
       font-size: 14px;
       font-weight: 500;
     }
@@ -178,7 +178,7 @@ import { SearchResult } from '../../lib/api';
       left: 12px;
       width: 32px;
       height: 32px;
-      background: linear-gradient(135deg, #2196f3 0%, #42a5f5 100%);
+      background: linear-gradient(135deg, var(--blue) 0%, var(--blue) 100%);
       color: white;
       border-radius: 50%;
       display: flex;
@@ -224,7 +224,7 @@ import { SearchResult } from '../../lib/api';
 
     .similarity-bar {
       height: 8px;
-      background: #e0e0e0;
+      background: var(--bdr);
       border-radius: 4px;
       overflow: hidden;
     }
@@ -247,7 +247,7 @@ import { SearchResult } from '../../lib/api';
     }
 
     .summary {
-      color: #616161;
+      color: var(--t2);
       line-height: 1.6;
       margin: 0;
       font-size: 14px;
@@ -261,29 +261,29 @@ import { SearchResult } from '../../lib/api';
         font-size: 64px;
         width: 64px;
         height: 64px;
-        color: #e0e0e0;
+        color: var(--bdr);
         margin-bottom: 16px;
       }
       
       h3 {
         margin: 0 0 8px 0;
         font-size: 20px;
-        color: #757575;
+        color: var(--t3);
       }
       
       p {
         margin: 0;
-        color: #9e9e9e;
+        color: var(--t3);
       }
     }
 
     ::ng-deep .mat-mdc-card-title {
-      color: #212121 !important;
+      color: var(--t1) !important;
       font-size: 16px !important;
     }
 
     ::ng-deep .mat-mdc-card-subtitle {
-      color: #757575 !important;
+      color: var(--t3) !important;
       display: flex;
       align-items: center;
       gap: 8px;

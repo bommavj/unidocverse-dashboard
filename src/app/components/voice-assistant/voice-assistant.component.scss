@@ -67,8 +67,8 @@
   transition: all 0.2s ease;
 
   &.listening {
-    background: #3b82f6;
-    box-shadow: 0 0 12px #3b82f6;
+    background: var(--grad);
+    box-shadow: 0 0 12px var(--blue);
     animation: indicator-pulse 1.2s infinite ease-in-out;
   }
   
@@ -87,7 +87,7 @@
 .btn-close {
   background: rgba(255, 255, 255, 0.05);
   border: none;
-  color: #9ca3af;
+  color: var(--t3);
   font-size: 1.5rem;
   width: 28px;
   height: 28px;
@@ -149,9 +149,9 @@
   }
 
   &.active {
-    background: rgba(99, 102, 241, 0.2);
-    border-color: rgba(99, 102, 241, 0.4);
-    color: #818cf8;
+    background: rgba(10,132,255, 0.2);
+    border-color: rgba(10,132,255, 0.4);
+    color: var(--blue);
   }
 }
 
@@ -178,7 +178,7 @@
   width: 90px;
   height: 90px;
   border-radius: 50%;
-  background: radial-gradient(circle, rgba(129, 140, 248, 0.4) 0%, rgba(99, 102, 241, 0.15) 60%, transparent 100%);
+  background: radial-gradient(circle, rgba(129, 140, 248, 0.4) 0%, rgba(10,132,255, 0.15) 60%, transparent 100%);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -237,7 +237,7 @@
 
 .voice-status {
   font-size: 0.8rem;
-  color: #9ca3af;
+  color: var(--t3);
   font-weight: 500;
 }
 
@@ -274,7 +274,7 @@
   gap: 0.35rem;
 
   &.gmail { border-left-color: #ef4444; }
-  &.teams { border-left-color: #4f46e5; }
+  &.teams { border-left-color: var(--blue); }
 }
 
 .schedule-meta {
@@ -285,7 +285,7 @@
   text-transform: uppercase;
 }
 
-.meta-src { color: #9ca3af; }
+.meta-src { color: var(--t3); }
 .meta-time { color: #a78bfa; }
 
 .schedule-title {
@@ -296,7 +296,7 @@
 
 .schedule-sub {
   font-size: 0.75rem;
-  color: #9ca3af;
+  color: var(--t3);
 }
 
 .summary-feed-card {
@@ -340,7 +340,7 @@
     font-size: 0.8rem;
     font-weight: 600;
     text-transform: uppercase;
-    color: #9ca3af;
+    color: var(--t3);
     margin-bottom: 0.5rem;
     letter-spacing: 0.5px;
   }
@@ -356,7 +356,7 @@
 
   li {
     font-size: 0.775rem;
-    color: #9ca3af;
+    color: var(--t3);
 
     em {
       color: #a78bfa;
@@ -366,13 +366,13 @@
 
 .ai-answer-card {
   background: rgba(255, 255, 255, 0.03);
-  border: 1px solid rgba(99, 102, 241, 0.2);
+  border: 1px solid rgba(10,132,255, 0.2);
   border-radius: 12px;
   padding: 1.25rem;
   display: flex;
   flex-direction: column;
   gap: 0.75rem;
-  box-shadow: 0 4px 20px rgba(99, 102, 241, 0.1);
+  box-shadow: 0 4px 20px rgba(10,132,255, 0.1);
 }
 
 .ai-answer-header {
@@ -381,7 +381,7 @@
   gap: 0.5rem;
   font-size: 0.85rem;
   font-weight: 700;
-  color: #818cf8;
+  color: var(--blue);
   text-transform: uppercase;
   letter-spacing: 0.5px;
 }
@@ -392,7 +392,7 @@
 
 .ai-answer-content {
   font-size: 0.825rem;
-  color: #f0f0ff;
+  color: var(--bluebg);
   line-height: 1.5;
   white-space: pre-wrap;
 
@@ -412,8 +412,8 @@
 }
 
 .btn-read-aloud {
-  background: rgba(99, 102, 241, 0.1);
-  border: 1px solid rgba(99, 102, 241, 0.25);
+  background: rgba(10,132,255, 0.1);
+  border: 1px solid rgba(10,132,255, 0.25);
   color: #a78bfa;
   font-size: 0.725rem;
   font-weight: 600;
@@ -424,15 +424,15 @@
   transition: all 0.2s;
 
   &:hover {
-    background: rgba(99, 102, 241, 0.2);
-    border-color: rgba(99, 102, 241, 0.4);
+    background: rgba(10,132,255, 0.2);
+    border-color: rgba(10,132,255, 0.4);
     color: #fff;
   }
 }
 
 .active-doc-badge {
-  background: rgba(99, 102, 241, 0.15);
-  border: 1px solid rgba(99, 102, 241, 0.35);
+  background: rgba(10,132,255, 0.15);
+  border: 1px solid rgba(10,132,255, 0.35);
   border-radius: 8px;
   padding: 0.5rem 0.75rem;
   display: flex;
@@ -449,7 +449,7 @@
 .doc-badge-name {
   font-size: 0.8rem;
   font-weight: 600;
-  color: #c7d2fe;
+  color: var(--bluebdr);
   flex: 1;
   white-space: nowrap;
   overflow: hidden;
@@ -488,7 +488,7 @@
     font-size: 0.8rem;
     font-weight: 600;
     text-transform: uppercase;
-    color: #9ca3af;
+    color: var(--t3);
     margin-bottom: 0.25rem;
     letter-spacing: 0.5px;
   }
@@ -503,7 +503,7 @@
 .suggested-q-btn {
   background: rgba(255, 255, 255, 0.03);
   border: 1px solid rgba(255, 255, 255, 0.08);
-  color: #c7d2fe;
+  color: var(--bluebdr);
   font-size: 0.775rem;
   padding: 0.5rem 0.75rem;
   border-radius: 8px;
@@ -512,8 +512,8 @@
   transition: all 0.2s;
 
   &:hover {
-    background: rgba(99, 102, 241, 0.15);
-    border-color: rgba(99, 102, 241, 0.35);
+    background: rgba(10,132,255, 0.15);
+    border-color: rgba(10,132,255, 0.35);
     color: #fff;
     transform: translateX(2px);
   }
@@ -567,7 +567,7 @@
 
   .doc-context-tag {
     font-size: 0.75rem;
-    color: #a5b4fc;
+    color: var(--bluebdr);
     display: inline-flex;
     align-items: center;
     gap: 0.25rem;
@@ -616,13 +616,13 @@
     font-size: 0.85rem;
 
     &::placeholder {
-      color: #9ca3af;
+      color: var(--t3);
     }
   }
 
   .btn-send-text {
-    background: rgba(99, 102, 241, 0.2);
-    border: 1px solid rgba(99, 102, 241, 0.4);
+    background: rgba(10,132,255, 0.2);
+    border: 1px solid rgba(10,132,255, 0.4);
     color: #fff;
     width: 32px;
     height: 32px;
@@ -634,7 +634,7 @@
     transition: all 0.2s;
 
     &:hover {
-      background: rgba(99, 102, 241, 0.35);
+      background: rgba(10,132,255, 0.35);
       transform: scale(1.05);
     }
   }
@@ -685,7 +685,7 @@
     .btn-confirm-no {
       background: rgba(255, 255, 255, 0.05);
       border: 1px solid rgba(255, 255, 255, 0.1);
-      color: #d1d5db;
+      color: var(--bdr2);
 
       &:hover {
         background: rgba(255, 255, 255, 0.1);
@@ -703,7 +703,7 @@
 :host-context(html:not(.dark-mode)) {
   .voice-panel {
     background: rgba(255, 255, 255, 0.95);
-    color: #1f2937;
+    color: var(--bluedark);
     border-left: 1px solid rgba(0, 0, 0, 0.08);
     box-shadow: -10px 0 40px rgba(0, 0, 0, 0.1);
   }
@@ -711,23 +711,23 @@
     border-bottom: 1px solid rgba(0, 0, 0, 0.08);
   }
   .voice-title {
-    color: #111827;
+    color: var(--t1);
   }
   .btn-close {
     background: rgba(0, 0, 0, 0.05);
-    color: #4b5563;
+    color: var(--t2);
     &:hover {
       background: rgba(0, 0, 0, 0.1);
-      color: #111827;
+      color: var(--t1);
     }
   }
   .voice-transcript {
     background: rgba(0, 0, 0, 0.02);
     border: 1px solid rgba(0, 0, 0, 0.08);
-    color: #111827;
+    color: var(--t1);
   }
   .voice-status {
-    color: #4b5563;
+    color: var(--t2);
   }
   .schedule-card {
     background: rgba(0, 0, 0, 0.02);
@@ -735,10 +735,10 @@
     border-left: 4px solid #7c3aed;
   }
   .schedule-title {
-    color: #111827;
+    color: var(--t1);
   }
   .schedule-sub {
-    color: #4b5563;
+    color: var(--t2);
   }
   .summary-feed-card {
     background: rgba(0, 0, 0, 0.02);
@@ -750,62 +750,62 @@
   }
   .feed-item {
     border-bottom: 1px solid rgba(0, 0, 0, 0.03);
-    color: #1f2937;
+    color: var(--bluedark);
   }
   .voice-commands-help {
     background: rgba(0, 0, 0, 0.01);
     border: 1px solid rgba(0, 0, 0, 0.06);
     h4 {
-      color: #6b7280;
+      color: var(--t3);
     }
     li {
-      color: #4b5563;
+      color: var(--t2);
       em {
         color: #6d28d9;
       }
     }
   }
   .ai-answer-card {
-    background: #f8fafc;
-    border: 1px solid rgba(99, 102, 241, 0.25);
-    box-shadow: 0 4px 20px rgba(99, 102, 241, 0.05);
+    background: var(--surf2);
+    border: 1px solid rgba(10,132,255, 0.25);
+    box-shadow: 0 4px 20px rgba(10,132,255, 0.05);
   }
   .ai-answer-header {
-    color: #4f46e5;
+    color: var(--blue);
   }
   .ai-answer-content {
-    color: #1e293b;
+    color: var(--t1);
   }
   .chat-user-bubble {
-    background: #f1f5f9;
+    background: var(--surf2);
     border: 1px solid rgba(0, 0, 0, 0.06);
     .user-query {
-      color: #0f172a;
+      color: var(--t1);
     }
     .doc-context-tag {
-      color: #4f46e5;
+      color: var(--blue);
     }
   }
   .voice-text-input-container {
     background: rgba(0, 0, 0, 0.02);
     border: 1px solid rgba(0, 0, 0, 0.08);
     input {
-      color: #0f172a;
+      color: var(--t1);
       &::placeholder {
-        color: #6b7280;
+        color: var(--t3);
       }
     }
   }
   .active-doc-badge {
-    background: #eef2ff;
-    border: 1px solid rgba(99, 102, 241, 0.25);
+    background: var(--bluebg);
+    border: 1px solid rgba(10,132,255, 0.25);
   }
   .doc-badge-name {
-    color: #312e81;
+    color: var(--blue);
   }
   .doc-badge-clear {
     background: rgba(0, 0, 0, 0.06);
-    color: #111827;
+    color: var(--t1);
     &:hover {
       background: rgba(0, 0, 0, 0.12);
     }
@@ -814,18 +814,18 @@
     background: rgba(0, 0, 0, 0.01);
     border: 1px solid rgba(0, 0, 0, 0.06);
     h4 {
-      color: #4b5563;
+      color: var(--t2);
     }
   }
   .suggested-q-btn {
     background: #fff;
     border: 1px solid rgba(0, 0, 0, 0.08);
-    color: #4f46e5;
+    color: var(--blue);
     box-shadow: 0 1px 2px rgba(0, 0, 0, 0.02);
     &:hover {
-      background: #eef2ff;
-      border-color: rgba(99, 102, 241, 0.35);
-      color: #312e81;
+      background: var(--bluebg);
+      border-color: rgba(10,132,255, 0.35);
+      color: var(--blue);
     }
   }
   .confirm-message {
@@ -834,38 +834,38 @@
   .btn-confirm-no {
     background: #fff;
     border: 1px solid rgba(0, 0, 0, 0.1);
-    color: #374151;
+    color: var(--t2);
     &:hover {
-      background: #f9fafb;
-      color: #111827;
+      background: var(--surf2);
+      color: var(--t1);
     }
   }
   .btn-theme-toggle-header {
     background: rgba(0, 0, 0, 0.05);
     border: 1px solid rgba(0, 0, 0, 0.08);
-    color: #4b5563;
+    color: var(--t2);
 
     &:hover {
       background: rgba(0, 0, 0, 0.1);
       border-color: rgba(0, 0, 0, 0.15);
-      color: #111827;
+      color: var(--t1);
     }
   }
   .btn-audio-toggle {
     background: rgba(0, 0, 0, 0.05);
     border: 1px solid rgba(0, 0, 0, 0.08);
-    color: #4b5563;
+    color: var(--t2);
 
     &:hover {
       background: rgba(0, 0, 0, 0.1);
       border-color: rgba(0, 0, 0, 0.15);
-      color: #111827;
+      color: var(--t1);
     }
 
     &.active {
-      background: rgba(99, 102, 241, 0.15);
-      border-color: rgba(99, 102, 241, 0.35);
-      color: #4f46e5;
+      background: rgba(10,132,255, 0.15);
+      border-color: rgba(10,132,255, 0.35);
+      color: var(--blue);
     }
   }
 }

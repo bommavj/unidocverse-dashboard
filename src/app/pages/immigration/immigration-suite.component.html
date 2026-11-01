@@ -115,9 +115,9 @@
           </div>
           <div class="is-linkwarn" *ngIf="ff.report.missing_required.length">Still needed: {{ ff.report.missing_required.join(' · ') }}</div>
           <p class="is-muted">Values come from what you enter here, then the client's questionnaire, then the case. “Derived” values (a name split into parts, an address parsed) need a check. Signatures and signature dates are never filled.</p>
-          <details class="is-ffgroup" *ngFor="let g of ffGroups()" open>
+          <details class="is-ffgroup" *ngFor="let g of ff.groups; trackBy: trackGroup" open>
             <summary>{{ g.name }}</summary>
-            <div class="is-ffrow" *ngFor="let f of $any(g.fields)" [class.need]="f.required && !f.value && ff.edits[f.key] === undefined">
+            <div class="is-ffrow" *ngFor="let f of $any(g.fields); trackBy: trackField" [class.need]="f.required && !f.value && ff.edits[f.key] === undefined">
               <label [for]="'ff-' + f.key">{{ f.label }}<span *ngIf="f.required" class="is-req">*</span></label>
               <input [id]="'ff-' + f.key" [ngModel]="ff.edits[f.key] ?? f.value" (ngModelChange)="ffEdit(f, $event)">
               <span class="is-src" [attr.data-s]="ff.edits[f.key] !== undefined ? 'entered' : f.source">{{ ff.edits[f.key] !== undefined ? 'edited' : (f.source || 'missing') }}</span>

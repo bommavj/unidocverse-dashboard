@@ -158,8 +158,8 @@ interface SummaryStats {
       }
 
       &.total {
-        .stat-icon { color: #1976d2; }
-        border-left: 4px solid #1976d2;
+        .stat-icon { color: var(--blue); }
+        border-left: 4px solid var(--blue);
       }
 
       &.success {

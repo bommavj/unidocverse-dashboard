@@ -47,7 +47,7 @@
     p {
       margin: 0;
       font-size: 14px;
-      color: #64748b;
+      color: var(--t3);
     }
   }
   
@@ -58,7 +58,7 @@
   .table-wrapper {
     flex: 1;
     overflow: auto;
-    border: 1px solid #e2e8f0;
+    border: 1px solid var(--bdr);
     border-radius: 8px;
     background: white;
   }
@@ -67,8 +67,8 @@
     width: 100%;
   
     th {
-      background-color: #f8fafc;
-      color: #475569;
+      background-color: var(--surf2);
+      color: var(--t2);
       font-weight: 600;
       font-size: 13px;
       padding: 16px;
@@ -78,8 +78,8 @@
     td {
       padding: 16px;
       font-size: 14px;
-      color: #1e293b;
-      border-bottom: 1px solid #f1f5f9;
+      color: var(--t1);
+      border-bottom: 1px solid var(--surf2);
   
       &.number-cell {
         font-variant-numeric: tabular-nums;
@@ -90,7 +90,7 @@
       transition: background-color 0.2s;
   
       &:hover {
-        background-color: #f8fafc;
+        background-color: var(--surf2);
       }
     }
   
@@ -106,7 +106,7 @@
     justify-content: center;
     padding: 48px 24px;
     gap: 12px;
-    color: #94a3b8;
+    color: var(--t3);
   
     mat-icon {
       font-size: 64px;
@@ -122,15 +122,15 @@
   
   .totals-row {
     display: flex;
-    background: #f8fafc;
-    border-top: 2px solid #cbd5e1;
+    background: var(--surf2);
+    border-top: 2px solid var(--bdr2);
     padding: 16px;
     font-weight: 600;
     font-size: 14px;
   
     .totals-label {
       margin-right: 24px;
-      color: #475569;
+      color: var(--t2);
     }
   
     .totals-values {
@@ -145,6 +145,6 @@
   }
   
   ::ng-deep .mat-paginator {
-    border-top: 1px solid #e2e8f0;
-    background: #fafafa;
+    border-top: 1px solid var(--bdr);
+    background: var(--surf2);
   }

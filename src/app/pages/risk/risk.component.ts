@@ -42,8 +42,8 @@ const BASE = 'http://localhost:7979';
   styles: [`
     :host {
       display: block;
-      font-family: 'Inter', system-ui, sans-serif;
-      background: #f9fafb;
+      font-family: var(--font);
+      background: transparent;
       min-height: var(--content-h);
       padding: 24px;
       box-sizing: border-box;
@@ -60,13 +60,13 @@ const BASE = 'http://localhost:7979';
     .page-title {
       font-size: 22px;
       font-weight: 700;
-      color: #111827;
+      color: var(--t1);
       margin: 0;
     }
 
     .page-subtitle {
       font-size: 13px;
-      color: #6b7280;
+      color: var(--t3);
       margin: 2px 0 0;
     }
 
@@ -75,7 +75,7 @@ const BASE = 'http://localhost:7979';
       align-items: center;
       gap: 6px;
       padding: 8px 16px;
-      background: #4f46e5;
+      background: var(--grad);
       color: #fff;
       border: none;
       border-radius: 8px;
@@ -84,8 +84,8 @@ const BASE = 'http://localhost:7979';
       cursor: pointer;
       transition: background 0.15s;
 
-      &:hover { background: #4338ca; }
-      &:disabled { background: #a5b4fc; cursor: not-allowed; }
+      &:hover { background: var(--bluedark); }
+      &:disabled { background: var(--bluebdr); cursor: not-allowed; }
     }
 
     .spinner {
@@ -115,7 +115,7 @@ const BASE = 'http://localhost:7979';
     .risk-table-card {
       background: #fff;
       border-radius: 12px;
-      border: 1px solid #e5e7eb;
+      border: 1px solid var(--bdr);
       overflow: hidden;
     }
 
@@ -126,7 +126,7 @@ const BASE = 'http://localhost:7979';
     }
 
     .risk-table thead tr {
-      background: #f3f4f6;
+      background: var(--surf2);
     }
 
     .risk-table th {
@@ -136,18 +136,18 @@ const BASE = 'http://localhost:7979';
       font-weight: 600;
       text-transform: uppercase;
       letter-spacing: 0.5px;
-      color: #6b7280;
-      border-bottom: 1px solid #e5e7eb;
+      color: var(--t3);
+      border-bottom: 1px solid var(--bdr);
     }
 
     .risk-table tbody tr {
       cursor: pointer;
-      border-bottom: 1px solid #f3f4f6;
+      border-bottom: 1px solid var(--surf2);
       transition: background 0.1s;
 
       &:last-child { border-bottom: none; }
-      &:hover { background: #f9fafb; }
-      &.selected { background: #eff6ff; }
+      &:hover { background: var(--surf2); }
+      &.selected { background: var(--bluebg); }
     }
 
     .risk-table td {
@@ -157,7 +157,7 @@ const BASE = 'http://localhost:7979';
 
     .doc-name {
       font-weight: 600;
-      color: #111827;
+      color: var(--t1);
       max-width: 200px;
       overflow: hidden;
       text-overflow: ellipsis;
@@ -166,7 +166,7 @@ const BASE = 'http://localhost:7979';
 
     .doc-type {
       font-size: 11px;
-      color: #6b7280;
+      color: var(--t3);
       margin-top: 2px;
     }
 
@@ -179,7 +179,7 @@ const BASE = 'http://localhost:7979';
     .health-bar {
       width: 60px;
       height: 6px;
-      background: #e5e7eb;
+      background: var(--bdr);
       border-radius: 3px;
       overflow: hidden;
     }
@@ -192,13 +192,13 @@ const BASE = 'http://localhost:7979';
 
     .health-pct {
       font-size: 11px;
-      color: #6b7280;
+      color: var(--t3);
       width: 28px;
     }
 
     .top-factor {
       font-size: 12px;
-      color: #374151;
+      color: var(--t2);
       max-width: 160px;
       overflow: hidden;
       text-overflow: ellipsis;
@@ -208,7 +208,7 @@ const BASE = 'http://localhost:7979';
     .no-data {
       text-align: center;
       padding: 48px 0;
-      color: #9ca3af;
+      color: var(--t3);
       font-size: 14px;
     }
 
@@ -229,12 +229,11 @@ const BASE = 'http://localhost:7979';
     /* ── Detail Panel ── */
     .detail-panel {
       background: #fff;
-      border-radius: 12px;
-      border: 1px solid #e5e7eb;
+      border-radius: 14px;
+      border: 1px solid var(--bdr);
       padding: 20px;
       position: sticky;
-      top: 24px;
-    }
+      top: 24px; box-shadow: var(--sh1); }
 
     .detail-empty {
       display: flex;
@@ -242,7 +241,7 @@ const BASE = 'http://localhost:7979';
       align-items: center;
       justify-content: center;
       padding: 48px 0;
-      color: #9ca3af;
+      color: var(--t3);
       font-size: 14px;
       gap: 8px;
 
@@ -252,14 +251,14 @@ const BASE = 'http://localhost:7979';
     .detail-filename {
       font-size: 15px;
       font-weight: 700;
-      color: #111827;
+      color: var(--t1);
       margin-bottom: 4px;
       word-break: break-word;
     }
 
     .detail-doctype {
       font-size: 12px;
-      color: #6b7280;
+      color: var(--t3);
       margin-bottom: 20px;
     }
 
@@ -272,7 +271,7 @@ const BASE = 'http://localhost:7979';
 
     .score-card {
       flex: 1;
-      border: 1px solid #e5e7eb;
+      border: 1px solid var(--bdr);
       border-radius: 10px;
       padding: 14px;
       text-align: center;
@@ -282,7 +281,7 @@ const BASE = 'http://localhost:7979';
       font-size: 11px;
       text-transform: uppercase;
       letter-spacing: 0.5px;
-      color: #6b7280;
+      color: var(--t3);
       margin-bottom: 8px;
     }
 
@@ -294,7 +293,7 @@ const BASE = 'http://localhost:7979';
 
     .score-sub {
       font-size: 11px;
-      color: #9ca3af;
+      color: var(--t3);
       margin-top: 4px;
     }
 
@@ -313,7 +312,7 @@ const BASE = 'http://localhost:7979';
     .donut-pct {
       font-size: 14px;
       font-weight: 700;
-      color: #111827;
+      color: var(--t1);
     }
 
     /* Section heading */
@@ -322,7 +321,7 @@ const BASE = 'http://localhost:7979';
       font-weight: 700;
       text-transform: uppercase;
       letter-spacing: 0.5px;
-      color: #374151;
+      color: var(--t2);
       margin: 0 0 10px;
     }
 
@@ -341,10 +340,10 @@ const BASE = 'http://localhost:7979';
       align-items: center;
       gap: 8px;
       font-size: 13px;
-      color: #374151;
+      color: var(--t2);
       padding: 6px 10px;
       border-radius: 6px;
-      background: #f9fafb;
+      background: var(--surf2);
     }
 
     .factor-icon { font-size: 14px; flex-shrink: 0; }
@@ -364,9 +363,9 @@ const BASE = 'http://localhost:7979';
       align-items: center;
       gap: 8px;
       font-size: 13px;
-      color: #6b7280;
+      color: var(--t3);
 
-      .check { color: #d1d5db; font-size: 14px; }
+      .check { color: var(--bdr2); font-size: 14px; }
     }
 
     .no-missing {
@@ -382,7 +381,7 @@ const BASE = 'http://localhost:7979';
       font-size: 13px;
       margin-bottom: 16px;
 
-      &.info    { background: #eff6ff; color: #1d4ed8; }
+      &.info    { background: var(--bluebg); color: var(--bluedark); }
       &.success { background: #d1fae5; color: #065f46; }
       &.error   { background: #fee2e2; color: #991b1b; }
     }

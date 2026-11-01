@@ -111,7 +111,7 @@ import { MatIconModule } from '@angular/material/icon';
       
       .consequence-text {
         font-size: 14px;
-        color: #64748b;
+        color: var(--t3);
         line-height: 1.6;
       }
     }

@@ -161,18 +161,21 @@ export class ImmigrationSuiteComponent implements OnInit, OnChanges {
   }
   openForm(form: string) {
     this.http.get<any>(`${this.api}/cases/${this.selected.id}/forms/${form}`).subscribe({
-      next: r => (this.ff = { form, report: r, edits: {} }), error: e => this.fail(e),
+      next: r => (this.ff = { form, report: r, edits: {}, groups: this.groupFields(r) }), error: e => this.fail(e),
     });
   }
-  ffGroups() {
+  // Built once per load: a getter returning fresh objects made *ngFor rebuild every input on each change-detection pass.
+  groupFields(report: any) {
     const g: any = {};
-    for (const f of this.ff.report.fields) (g[f.group] = g[f.group] || []).push(f);
+    for (const f of report.fields) (g[f.group] = g[f.group] || []).push(f);
     return Object.entries(g).map(([name, fields]) => ({ name, fields }));
   }
+  trackGroup = (_: number, g: any) => g.name;
+  trackField = (_: number, f: any) => f.key;
   ffEdit(f: any, v: string) { this.ff.edits[f.key] = v; }
   saveForm(then?: () => void) {
     this.http.patch<any>(`${this.api}/cases/${this.selected.id}/forms/${this.ff.form}`, { values: this.ff.edits }).subscribe({
-      next: r => { this.ff.report = r; this.ff.edits = {}; then && then(); }, error: e => this.fail(e),
+      next: r => { this.ff.report = r; this.ff.groups = this.groupFields(r); this.ff.edits = {}; then && then(); }, error: e => this.fail(e),
     });
   }
   downloadForm() {

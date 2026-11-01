@@ -1,33 +1,46 @@
-@import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap');
 
 *,*::before,*::after { box-sizing: border-box; margin: 0; padding: 0; }
 
 :root {
-  --surf:#fff; --surf2:#f6f8fb; --surf3:#edf1f6;
-  --bdr:#e1e7ef; --bdr2:#cbd4e1;
-  --t1:#0b1a2e; --t2:#4a5568; --t3:#76839a;
-  --blue:#1f4fd1; --bluedark:#173c9f; --bluebg:#eef3fd; --bluebdr:#d8e3fb;
-  --green:#0f7a55; --greenbg:#e7f5ef; --greenbdr:#bfe3d3; --greendark:#0b5e41;
-  --amber:#a85b06; --amberbg:#fdf3e4;
-  --rose:#b42318; --rosebg:#fdecea;
-  --ink:#0b1a2e;
-  --font:'IBM Plex Sans',system-ui,-apple-system,'Segoe UI',sans-serif;
-  --mono:'IBM Plex Mono',ui-monospace,monospace;
-  --sh1:0 1px 2px rgba(11,26,46,.06),0 1px 1px rgba(11,26,46,.04);
-  --sh2:0 12px 32px rgba(11,26,46,.10);
-  --sh3:0 30px 70px rgba(11,26,46,.16);
-  --r:10px;
+  /* Apple-style light theme: SF Pro (Inter off Apple devices), #f5f5f7 page, white cards, hairline borders, system blue */
+  --surf:#fff; --surf2:#f5f5f7; --surf3:#ebebf0;
+  --bdr:#e5e5ea; --bdr2:#d2d2d7;
+  --t1:#1d1d1f; --t2:#515154; --t3:#86868b;
+  --blue:#0071e3; --bluedark:#0062c4; --bluebg:#e8f2fd; --bluebdr:#cfe3fa;
+  --green:#248a3d; --greenbg:#e6f4ea; --greenbdr:#bfe3c8; --greendark:#1b6b2f;
+  --amber:#b25000; --amberbg:#fff4e5;
+  --rose:#d70015; --rosebg:#fdecee;
+  --ink:#1d1d1f;
+  --nav-bg:rgba(246,246,248,.82); --nav-bg2:rgba(0,0,0,.06); --nav-t:#1d1d1f; --nav-t2:#86868b; --nav-line:rgba(0,0,0,.08);
+  --page-bg:#f5f5f7;
+  /* Brand gradient: teal to blue to violet (the glow in Apple's M-series art) */
+  --g1:#00d4c4; --g2:#0a84ff; --g3:#5e5ce6;
+  --grad:linear-gradient(135deg,var(--g1) 0%,var(--g2) 55%,var(--g3) 100%);
+  --grad-soft:linear-gradient(135deg,rgba(0,212,196,.14),rgba(10,132,255,.12) 55%,rgba(94,92,230,.14));
+  --c1:#00c7be; --c2:#0a84ff; --c3:#5e5ce6; --c4:#bf5af2; --c5:#ff375f; --c6:#ff9f0a;
+  --glow:0 6px 20px rgba(10,132,255,.35),0 2px 6px rgba(0,212,196,.25);
+  --font:-apple-system,BlinkMacSystemFont,'SF Pro Text','SF Pro Display','Inter','Segoe UI',system-ui,sans-serif;
+  --font-head:-apple-system,BlinkMacSystemFont,'SF Pro Display','Inter','Segoe UI',system-ui,sans-serif;
+  --mono:ui-monospace,'SF Mono','JetBrains Mono',Menlo,monospace;
+  --sh1:0 1px 2px rgba(0,0,0,.04),0 0 0 .5px rgba(0,0,0,.04);
+  --sh2:0 8px 30px rgba(0,0,0,.10);
+  --sh3:0 24px 64px rgba(0,0,0,.16);
+  --r:14px;
   --topbar-h:60px;
   --content-h:calc(100vh - var(--topbar-h));
 }
 
+h1,h2,h3,h4 { font-family: var(--font-head); font-weight: 650; letter-spacing: -.03em; }
+h1 { font-weight: 700; letter-spacing: -.035em;
+  background: linear-gradient(100deg,#0b1f3a 0%,#0a84ff 60%,#5e5ce6 100%); -webkit-background-clip: text; background-clip: text; color: transparent; }
 
 /* ── Dark mode ──────────────────────────────────────────────────────────── */
 .dark-mode {
-  --surf:#0f172a; --surf2:#1e293b; --surf3:#273549;
+  --surf:var(--t1); --surf2:var(--t1); --surf3:#273549;
   --bdr:#2d3f55; --bdr2:#3b5068;
-  --t1:#f1f5f9; --t2:#94a3b8; --t3:#64748b;
-  --blue:#818cf8; --bluedark:#6366f1; --bluebg:#1e1b4b; --bluebdr:#3730a3;
+  --t1:var(--surf2); --t2:var(--t3); --t3:var(--t3);
+  --blue:#818cf8; --bluedark:var(--blue); --bluebg:#1e1b4b; --bluebdr:var(--bluedark);
   --green:#34d399; --greenbg:#064e3b; --greenbdr:#065f46; --greendark:#10b981;
   --amber:#fbbf24; --amberbg:#451a03;
   --rose:#fb7185; --rosebg:#4c0519;
@@ -40,10 +53,10 @@
   background: #0a0f1a;
   background-image:
     radial-gradient(ellipse at 0% 0%,   #0f1f35 0%, transparent 55%),
-    radial-gradient(ellipse at 100% 0%,  #111827 0%, transparent 50%),
+    radial-gradient(ellipse at 100% 0%,  var(--t1) 0%, transparent 50%),
     radial-gradient(ellipse at 100% 100%,#0d1929 0%, transparent 55%),
-    radial-gradient(ellipse at 0% 100%,  #0f172a 0%, transparent 50%),
-    radial-gradient(ellipse at 50% 50%,  #111827 0%, transparent 70%);
+    radial-gradient(ellipse at 0% 100%,  var(--t1) 0%, transparent 50%),
+    radial-gradient(ellipse at 50% 50%,  var(--t1) 0%, transparent 70%);
   color: var(--t1);
 }
 
@@ -54,18 +67,16 @@ html, body {
   color: var(--t1);
   font-size: 13px;
   -webkit-font-smoothing: antialiased;
-  background: #dde6ff;
+  background-color: var(--page-bg);
   background-image:
-    radial-gradient(ellipse at 0% 0%,   #c7d4ff 0%, transparent 55%),
-    radial-gradient(ellipse at 100% 0%,  #d4c9ff 0%, transparent 50%),
-    radial-gradient(ellipse at 100% 100%,#bdd4ff 0%, transparent 55%),
-    radial-gradient(ellipse at 0% 100%,  #c9d8ff 0%, transparent 50%),
-    radial-gradient(ellipse at 50% 50%,  #e8eeff 0%, transparent 70%);
+    radial-gradient(900px 480px at 8% -8%,  rgba(0,212,196,.20), transparent 60%),
+    radial-gradient(900px 520px at 100% -10%, rgba(10,132,255,.20), transparent 60%),
+    radial-gradient(700px 500px at 60% 110%, rgba(94,92,230,.12), transparent 60%);
   background-attachment: fixed;
 }
 
 /* Material overrides */
-.mat-mdc-card { border-radius: var(--r) !important; font-family: var(--font) !important; }
+.mat-mdc-card { border-radius: var(--r) !important; box-shadow: var(--sh1) !important; font-family: var(--font) !important; }
 .mat-mdc-button, .mat-mdc-raised-button, .mat-mdc-stroked-button {
   font-family: var(--font) !important; border-radius: 10px !important;
 }
@@ -100,13 +111,13 @@ html, body {
 
   &:hover {
     border-color: var(--bdr2);
-    box-shadow: 0 4px 12px rgba(79, 70, 229, 0.05);
+    box-shadow: 0 4px 12px rgba(10,132,255, 0.05);
   }
 
   &:focus {
     border-color: var(--blue);
     background-color: #fff;
-    box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.1);
+    box-shadow: 0 0 0 3px rgba(10,132,255, 0.1);
   }
 }
 
@@ -137,3 +148,178 @@ html, body {
 
 
 
+
+/* Gradient primary actions with a soft glow */
+.mat-mdc-raised-button.mat-primary, .mdc-button--raised.mat-mdc-button-base:not([disabled]).mat-primary {
+  background: var(--grad) !important; color: #fff !important; box-shadow: var(--glow) !important;
+}
+.mat-mdc-card { transition: box-shadow .2s, transform .2s; }
+.mat-mdc-card:hover { box-shadow: 0 10px 30px rgba(10,132,255,.12) !important; }
+::selection { background: rgba(10,132,255,.25); }
+
+/* ── One button system ─────────────────────────────────────────────────────
+   Pages style their own buttons with many different class names. These rules give every text button the
+   same shape, alignment and weight. Icon-only, close, tab and toggle buttons keep their own shapes. */
+button[class*="btn"]:not([class*="icon"]):not([class*="close"]):not([class*="tab"]):not([class*="toggle"]):not([class*="-x"]):not([class*="ic"]),
+a[class*="btn"]:not([class*="icon"]):not([class*="close"]):not([class*="tab"]):not([class*="toggle"]),
+.mat-mdc-button, .mat-mdc-raised-button, .mat-mdc-stroked-button, .mat-mdc-unelevated-button {
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  gap: 6px;
+  border-radius: 980px !important;
+  font-family: var(--font) !important;
+  font-weight: 500;
+  line-height: 1.2;
+  white-space: nowrap;
+  vertical-align: middle;
+  text-decoration: none;
+  transition: filter .15s, background-color .15s, box-shadow .15s, transform .1s;
+}
+button[class*="btn"]:not([class*="sm"]):not([class*="small"]):not([class*="mini"]):not([class*="icon"]):not([class*="close"]):not([class*="tab"]):not([class*="toggle"]):not([class*="-x"]):not([class*="ic"]),
+a[class*="btn"]:not([class*="sm"]):not([class*="small"]):not([class*="mini"]):not([class*="icon"]):not([class*="close"]):not([class*="tab"]):not([class*="toggle"]) {
+  min-height: 34px;
+}
+button[class*="btn"]:not([disabled]):active { transform: scale(.97); }
+button[class*="btn"]:focus-visible, a[class*="btn"]:focus-visible { outline: 3px solid rgba(10,132,255,.35); outline-offset: 2px; }
+button[disabled], button[class*="btn"][disabled] { opacity: .5; cursor: not-allowed; }
+/* Form controls share one corner radius too */
+input:not([type=checkbox]):not([type=radio]):not([type=range]):not([type=file]), select, textarea { border-radius: 10px; }
+
+/* ── One card / panel / table / badge language (matches Integrations) ───────
+   Pages name their containers differently (stat-card, doc-card, kpi-panel…). These rules match the container
+   whose own class ends in card, panel, tile or box, so inner parts such as card-title are left alone. */
+:is([class~="card"],[class~="panel"],[class~="tile"],[class~="box"],
+    [class*="-card"]:not([class*="-card-"]):not([class*="-card_"]),
+    [class*="-panel"]:not([class*="-panel-"]):not([class*="-panel_"]),
+    [class*="-tile"]:not([class*="-tile-"]):not([class*="-tile_"]),
+    [class*="_card"]:not([class*="_card-"]),
+    [class*="-box"]:not([class*="-box-"]):not([class*="-box_"]):not([class*="check"]):not([class*="select"])) {
+  border-radius: 14px !important;
+  box-shadow: 0 1px 2px rgba(0,0,0,.04), 0 0 0 .5px rgba(0,0,0,.05) !important;
+  transition: box-shadow .2s, transform .2s, border-color .2s;
+}
+:is(a,button,[role="button"],[tabindex]):is([class~="card"],[class*="-card"]:not([class*="-card-"])):hover {
+  box-shadow: 0 10px 28px rgba(10,132,255,.12), 0 0 0 .5px rgba(10,132,255,.25) !important;
+  transform: translateY(-2px);
+}
+
+/* Tables */
+table { border-collapse: separate; border-spacing: 0; font-family: var(--font); }
+th { font-size: 11.5px; font-weight: 600; letter-spacing: .05em; text-transform: uppercase; color: var(--t3); }
+tbody tr { transition: background .12s; }
+tbody tr:hover > td { background: var(--bluebg); }
+
+/* Badges and pills */
+:is([class*="badge"],[class*="pill"],[class*="chip"]):not([class*="-badge-"]):not(img):not(svg) { border-radius: 980px; }
+
+/* Focus ring for every field */
+:is(input,select,textarea):focus { outline: none; border-color: var(--blue) !important; box-shadow: 0 0 0 4px rgba(10,132,255,.15); }
+
+/* Dialogs and menus */
+.mat-mdc-dialog-container .mdc-dialog__surface { border-radius: 18px !important; }
+.mat-mdc-menu-panel, .mat-mdc-select-panel, .mat-mdc-autocomplete-panel { border-radius: 12px !important; box-shadow: var(--sh2) !important; }
+
+/* ── Colour: each card in a row gets its own accent stripe and icon tint ─────────── */
+:is([class~="card"],[class~="panel"],[class~="tile"],
+    [class*="-card"]:not([class*="-card-"]):not([class*="-card_"]),
+    [class*="-tile"]:not([class*="-tile-"]):not([class*="-tile_"])):not(#x) { --acc: var(--c2); box-shadow: inset 0 3px 0 var(--acc), 0 1px 2px rgba(0,0,0,.04), 0 0 0 .5px rgba(0,0,0,.05) !important; }
+:is([class~="card"],[class~="panel"],[class~="tile"],
+    [class*="-card"]:not([class*="-card-"]):not([class*="-card_"]),
+    [class*="-tile"]:not([class*="-tile-"]):not([class*="-tile_"])):not(#x):nth-child(6n+1) { --acc: var(--c1); }
+:is([class~="card"],[class~="panel"],[class~="tile"],
+    [class*="-card"]:not([class*="-card-"]):not([class*="-card_"]),
+    [class*="-tile"]:not([class*="-tile-"]):not([class*="-tile_"])):not(#x):nth-child(6n+2) { --acc: var(--c2); }
+:is([class~="card"],[class~="panel"],[class~="tile"],
+    [class*="-card"]:not([class*="-card-"]):not([class*="-card_"]),
+    [class*="-tile"]:not([class*="-tile-"]):not([class*="-tile_"])):not(#x):nth-child(6n+3) { --acc: var(--c3); }
+:is([class~="card"],[class~="panel"],[class~="tile"],
+    [class*="-card"]:not([class*="-card-"]):not([class*="-card_"]),
+    [class*="-tile"]:not([class*="-tile-"]):not([class*="-tile_"])):not(#x):nth-child(6n+4) { --acc: var(--c4); }
+:is([class~="card"],[class~="panel"],[class~="tile"],
+    [class*="-card"]:not([class*="-card-"]):not([class*="-card_"]),
+    [class*="-tile"]:not([class*="-tile-"]):not([class*="-tile_"])):not(#x):nth-child(6n+5) { --acc: var(--c5); }
+:is([class~="card"],[class~="panel"],[class~="tile"],
+    [class*="-card"]:not([class*="-card-"]):not([class*="-card_"]),
+    [class*="-tile"]:not([class*="-tile-"]):not([class*="-tile_"])):not(#x):nth-child(6n+6) { --acc: var(--c6); }
+:is([class~="card"],[class~="panel"],[class~="tile"],
+    [class*="-card"]:not([class*="-card-"]):not([class*="-card_"]),
+    [class*="-tile"]:not([class*="-tile-"]):not([class*="-tile_"])):not(#x):hover { box-shadow: inset 0 3px 0 var(--acc), 0 12px 30px color-mix(in srgb, var(--acc) 22%, transparent), 0 0 0 .5px color-mix(in srgb, var(--acc) 40%, transparent) !important; }
+:is([class~="card"],[class~="panel"],[class~="tile"],
+    [class*="-card"]:not([class*="-card-"]):not([class*="-card_"]),
+    [class*="-tile"]:not([class*="-tile-"]):not([class*="-tile_"])):not(#x) :is(div,span)[class$="icon"]:not(.ti) {
+  background: color-mix(in srgb, var(--acc) 14%, white) !important; color: var(--acc) !important; border-radius: 12px;
+}
+/* Lead sentence of a section: gradient accent bar before section headings that have one */
+[class*="sec-bar"], [class*="accent-bar"] { background: linear-gradient(180deg,var(--g1),var(--g2) 55%,var(--g3)) !important; }
+
+/* ── Stat tiles (fs, kpi, stat, metric) share the same coloured treatment ────────── */
+:is(.fs,.kpi,.stat,.metric,[class~="stat-tile"],[class~="kpi-tile"]) {
+  --acc: var(--c2);
+  border-radius: 14px !important;
+  background: linear-gradient(180deg, color-mix(in srgb, var(--acc) 7%, white), #fff 70%) !important;
+  box-shadow: inset 0 3px 0 var(--acc), 0 1px 2px rgba(0,0,0,.04), 0 0 0 .5px rgba(0,0,0,.05) !important;
+}
+:is(.fs,.kpi,.stat,.metric):nth-child(6n+1) { --acc: var(--c1); }
+:is(.fs,.kpi,.stat,.metric):nth-child(6n+2) { --acc: var(--c2); }
+:is(.fs,.kpi,.stat,.metric):nth-child(6n+3) { --acc: var(--c3); }
+:is(.fs,.kpi,.stat,.metric):nth-child(6n+4) { --acc: var(--c4); }
+:is(.fs,.kpi,.stat,.metric):nth-child(6n+5) { --acc: var(--c5); }
+:is(.fs,.kpi,.stat,.metric):nth-child(6n+6) { --acc: var(--c6); }
+:is(.fs,.kpi,.stat,.metric) > :is(b,strong):not(.red):not(.amber):not(.green) {
+  background: linear-gradient(100deg, var(--acc), color-mix(in srgb, var(--acc) 55%, #5e5ce6));
+  -webkit-background-clip: text; background-clip: text; color: transparent;
+}
+/* Secondary ("ghost") buttons: tinted pill, so primary and secondary read as a pair */
+:is(button,a)[class*="btn"][class*="ghost"] { background: var(--bluebg) !important; color: var(--blue) !important; border: 1px solid var(--bluebdr) !important; }
+:is(button,a)[class*="btn"][class*="ghost"]:hover { background: var(--bluebdr) !important; }
+
+/* Panel headings get a small gradient marker, like the section bars on Integrations */
+:is(.panel,.card,[class$="-panel"],[class$="-card"]) > :is(h2,h3):first-child::before {
+  content: ""; display: inline-block; width: 4px; height: .95em; margin-right: 8px; vertical-align: -.1em;
+  border-radius: 4px; background: linear-gradient(180deg, var(--g1), var(--g2) 55%, var(--g3));
+}
+/* Tabs: pill segments, active one in the gradient */
+[role="tablist"] { gap: 4px; }
+[role="tab"]:not(.mat-mdc-tab) { border-radius: 980px; transition: background .15s, color .15s; }
+[role="tab"][aria-selected="true"]:not(.mat-mdc-tab) { background: var(--grad) !important; color: #fff !important; box-shadow: var(--glow); border-color: transparent !important; }
+.mat-mdc-tab-header .mdc-tab-indicator__content--underline { border-color: var(--blue) !important; border-top-width: 3px !important; border-radius: 3px; }
+.mat-mdc-tab:not(.mdc-tab--active) .mdc-tab__text-label { color: var(--t3) !important; }
+.mat-mdc-tab.mdc-tab--active .mdc-tab__text-label { color: var(--blue) !important; font-weight: 600; }
+
+/* Page titles that are not <h1>: same gradient headline everywhere */
+:is(.topbar-title,.docs-tb-title,.wf-topbar-title,.hist-title,.page-title,[class$="-page-title"],[class$="page-title"]) {
+  font-family: var(--font-head); font-weight: 700; letter-spacing: -.03em;
+  background: linear-gradient(100deg,#0b1f3a 0%,#0a84ff 60%,#5e5ce6 100%); -webkit-background-clip: text; background-clip: text; color: transparent;
+}
+/* Angular Material tables, fields, chips */
+.mat-mdc-table { background: transparent !important; font-family: var(--font) !important; }
+.mat-mdc-header-cell { font-size: 11.5px !important; font-weight: 600 !important; letter-spacing: .05em; text-transform: uppercase; color: var(--t3) !important; }
+.mat-mdc-row:hover { background: var(--bluebg) !important; }
+.mat-mdc-form-field-flex .mdc-notched-outline__leading { border-radius: 10px 0 0 10px !important; }
+.mat-mdc-form-field-flex .mdc-notched-outline__trailing { border-radius: 0 10px 10px 0 !important; }
+.mdc-evolution-chip, .mat-mdc-chip { border-radius: 980px !important; }
+.mat-mdc-card { border: 0 !important; }
+
+/* ── Drop-down menus (see app/services/select-menu.ts) ─────────────────────── */
+select:not([multiple]):not([size]):not([data-native]) {
+  -webkit-appearance: none; appearance: none; cursor: pointer;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke='%2386868b' stroke-width='2.5'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' d='M19.5 8.25l-7.5 7.5-7.5-7.5'/%3E%3C/svg%3E");
+  background-repeat: no-repeat; background-position: right 10px center; background-size: 14px; padding-right: 30px;
+}
+select.udv-open { border-color: var(--blue) !important; box-shadow: 0 0 0 4px rgba(10,132,255,.15); }
+.udv-menu {
+  position: fixed; z-index: 2147483000; overflow-y: auto; padding: 6px; font-family: var(--font); font-size: 13.5px; color: var(--t1);
+  background: rgba(255,255,255,.92); -webkit-backdrop-filter: saturate(180%) blur(24px); backdrop-filter: saturate(180%) blur(24px);
+  border: .5px solid rgba(0,0,0,.1); border-radius: 14px; box-shadow: 0 18px 50px rgba(0,0,0,.18), 0 2px 8px rgba(0,0,0,.06);
+  animation: udv-pop .12s ease-out; scrollbar-width: thin;
+}
+@keyframes udv-pop { from { opacity: 0; transform: translateY(-4px) scale(.98); } to { opacity: 1; transform: none; } }
+.udv-menu-item { display: flex; align-items: center; gap: 8px; padding: 8px 10px; border-radius: 9px; cursor: pointer; line-height: 1.3; white-space: nowrap; }
+.udv-menu-item.hot { background: var(--grad); color: #fff; }
+.udv-menu-item.on:not(.hot) { color: var(--blue); font-weight: 600; }
+.udv-menu-item.off { opacity: .4; cursor: default; }
+.udv-menu-check { width: 14px; flex: none; font-size: 12px; text-align: center; }
+.udv-menu-text { overflow: hidden; text-overflow: ellipsis; }
+.udv-menu-group { padding: 8px 10px 4px; font-size: 11px; font-weight: 600; letter-spacing: .06em; text-transform: uppercase; color: var(--t3); }
+.dark-mode .udv-menu { background: rgba(30,41,59,.94); border-color: rgba(255,255,255,.12); color: var(--t1); }

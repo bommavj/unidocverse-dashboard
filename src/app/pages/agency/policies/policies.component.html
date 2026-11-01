@@ -12,7 +12,7 @@
     <div class="tb-sp"></div>
 
     <div class="tb-search">
-      <span style="color:#94a3b8;font-size:14px">🔍</span>
+      <span style="color:var(--t3);font-size:14px">🔍</span>
       <input [(ngModel)]="searchQ" (ngModelChange)="applyFilter()"
              placeholder="Search policy #, client, carrier…">
       <button class="tb-clear" *ngIf="searchQ" (click)="searchQ=''; applyFilter()">✕</button>

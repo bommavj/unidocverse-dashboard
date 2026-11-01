@@ -56,14 +56,14 @@ import { AuthService } from '../services/auth.service';
   styles: [`
     .login-page {
       min-height: 100vh;
-      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      background: linear-gradient(135deg, var(--g1) 0%, var(--g2) 55%, var(--g3) 100%);
       display: flex; align-items: center; justify-content: center;
       font-family: -apple-system, sans-serif;
     }
     .login-card {
-      background: white; border-radius: 20px;
+      background: white; border-radius: 14px;
       padding: 48px 40px; width: 100%; max-width: 420px;
-      box-shadow: 0 20px 60px rgba(0,0,0,0.2);
+      box-shadow: var(--sh1);
     }
 
     /* ── Brand ── */
@@ -78,7 +78,7 @@ import { AuthService } from '../services/auth.service';
     }
 
     .brand-name {
-      font-size: 20px; font-weight: 500; color: #111827;
+      font-size: 20px; font-weight: 500; color: var(--t1);
       letter-spacing: -.2px;
     }
     /* "Doc" in thick green — matches Image 2 */
@@ -89,8 +89,8 @@ import { AuthService } from '../services/auth.service';
     }
 
     /* ── Form ── */
-    .login-title { font-size: 24px; font-weight: 700; color: #111827; margin: 0 0 4px; }
-    .login-sub   { color: #6b7280; font-size: 14px; margin: 0 0 28px; }
+    .login-title { font-size: 24px; font-weight: 700; color: var(--t1); margin: 0 0 4px; }
+    .login-sub   { color: var(--t3); font-size: 14px; margin: 0 0 28px; }
 
     .login-error {
       background: #fef2f2; border: 1px solid #fecaca;
@@ -99,11 +99,11 @@ import { AuthService } from '../services/auth.service';
     }
 
     .field { margin-bottom: 20px; }
-    .field label { display: block; font-size: 13px; font-weight: 600; color: #374151; margin-bottom: 6px; }
+    .field label { display: block; font-size: 13px; font-weight: 600; color: var(--t2); margin-bottom: 6px; }
 
     input {
       width: 100%; padding: 11px 14px;
-      border: 1.5px solid #e5e7eb; border-radius: 10px;
+      border: 1.5px solid var(--bdr); border-radius: 10px;
       font-size: 14px; outline: none; box-sizing: border-box;
       transition: border-color .15s;
     }
@@ -115,13 +115,13 @@ import { AuthService } from '../services/auth.service';
 
     .login-btn {
       width: 100%; padding: 13px;
-      background: linear-gradient(135deg, #6366f1, #8b5cf6);
+      background: linear-gradient(135deg, var(--g1) 0%, var(--g2) 55%, var(--g3) 100%);
       color: white; border: none; border-radius: 10px;
       font-size: 15px; font-weight: 600; cursor: pointer;
       display: flex; align-items: center; justify-content: center;
       margin-top: 8px; transition: all .16s;
     }
-    .login-btn:hover:not(:disabled) { background: linear-gradient(135deg, #4f46e5, #7c3aed); transform: translateY(-1px); }
+    .login-btn:hover:not(:disabled) { background: linear-gradient(135deg, var(--g1) 0%, var(--g2) 55%, var(--g3) 100%); transform: translateY(-1px); }
     .login-btn:disabled { opacity: 0.6; cursor: not-allowed; }
 
     .spinner {
@@ -132,7 +132,7 @@ import { AuthService } from '../services/auth.service';
     }
     @keyframes spin { to { transform: rotate(360deg); } }
 
-    .offline-note { text-align: center; font-size: 12px; color: #9ca3af; margin: 20px 0 0; }
+    .offline-note { text-align: center; font-size: 12px; color: var(--t3); margin: 20px 0 0; }
   `]
 })
 export class LoginComponent {
