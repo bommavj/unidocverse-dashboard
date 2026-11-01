@@ -3,11 +3,7 @@
   <!-- Header -->
   <div class="imm-header">
     <div class="imm-header-left">
-      <div class="imm-header-icon">🛂</div>
-      <div>
-        <h1 class="imm-title">Immigration</h1>
-        <div class="imm-subtitle">Visa tracking · cases · clients · forms · e-signature · reports · legal AI · translations</div>
-      </div>
+      <h1 class="imm-title">Immigration</h1>
     </div>
     <button class="imm-refresh" *ngIf="section==='tracker'" (click)="load()" [disabled]="loading">
       {{ loading ? 'Loading…' : '↻ Refresh' }}
@@ -16,7 +12,7 @@
 
   <nav class="imm-sections" aria-label="Immigration sections">
     <button *ngFor="let s of sections" [class.on]="section===s.id" (click)="go(s.id)" [attr.aria-current]="section===s.id ? 'page' : null">
-      <span aria-hidden="true">{{ s.icon }}</span> {{ s.label }}</button>
+      <i class="ti {{ s.icon }}" aria-hidden="true"></i>{{ s.label }}</button>
   </nav>
 
   <app-immigration-suite *ngIf="section!=='tracker'" [section]="section"></app-immigration-suite>

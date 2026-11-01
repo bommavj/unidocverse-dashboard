@@ -23,14 +23,14 @@ export class ImmigrationComponent implements OnInit {
   activeTab: 'all' | 'expired' | 'critical' | 'high' | 'medium' | 'low' = 'all';
 
   readonly sections = [
-    { id: 'tracker', label: 'Visa Tracker', icon: '🛂' },
-    { id: 'cases', label: 'Cases', icon: '📁' },
-    { id: 'crm', label: 'Clients', icon: '👥' },
-    { id: 'forms', label: 'Forms', icon: '📝' },
-    { id: 'esign', label: 'E-Signature', icon: '✍️' },
-    { id: 'reports', label: 'Reports', icon: '📊' },
-    { id: 'ai', label: 'Legal AI', icon: '✨' },
-    { id: 'translate', label: 'Translations', icon: '🌐' },
+    { id: 'tracker', label: 'Visa Tracker', icon: 'ti-id-badge-2' },
+    { id: 'cases', label: 'Cases', icon: 'ti-folders' },
+    { id: 'crm', label: 'Clients', icon: 'ti-users' },
+    { id: 'forms', label: 'Forms', icon: 'ti-forms' },
+    { id: 'esign', label: 'E-Signature', icon: 'ti-signature' },
+    { id: 'reports', label: 'Reports', icon: 'ti-chart-bar' },
+    { id: 'ai', label: 'Legal AI', icon: 'ti-sparkles' },
+    { id: 'translate', label: 'Translations', icon: 'ti-language' },
   ];
   section: any = 'tracker';
 

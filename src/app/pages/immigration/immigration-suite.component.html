@@ -33,14 +33,14 @@
       <button class="is-btn is-sec" (click)="newCase=null">Cancel</button></div>
   </div>
 
-  <div class="is-split">
+  <div class="is-split" [class.solo]="!selected">
     <div class="is-list">
       <div class="is-empty" *ngIf="!cases.length">No cases yet. Open one from a suggestion above, or with “New case”.</div>
       <button class="is-case" *ngFor="let c of cases" (click)="open(c)" [class.on]="selected?.id===c.id">
         <div class="is-case-top"><b>{{ c.beneficiary }}</b><span class="is-pill" [attr.data-s]="c.status">{{ label(c.status) }}</span></div>
         <div class="is-muted">{{ c.case_label }} · {{ c.form }}<span *ngIf="c.receipt_number"> · {{ c.receipt_number }}</span></div>
         <div class="is-prog"><span [style.width.%]="c.progress"></span></div>
-        <div class="is-muted" *ngIf="c.next_deadline">{{ c.next_deadline.what }} — {{ c.next_deadline.date }} ({{ daysText(c.next_deadline.days) }})</div>
+        <div class="is-due" *ngIf="c.next_deadline" [class.over]="c.next_deadline.days < 0" [class.warn]="c.next_deadline.days >= 0 && c.next_deadline.days <= 30">{{ c.next_deadline.what }} — {{ c.next_deadline.date }} ({{ daysText(c.next_deadline.days) }})</div>
       </button>
     </div>
 
@@ -174,8 +174,8 @@
 
 <!-- ═══════════════ CRM ═══════════════ -->
 <ng-container *ngIf="section==='crm'">
-  <div class="is-bar"><span class="is-muted">Track inquiries from first contact to a retained case.</span>
-    <button class="is-btn" (click)="startLead()">+ New lead</button></div>
+  <div class="is-bar is-bar-end"><span></span>
+    <button class="is-btn" (click)="startLead()"><i class="ti ti-plus"></i> New lead</button></div>
   <div class="is-card" *ngIf="newLead">
     <div class="is-grid">
       <label>Name *<input [(ngModel)]="newLead.name"></label>
@@ -195,7 +195,7 @@
     <div class="is-col" *ngFor="let st of meta.lead_stages">
       <div class="is-col-h">{{ label(st) }} <span>{{ leadsIn(st).length }}</span></div>
       <div class="is-lead" *ngFor="let l of leadsIn(st)">
-        <b>{{ l.name }}</b>
+        <b class="is-lead-n">{{ l.name }}</b>
         <div class="is-muted">{{ meta.case_types[l.interest]?.label || 'No case type yet' }}</div>
         <div class="is-muted" *ngIf="l.email || l.phone">{{ l.email }} {{ l.phone }}</div>
         <div class="is-muted" *ngIf="l.next_follow_up">Follow up {{ l.next_follow_up }}</div>
@@ -203,7 +203,7 @@
           <select [ngModel]="l.stage" (ngModelChange)="moveLead(l, $event)" aria-label="Move to stage">
             <option *ngFor="let s of meta.lead_stages" [value]="s">{{ label(s) }}</option></select>
           <button class="is-btn is-btn-sm" *ngIf="!l.case_id" (click)="convert(l)">Open case</button>
-          <button class="is-x" (click)="removeLead(l)" aria-label="Delete lead">🗑</button>
+          <button class="is-x" (click)="removeLead(l)" aria-label="Delete lead"><i class="ti ti-trash"></i></button>
         </div>
       </div>
     </div>
