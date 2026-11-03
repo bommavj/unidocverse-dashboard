@@ -6,7 +6,7 @@
       <h1 class="imm-title">Immigration</h1>
     </div>
     <button class="imm-refresh" *ngIf="section==='tracker'" (click)="load()" [disabled]="loading">
-      {{ loading ? 'Loading…' : '↻ Refresh' }}
+      {{ loading ? 'Loading…' : 'Refresh' }}
     </button>
   </div>
 
@@ -29,27 +29,22 @@
     <!-- Stat cards -->
     <div class="imm-stats">
       <div class="imm-sc imm-sc--exp" (click)="activeTab='expired'">
-        <div class="imm-sc-ico">🔴</div>
         <div class="imm-sc-val">{{ counts.expired || 0 }}</div>
         <div class="imm-sc-lbl">Expired</div>
       </div>
       <div class="imm-sc imm-sc--crit" (click)="activeTab='critical'">
-        <div class="imm-sc-ico">⚠️</div>
         <div class="imm-sc-val">{{ counts.critical || 0 }}</div>
         <div class="imm-sc-lbl">Critical (&lt;7 days)</div>
       </div>
       <div class="imm-sc imm-sc--high" (click)="activeTab='high'">
-        <div class="imm-sc-ico">🟠</div>
         <div class="imm-sc-val">{{ counts.high || 0 }}</div>
         <div class="imm-sc-lbl">Expiring Soon (&lt;30d)</div>
       </div>
       <div class="imm-sc imm-sc--med" (click)="activeTab='medium'">
-        <div class="imm-sc-ico">🟡</div>
         <div class="imm-sc-val">{{ counts.medium || 0 }}</div>
         <div class="imm-sc-lbl">Renew Soon (&lt;90d)</div>
       </div>
       <div class="imm-sc imm-sc--low" (click)="activeTab='low'">
-        <div class="imm-sc-ico">🟢</div>
         <div class="imm-sc-val">{{ counts.low || 0 }}</div>
         <div class="imm-sc-lbl">Valid</div>
       </div>
@@ -57,10 +52,10 @@
 
     <!-- Search -->
     <div class="imm-search">
-      <span class="imm-search-ico" aria-hidden="true">🔍</span>
+      <i class="ti ti-search imm-search-ico" aria-hidden="true"></i>
       <input type="search" [(ngModel)]="query" placeholder="Search by name, visa class, employer, document or receipt #"
              aria-label="Search immigration records">
-      <button *ngIf="query" class="imm-search-clear" (click)="query=''" aria-label="Clear search">✕</button>
+      <button *ngIf="query" class="imm-search-clear" (click)="query=''" aria-label="Clear search"><i class="ti ti-x"></i></button>
       <span *ngIf="query" class="imm-search-count">{{ visibleRecords.length }} match{{ visibleRecords.length === 1 ? '' : 'es' }}</span>
     </div>
 
@@ -76,18 +71,18 @@
 
     <!-- Empty -->
     <div class="imm-empty" *ngIf="visibleRecords.length === 0 && query">
-      <div class="imm-empty-ico">🔍</div>
+      <i class="ti ti-search imm-empty-ico"></i>
       <div class="imm-empty-title">No records match “{{ query }}”</div>
       <div class="imm-empty-sub">Try part of a name (e.g. “Bomma”), a visa class (“H-1B”) or an employer.</div>
     </div>
     <div class="imm-empty" *ngIf="visibleRecords.length === 0 && !query">
-      <div class="imm-empty-ico">🛂</div>
+      <i class="ti ti-id-badge-2 imm-empty-ico"></i>
       <div class="imm-empty-title">No immigration records found</div>
       <div class="imm-empty-sub">
         Upload passports, I-797 approval notices (H-1B, H-4, L-1…), EADs or I-94s.<br>
         Expiry dates are read from the documents and tracked here.
       </div>
-      <a class="imm-empty-btn" routerLink="/upload">↑ Upload documents</a>
+      <a class="imm-empty-btn" routerLink="/upload"><i class="ti ti-upload"></i> Upload documents</a>
     </div>
 
     <!-- Table -->
@@ -111,7 +106,7 @@
           <tr *ngFor="let r of visibleRecords" [ngClass]="urgencyClass(r.urgency)">
             <td>
               <span class="imm-pill" [ngClass]="'imm-pill--' + r.urgency">
-                {{ urgencyIcon(r.urgency) }} {{ r.urgency_label }}
+                {{ r.urgency_label }}
               </span>
             </td>
             <td class="imm-doc-label">{{ r.doc_label }}</td>
@@ -135,7 +130,7 @@
               <a *ngIf="r.client_id" class="imm-view-btn" [routerLink]="['/clients', r.client_id]" [queryParams]="{tab:'immigration'}">
                 View →
               </a>
-              <span *ngIf="!r.client_id" class="imm-source" [title]="r.source_file">📄 {{ r.source_file }}</span>
+              <span *ngIf="!r.client_id" class="imm-source" [title]="r.source_file"><i class="ti ti-file-text"></i> {{ r.source_file }}</span>
               <div *ngIf="r.notes" class="imm-note">{{ r.notes }}</div>
             </td>
           </tr>

@@ -1,4 +1,4 @@
-<div class="is-error" *ngIf="error" role="alert">{{ error }} <button class="is-x" (click)="error=''" aria-label="Dismiss">✕</button></div>
+<div class="is-error" *ngIf="error" role="alert">{{ error }} <button class="is-x" (click)="error=''" aria-label="Dismiss"><i class="ti ti-x"></i></button></div>
 
 <!-- ═══════════════ CASES ═══════════════ -->
 <ng-container *ngIf="section==='cases'">
@@ -99,7 +99,7 @@
           <b>{{ lastLink.kind }}</b> — send this to your client (shown once):
           <code>{{ lastLink.url }}</code><button class="is-btn is-sec is-btn-sm" (click)="copy(lastLink.url)">Copy</button>
       <button class="is-btn is-sec is-btn-sm" (click)="openLink(lastLink.url)" title="Open it here — e.g. to fill it in with the client on a call, or sign in person">Open</button>
-      <div class="is-linkwarn" *ngIf="lastLink.warning">⚠ {{ lastLink.warning }}</div>
+      <div class="is-linkwarn" *ngIf="lastLink.warning"><i class="ti ti-alert-triangle"></i> {{ lastLink.warning }}</div>
         </div>
         <div class="is-mini" *ngFor="let i of selected.intakes">📝 Intake ({{ meta.languages[i.language] }}) — {{ i.status }} · {{ i.answered }} answers</div>
         <div class="is-mini" *ngFor="let s of selected.signatures">✍️ {{ s.title }} — {{ s.signer_name }} · {{ s.status }}</div>
@@ -230,7 +230,7 @@
       <b>{{ lastLink.kind }}</b> — send this to your client (shown once):
       <code>{{ lastLink.url }}</code><button class="is-btn is-sec is-btn-sm" (click)="copy(lastLink.url)">Copy</button>
       <button class="is-btn is-sec is-btn-sm" (click)="openLink(lastLink.url)" title="Open it here — e.g. to fill it in with the client on a call, or sign in person">Open</button>
-      <div class="is-linkwarn" *ngIf="lastLink.warning">⚠ {{ lastLink.warning }}</div>
+      <div class="is-linkwarn" *ngIf="lastLink.warning"><i class="ti ti-alert-triangle"></i> {{ lastLink.warning }}</div>
     </div>
   </div>
 
@@ -247,7 +247,7 @@
       </tr></tbody></table>
   </div>
   <div class="is-card" *ngIf="intakeView">
-    <div class="is-block-h"><h3>Answers</h3><button class="is-x" (click)="intakeView=null" aria-label="Close">✕</button></div>
+    <div class="is-block-h"><h3>Answers</h3><button class="is-x" (click)="intakeView=null" aria-label="Close"><i class="ti ti-x"></i></button></div>
     <div *ngFor="let s of intakeView.schema"><h4>{{ s.title }}</h4>
       <div class="is-qa" *ngFor="let f of s.fields"><span>{{ f.label }}</span><b>{{ intakeView.answers[f.key] || '—' }}</b></div></div>
   </div>
@@ -293,7 +293,7 @@
       <b>{{ lastLink.kind }}</b> — send this to the signer (shown once):
       <code>{{ lastLink.url }}</code><button class="is-btn is-sec is-btn-sm" (click)="copy(lastLink.url)">Copy</button>
       <button class="is-btn is-sec is-btn-sm" (click)="openLink(lastLink.url)" title="Open it here — e.g. to fill it in with the client on a call, or sign in person">Open</button>
-      <div class="is-linkwarn" *ngIf="lastLink.warning">⚠ {{ lastLink.warning }}</div>
+      <div class="is-linkwarn" *ngIf="lastLink.warning"><i class="ti ti-alert-triangle"></i> {{ lastLink.warning }}</div>
     </div>
   </div>
 
@@ -310,15 +310,15 @@
           <button class="is-btn is-sec is-btn-sm" *ngIf="s.status==='sent' || s.status==='viewed'" (click)="voidSig(s)">Cancel</button></td>
       </tr></tbody></table>
   </div>
-  <p class="is-note">USCIS accepts electronic signatures only in specific cases — check the form instructions before filing an e-signed form.</p>
+  <p class="is-note"><i class="ti ti-info-circle"></i> USCIS accepts electronic signatures only in specific cases — check the form instructions before filing an e-signed form.</p>
 </ng-container>
 
 <!-- ═══════════════ REPORTS ═══════════════ -->
 <ng-container *ngIf="section==='reports' && report">
   <div class="is-bar is-bar-end">
-    <span class="is-muted">Live figures for your cases, leads and signatures.</span>
-    <button class="is-btn is-sec" (click)="download(api + '/report/export?format=xlsx', 'immigration_report.xlsx')">⬇ Excel</button>
-    <button class="is-btn is-sec" (click)="download(api + '/report/export?format=pdf', 'immigration_report.pdf')">⬇ PDF</button>
+    <span></span>
+    <button class="is-btn is-sec" (click)="download(api + '/report/export?format=xlsx', 'immigration_report.xlsx')"><i class="ti ti-download"></i> Excel</button>
+    <button class="is-btn is-sec" (click)="download(api + '/report/export?format=pdf', 'immigration_report.pdf')"><i class="ti ti-download"></i> PDF</button>
   </div>
   <div class="is-kpis">
     <div class="is-kpi"><span>Open cases</span><b>{{ report.totals.open }}</b></div>
