@@ -167,6 +167,7 @@ export class IntegrationsComponent implements OnInit, OnDestroy {
   mcpCopied       = false;
   snippetCopied   = '';
   mcpClients: Record<string, boolean> = {};
+  readonly MCP_HTTP_URL = 'http://localhost:7979/mcp';
   readonly MCP_SSE_URL = 'http://localhost:7979/mcp/sse';
 
   // MCP activation modal
@@ -427,7 +428,7 @@ curl -X POST "http://localhost:7979/mcp/messages/?session_id=<ID>" \\
   }
 
   copyMcpUrl(): void {
-    navigator.clipboard.writeText(this.MCP_SSE_URL).then(() => {
+    navigator.clipboard.writeText(this.MCP_HTTP_URL).then(() => {
       this.mcpCopied = true;
       setTimeout(() => { this.mcpCopied = false; this.cdr.markForCheck(); }, 2000);
       this.cdr.markForCheck();
